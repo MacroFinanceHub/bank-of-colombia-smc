@@ -1,0 +1,30 @@
+#+TITLE: Advanced Monte Carlo for Macroeconometrics: Part 1 Theory
+
+
+* Objectives
+  
+  
+* (Tentative) Calendar 
+  
+** Lecture 1 <2020-11-09 Mon 10:00-12:00> [[A Crash Course In Bayesian Inference]]
+   /Abstract/: 
+
+   
+** Lecture 2 <2020-11-10 Tue 10:00-12:00> [[Simulation Theory]]
+   /Abstract/:
+
+   
+** Lecture 3 <2020-11-11 Wed 10:00-12:00>   
+   /Abstract/:
+
+** Lecture 4 <2020-11-11 Wed 2:00PM-4:00PM>   
+   /Abstract/:
+
+** Lecture 5 <2020-11-12 Thu 10:00AM-12:00PM>   
+   /Abstract/:
+   
+** Lecture 6 <2020-11-13 Fri 10:00AM-12:00PM>   
+   /Abstract/:
+   
+** Lecture 7 <2020-11-   
+   /Abstract/:

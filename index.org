@@ -1,30 +1,119 @@
-#+TITLE: Advanced Monte Carlo for Macroeconometrics: Part 1 Theory
+#+TITLE: Advanced Monte Carlo for Macroeconometrics: Part 1, Theory
+#+OPTIONS: toc:nil H:3 num:nil
+#+description: syllabus
+#+LaTeX_CLASS_OPTIONS: [12pt]
+#+LaTeX_HEADER: \linespread{1.2}
+#+LaTeX_HEADER: \usepackage[document]{ragged2e}
+#+LaTeX_HEADER: \usepackage[margin=1.25in]{geometry}
+#+LaTeX_HEADER: \setlength{\parindent}{1cm}
+#+LaTeX_HEADER: \usepackage{filecontents}
+#+LaTeX_HEADER: \usepackage{natbib}
+#+LaTeX_HEADER: \usepackage{bibentry}
+#+LaTeX_HEADER: \usepackage{xcolor}
+#+LaTeX_HEADER: \definecolor{ll}{rgb}{0.95,0.95,0.95}
+#+LaTeX_HEADER: \usepackage{minted}
+#+LATEX_HEADER_EXTRA:  \usepackage{mdframed}
+#+LATEX_HEADER_EXTRA: \setminted{fontsize=\small,baselinestretch=0.7,bgcolor=ll}
+#+LaTeX_HEADER: \usepackage{fontspec,unicode-math}
+#+LaTeX_HEADER: \setmonofont[Scale=0.83]{Inconsolata}
+#+LaTeX_HEADER: \setmainfont{Crimson Text}
+#+LaTeX_HEADER: \setmathfont[Scale=0.82]{Latin Modern Math}
+#+LaTeX_HEADER: \usepackage{xunicode}
+#+LATEX_HEADER: \usepackage{enumitem}
+#+HUGO_BASE_DIR: /home/eherbst/Dropbox/www
+#+HUGO_SECTION: teaching/bank-of-colombia-smc
+#+hugo_custom_front_matter: :math true
+#+hugo_auto_set_lastmod: t
+#+LaTeX_HEADER: \usepackage{fontawesome}
+#+LATEX_HEADER: \newfontfamily{\FA}{FontAwesome Regular}	
+#+LATEX_HEADER: \def\calendar{{\FA \faCalendar} }
+
+#+DATE: \today
 
 
-* Objectives
-  
-  
+* What is this?
+  #+latex:\twitter
+  The goal of this course is to 
+
+#+latex: \bibliographystyle{econometrica}
+[[nobibliography:/home/eherbst/Dropbox/ref/ref.bib]]
+
 * (Tentative) Calendar 
-  
-** Lecture 1 <2020-11-09 Mon 10:00-12:00> [[A Crash Course In Bayesian Inference]]
-   /Abstract/: 
 
-   
-** Lecture 2 <2020-11-10 Tue 10:00-12:00> [[Simulation Theory]]
-   /Abstract/:
+** Lecture 1: Hello, welcome to Bayesian inference
+   #+latex: \vspace{-0.1in} \calendar 
+   [2020-11-09 Mon 10:00-12:00]
 
-   
-** Lecture 3 <2020-11-11 Wed 10:00-12:00>   
-   /Abstract/:
+   /Topics/: Introduction, A Crash Course in Bayesian Inference
 
-** Lecture 4 <2020-11-11 Wed 2:00PM-4:00PM>   
-   /Abstract/:
+   /Some Background Readings/: [[citeauthor:HerbstSchorfheide2015][Chapter 3]]
+   
+   - bibentry:Schorfheide2008
 
-** Lecture 5 <2020-11-12 Thu 10:00AM-12:00PM>   
-   /Abstract/:
+**** slides                                                        :noexport:
+   /Slides/: [[file:lectures/01-a-crash-course-in-bayesian-inference][A Crash Course in Bayesian Inference]]
+
+
+** Lecture 2: (Linear) Bayesian DSGE Models
+   #+latex: \vspace{-0.1in} \calendar 
+   [2020-11-10 Tue 10:00-12:00]
+
+    /Topics/: State Space Models and the Kalman Filter, Prior specification, posterior / prior predictive checks 
+     - bibentry:An2007b
    
-** Lecture 6 <2020-11-13 Fri 10:00AM-12:00PM>   
-   /Abstract/:
+** Lecture 3: Monte Carlo Simulation
+   #+latex: \vspace{-0.1in} \calendar 
+   [2020-11-11 Wed 10:00-12:00]
+
+   /Topics/: Rejection Sampling, Importance Sampling
+
+** Lecture 4: Markov Chain Monte Carlo Simulation
+   #+latex: \vspace{-0.1in} \calendar 
+   [2020-11-11 Wed 2:00PM-4:00PM]
+   /Topics/: Markov chain basics, the Metropolis-Hastings algorithm
+
+** Lecture 5: Importance Sampling on Steriods: Sequential Monte Carlo  
+   #+latex: \vspace{-0.1in} \calendar 
+   [2020-11-12 Thu 10:00AM-12:00PM]
+
+   /Topics/: Sequential Monte Carlo 
    
-** Lecture 7 <2020-11-   
-   /Abstract/:
+** Lecture 6: Estimating a Linear DSGE Model
+   #+latex: \vspace{-0.1in} \calendar 
+   [2020-11-13 Fri 10:00AM-12:00PM]
+
+   /Topics/:
+   
+** Lecture 7: Nonlinear DSGE Models
+   #+latex: \vspace{-0.1in} \calendar 
+   [2020-11-13 Fri 2:00PM-4:00PM]
+
+   /Topics:/
+
+** Lecture 8: The Particle Filter 
+   #+latex: \vspace{-0.1in} \calendar 
+   [2020-11-17 Mon 10:00AM-12:00PM]
+
+** Lecture 9: Bayesian Estimation of Nonlinear Models
+   #+latex: \vspace{-0.1in} \calendar
+   [2020-11-18 Tue 10:00AM-12:00PM]
+
+** Lecture 10: SMC^2
+   #+latex: \vspace{-0.1in} \calendar
+   [2020-11-18 Tue 2:00PM-4:00PM]
+
+** Lecture 11: Advanced Methods for Nonlinear Estimation
+   #+latex: \vspace{-0.1in} \calendar
+   [2020-11-18 Wed 10:00AM-12:00PM]
+
+** Lecture 12: Piecewise Linear Model
+   #+latex: \vspace{-0.1in} \calendar
+   [2020-11-19 Thu 10:00AM-12:00PM]
+
+
+** Selected Readings
+   
+   /Bayesian Statistics/: 
+
+
+   [[bibliography:/home/eherbst/Dropbox/ref/ref.bib]]

@@ -1,0 +1,750 @@
+#+TITLE: Introduction
+#+DATE: \today
+#+HUGO_BASE_DIR: /home/eherbst/Dropbox/www/
+#+HUGO_SECTION: teaching/bank-of-colombia-smc/lectures
+#+hugo_custom_front_matter: :math true
+#+hugo_auto_set_lastmod: t
+#+MACRO: NEWLINE @@latex:\\~\\~@@ @@html:<br>@@ @@ascii:|@@
+
+* Intro
+** Background
+   - /Textbook treatments:/ cite:woodford_2003, cite:Gali2008 
+     {{{NEWLINE}}}
+   - /Key empirical papers/: cite:ireland2004,  cite:christiano2005, cite:Smets2007, cite:An2007b,
+     {{{NEWLINE}}}
+   - /Frequentist estimation:/ cite:Harvey1991, cite:Hamilton, 
+     {{{NEWLINE}}}
+   - /Bayesian estimation:/ cite:HerbstSchorfheide2015
+
+* A DSGE Model
+** Small-Scale DSGE Model
+   - Intermediate and final goods producers
+     {{{NEWLINE}}}
+   - Households
+     {{{NEWLINE}}}
+   - Monetary and fiscal policy
+     {{{NEWLINE}}}
+   - Exogenous processes
+     {{{NEWLINE}}}
+   - Equilibrium Relationships
+
+
+** Final Goods Producers
+   - Perfectly competitive firms combine
+     a continuum of intermediate goods:
+     \[
+     Y_t = \left( \int_0^1 Y_t(j)^{1-\nu} dj \right)^{\frac{1}{1-\nu}}.
+     \]
+   - Firms take input prices $P_t(j)$ and output prices $P_t$ as given; maximize profits
+     \[
+     \Pi_t =  P_t \left( \int_0^1 Y_t(j)^{1-\nu} dj \right)^{\frac{1}{1-\nu}} - \int_{0}^1 P_t(j)Y_t(j)dj.
+     \]
+   - Demand for intermediate good $j$:
+     \[
+     Y_t(j) = \left( \frac{P_t(j)}{P_t} \right)^{-1/\nu} Y_t.
+     \]
+   - Zero-profit condition implies
+     \[
+     P_t = \left( \int_0^1 P_t(j)^{\frac{\nu-1}{\nu}} dj \right)^{\frac{\nu}{\nu-1}}.
+     \]
+
+** Intermediate Goods Producers
+   - Intermediate good $j$ is produced by a monopolist according to:
+     \[
+     Y_t(j) = A_t N_t(j).
+     \]
+   - Nominal price stickiness via quadratic price adjustment costs
+     \[
+     AC_t(j) = \frac{\phi}{2} \left( \frac{ P_t(j) }{ P_{t-1}(j)} - \pi \right)^2 Y_t(j).
+     \] 
+   - Firm $j$
+     chooses its labor input $N_t(j)$ and the price $P_t(j)$ to maximize
+     the present value of future profits:
+     \[ \mathbb{E}_t \bigg[
+             \sum_{s=0}^\infty \beta^{s} Q_{t+s|t} \bigg(
+             \frac{P_{t+s}(j)}{P_{t+s}} Y_{t+s}(j) - W_{t+s} N_{t+s}(j) - AC_{t+s}(j) \bigg) \bigg].
+     \]
+
+** Households
+   - Household derives disutility from hours worked $H_t$ and maximizes
+     \begin{eqnarray*}
+     \lefteqn{ \mathbb{E}_t \bigg[ \sum_{s=0}^\infty \beta^s \bigg( \frac{ (C_{t+s}/A_{t+s})^{1-\tau} -1 }{1-\tau} } \\
+     &&+ \chi_M \ln \left( \frac{M_{t+s}}{P_{t+s}} \right) - \chi_H H_{t+s} \bigg) \bigg].
+     \end{eqnarray*}
+   - Budget constraint:
+     \begin{eqnarray*}
+     \lefteqn{P_t C_{t} + B_{t} + M_t + T_t} \\
+     &=& P_t W_t H_{t} + R_{t-1}B_{t-1} + M_{t-1} + P_t D_{t} + P_t SC_t.
+     \end{eqnarray*}	
+
+** Monetary and Fiscal Policy
+   - Central bank adjusts money supply to attain desired interest rate.
+   - Monetary policy rule:
+     \begin{eqnarray*}
+	R_t &=& R_t^{*, 1-\rho_R} R_{t-1}^{\rho_R} e^{\epsilon_{R,t}} \\
+	 R_t^* &=& r \pi^* \left( \frac{\pi_t}{\pi^*} \right)^{\psi_1} \left( \frac{Y_t}{Y_t^*} \right)^{\psi_2}
+     \end{eqnarray*}
+   - Fiscal authority consumes fraction of aggregate output: $G_t = \zeta_t Y_t$.
+   - Government budget constraint:
+     \[
+	P_t G_t + R_{t-1} B_{t-1} + M_{t-1} = T_t + B_t + M_t.
+     \]
+
+** Exogenous Processes
+   - Technology:
+     \[
+     \ln A_t = \ln \gamma + \ln A_{t-1} + \ln z_t, \quad
+     \ln z_t = \rho_z \ln z_{t-1} + \epsilon_{z,t}.
+     \]
+   - Government spending / aggregate demand: define $g_t = 1/(1-\zeta_t)$; assume
+     \[
+     \ln g_t = (1-\rho_g) \ln g + \rho_g \ln g_{t-1} + \epsilon_{g,t}.
+     \]
+   - Monetary policy shock $\epsilon_{R,t}$ is assumed to be serially uncorrelated.		
+
+** Equilibrium Conditions
+   - Consider the symmetric equilibrium in which all intermediate goods producing
+     firms make identical choices; omit $j$ subscript.
+   - Market clearing:
+     \[
+       Y_t = C_t + G_t + AC_t \quad \mbox{and} \quad H_t = N_t.
+     \]
+   - Complete markets:
+     \[
+       Q_{t+s|t} = (C_{t+s}/C_t)^{-\tau}(A_t/A_{t+s})^{1-\tau}.
+     \]
+   - Consumption Euler equation and New Keynesian Phillips curve:
+     \begin{eqnarray*}
+     1 &=& \beta \mathbb{E}_t \left[ \left( \frac{ C_{t+1} /A_{t+1} }{C_t/A_t} \right)^{-\tau} \frac{A_t}{A_{t+1}} \frac{R_t}{\pi_{t+1}} \right] \label{eq_dsge1HHopt} \\
+     1 &=&
+     \phi (\pi_t - \pi) \left[ \left( 1 - \frac{1}{2\nu} \right) \pi_t + \frac{\pi}{2 \nu} \right] \label{eq_dsge1Firmopt}\\
+     && - \phi \beta \mathbb{E}_t \left[ \left( \frac{ C_{t+1} /A_{t+1} }{C_t/A_t} \right)^{-\tau} \frac{ Y_{t+1} /A_{t+1} }{Y_t/A_t}
+     (\pi_{t+1} - \pi) \pi_{t+1} \right] \nonumber \\
+     && + \frac{1}{\nu} \left[ 1 - \left( \frac{C_t}{A_t} \right)^\tau \right]. \nonumber
+     \end{eqnarray*}
+
+
+** Equilibrium Conditions -- Continued
+   - In the absence of nominal rigidities $(\phi = 0)$
+     aggregate output is given by 
+     \[
+     Y_t^* = (1-\nu)^{1/\tau} A_t g_t, 
+     \]
+     which is the target level of output that appears in the monetary policy rule.
+
+** Steady State
+   - Set $\epsilon_{R,t}$, $\epsilon_{g,t}$, and $\epsilon_{z,t}$
+     to zero at all times.
+   - Because technology $\ln A_t$ evolves according
+     to a random walk with drift $\ln \gamma$, consumption and output need
+     to be detrended for a steady state to exist.
+   - Let 
+     \[
+       c_t = C_t/A_t, \quad y_t = Y_t/A_t, \quad 
+       y^*_t = Y^*_t/A_t.
+     \] 
+   - Steady state is given by:
+     \begin{eqnarray*}
+     \pi &=& \pi^*, \quad r = \frac{\gamma}{\beta}, \quad R = r
+     \pi^*, \\
+     c &=& (1-\nu)^{1/\tau}, \quad  y = g c =
+     y^*.  
+     \end{eqnarray*}    
+
+
+
+
+* Solving DSGE Models
+** Solving DSGE Models
+   - Derive nonlinear equilibrium conditions:
+     - System of nonlinear expectational difference equations;
+     - transversality conditions.
+   - Find solution(s) of system of expectational difference methods:
+     - Global (nonlinear) approximation
+     - Local approximation near steady state
+   - \textcolor{blue}{We will focus on log-linear approximations around the steady state.}
+   - More detail in: cite:Fern_ndez_Villaverde_2016: ``Solution and Estimation Methods for DSGE Models.''
+
+** What is a Local Approximation?
+   - In a nutshell... consider the backward-looking model
+     \[
+     y_t = f(y_{t-1},\sigma \epsilon_t).
+     \]
+   - Guess that the solution is of the form
+     \[
+     y_t = y_t^{(0)} + \sigma y_t^{(1)} + o(\sigma).
+     \]
+   - Steady state:
+     \[
+         y_t^{(0)} = y^{(0)} = f(y^{(0)},0)	 
+     \]
+   - Suppose $y^{(0)}=0$. Expand $f(\cdot)$ around $\sigma=0$:
+     \[
+     f(y_{t-1},\sigma \epsilon_t)
+     = f_y y_{t-1} + f_\epsilon \sigma \epsilon_t + o(|y_{t-1}|) + o(\sigma)
+     \]
+   - Now plug-in conjectured solution:
+     \[
+     \sigma y_t^{(1)}
+     =  f_y \sigma y_{t-1}^{(1)} + f_\epsilon \sigma \epsilon_t + o(\sigma)
+     \]
+   - Deduce that $y_t^{(1)} = f_y y_{t-1}^{(1)} + f_\epsilon \epsilon_t$
+
+** What is a Log-Linear Approximation?
+   - Consider a Cobb-Douglas production function: $Y_t = A_t K_t^\alpha N_t^{1-\alpha}$.
+   - \textcolor{red}{Linearization} around $Y_*$, $A_*$, $K_*$, $N_*$:
+     \begin{eqnarray*}
+	     Y_t-Y_* &\approx& K_*^\alpha N_*^{1-\alpha}(A_t - A_*)
+	     + \alpha A_* K_*^{\alpha-1} N_*^{1-\alpha} (K_t-K_*) \\
+	     &&	  + (1-\alpha) A_* K_*^\alpha N_*^{-\alpha} (N_t-N_*)
+     \end{eqnarray*}
+   - \textcolor{blue}{Log-linearization:} Let $f(x) = f(e^v)$ and linearize
+     with respect to $v$:
+     \[
+     f(e^v) \approx f(e^{v_*}) + e^{v_*} f'(e^{v_*}) (v-v_*).
+     \]
+     Thus:
+     \[
+     f(x) \approx f(x_*) + x_* f'(x_*){\color{blue} (\ln x/x_*)} = f(x_*) + f'(x_*) {\color{blue} \tilde{x}}
+     \]
+   - Cobb-Douglas production function (here relationship is exact):
+     \[
+     \tilde{Y}_t = \tilde{A}_t + \alpha \tilde{K}_t + (1-\alpha) \tilde{N_t}
+     \]
+
+** Loglinearization of New Keynesian Model
+   - Consumption Euler equation:
+     \[
+     \hat{y}_{t} =  \mathbb{E}_t[\hat y_{t+1}] - \frac{1}{\tau} \bigg( \hat R_t -  \mathbb{E}_t[\hat\pi_{t+1}] - \mathbb{E}_t[\hat{z}_{t+1}] \bigg) + \hat{g}_t - \mathbb{E}_t[\hat{g}_{t+1}]
+     \]
+   - New Keynesian Phillips curve:
+     \[
+     \hat \pi_t = \beta \mathbb{E}_t[\hat \pi_{t+1}] + \kappa (\hat y_t- \hat g_t),
+     \]
+     where
+     \[
+       \kappa = \tau \frac{1 -\nu}{ \nu \pi^2 \phi }	  
+     \]
+   - Monetary policy rule:
+     \[
+     \hat R_{t} = \rho_R \hat R_{t-1} + (1-\rho_R) \psi_1 \hat \pi_{t} + (1-\rho_R) \psi_2 \left( \hat y_{t} - \hat g_t \right)+ \epsilon_{R,t}
+     \]	
+
+** Canonical Linear Rational Expectations System
+   - Define 
+     \[
+     x_t  = [ \hat y_t, \hat \pi_t, \hat R_t, \epsilon_{R,t}, \hat{g}_t, \hat z_t  ]'.
+     \]
+   - Augment $x_t$ by
+     $\mathbb{E}_t[\hat{y}_{t+1}]$ and $\mathbb{E}_t[\hat{\pi}_{t+1}]$.
+   - Define
+     \[
+     s_t = \big[ x_t', \mathbb{E}_t[\hat{y}_{t+1}], \mathbb{E}_t[\hat{\pi}_{t+1}] \big]'.
+     \]
+   - Define rational expectations forecast errors forecast errors for inflation and output. Let
+     \[
+     \eta_{y,t} = y_t - \mathbb{E}_{t-1}[\hat{y}_t], \quad \eta_{\pi,t} = \pi_t - \mathbb{E}_{t-1}[\hat{\pi}_t].
+     \]
+   - Write system in canonical form cite:Sims2002:
+     \[
+     \Gamma_0 s_t = \Gamma_1 s_{t-1} + \Psi \epsilon_t + \Pi \eta_t.
+     \]		
+
+** How Can One Solve Linear Rational Expectations Systems? A Simple Example
+   - Consider
+     \begin{eqnarray}
+     y_t = \frac{1}{\theta} \EE_t[y_{t+1}] + \epsilon_t,
+     \label{eq_yex}
+     \end{eqnarray}
+     where $\epsilon_t \sim iid(0,1)$ and $\theta \in \Theta = [0,2]$.
+     {{{NEWLINE}}}
+   - Introduce conditional expectation $\xi_t = \mathbb E_{t}[y_{t+1}]$ and forecast error $\eta_t = y_t - \xi_{t-1}$.
+     {{{NEWLINE}}}
+   - Thus,
+     \begin{eqnarray}
+     \xi_t = \theta \xi_{t-1} - \theta \epsilon_t + \theta \eta_t. \label{eq_lreex}
+     \end{eqnarray}
+
+
+** A Simple Example
+   - Determinacy: $\theta > 1$. Then only stable solution:
+     \begin{eqnarray}
+     \xi_t = 0, \quad \eta_t = \epsilon_t, \quad  y_t = \epsilon_t
+     \end{eqnarray}
+		
+   - Indeterminacy: $\theta \le 1$ the stability requirement imposes no restrictions on forecast error:
+     \begin{eqnarray}
+     \eta_t = \widetilde{M} \epsilon_t + \zeta_t.
+     \end{eqnarray}
+		
+   - For simplicity assume now  $\zeta_t = 0$. Then
+     \begin{eqnarray}
+     y_t - \theta y_{t-1} = \widetilde{M} \epsilon_t - \theta \epsilon_{t-1}.
+     \label{eq_arma11}
+     \end{eqnarray}
+
+   - General solution methods for LREs: Blanchard and Kahn (1980), King and Watson (1998), Uhlig (1999),
+     Anderson (2000), Klein (2000), Christiano (2002), Sims (2002).
+
+** Solving a More General System
+   - Canonical form:
+     \begin{equation}
+             \Gamma_{0}(\theta)s_{t}=\Gamma_{1}(\theta) s_{t-1}+\Psi
+             (\theta)\epsilon_t+\Pi (\theta)\eta_{t},
+     \end{equation}
+    
+   - The system can be rewritten as
+     \begin{equation}
+             s_{t}=\Gamma _{1}^{\ast }(\theta) s_{t-1}+\Psi^{\ast}(\theta)\epsilon_{t}
+             +\Pi^{\ast }(\theta)\eta_{t}.
+     \end{equation}
+    
+   - Replace $\Gamma _{1}^{\ast }$ by  $J\Lambda J^{-1}$ and define  $w_{t}=J^{-1}s_{t}$.
+    
+   - To deal with repeated eigenvalues and non-singular $\Gamma_0$ we use Generalized Complex Schur Decomposition (QZ) in practice.
+    
+   - Let the $i$'th element of $w_{t}$ be $w_{i,t}$ and denote the $i$'th
+     row of $J^{-1}\Pi ^{\ast }$ and $J^{-1}\Psi ^{\ast }$ by \([J^{-1}\Pi
+     ^{\ast }]_{i.}\) and $[J^{-1}\Psi ^{\ast }]_{i.}$, respectively.
+
+
+** Solving a More General System
+   - Rewrite model:
+     \begin{equation}
+             w_{i,t}=\lambda_{i}w_{i,t-1}+[J^{-1}\Psi ^{\ast }]_{i.} \epsilon_{t}+[J^{-1}\Pi ^{\ast }]_{i.}\eta _{t}.  \label{eq_wit1}
+     \end{equation}
+    
+   - Define the set of stable AR(1) processes as
+     \begin{equation}
+             I_{s}(\theta)=\bigg\{i\in \{1,\ldots n\}\bigg|\left\vert \lambda_{i}(\theta)\right\vert	 \le 1\bigg\}
+     \end{equation}
+    
+   - Let $I_{x}(\theta)$ be its complement. Let $\Psi _{x}^{J}$ and $\Pi_{x}^{J}$ be the matrices composed of the row vectors $[J^{-1}\Psi^{\ast }]_{i.}$ and $[J^{-1}\Pi ^{\ast }]_{i.}$ that correspond to unstable eigenvalues, i.e., $i\in I_{x}(\theta)$.
+    
+   - Stability condition:
+     \begin{equation}
+             \Psi_{x}^{J}\epsilon_{t}+\Pi_{x}^{J}\eta_{t}=0  \label{eq_stabcond}
+     \end{equation}
+     for all $t$.
+
+** Solving a More General System
+   - Solving for $\eta_t$. Define
+     \begin{eqnarray}
+     \Pi_x^J &=& \left[
+     \begin{array}{cc}
+             U_{.1} & U_{.2}
+     \end{array}
+     \right] \left[
+     \begin{array}{cc}
+             D_{11} & 0 \\
+             0 & 0
+     \end{array}
+     \right] \left[
+     \begin{array}{c}
+             V_{.1}^{\prime } \\
+             V_{.2}^{\prime }
+     \end{array}
+     \right] \label{eq_svd} \\
+     &=&\underbrace{U}_{m\times m}\underbrace{D}_{m\times k}\underbrace{V^{\prime }}_{k\times k} \nonumber \\
+     &=&\underbrace{U_{.1}}_{m\times r}\underbrace{D_{11}}_{r\times r}\underbrace{V_{.1}^{\prime }}_{r\times k}. \nonumber
+     \end{eqnarray}
+
+   - If there exists a solution to Eq.~(\ref{eq_stabcond}) that expresses the forecast errors as function of the fundamental shocks $\epsilon_t$ and sunspot shocks $\zeta_t$, it is of the form
+     \begin{eqnarray}
+     \eta_t &=& \eta_1 \epsilon_t + \eta_2 \zeta_t  \label{eq_etasol} \\
+     &=& ( - V_{.1}D_{11}^{-1} U_{.1}^{\prime}\Psi_x^J + V_{.2} \widetilde{M}) \epsilon_t +
+     V_{.2} M_\zeta \zeta_t,	 \notag
+     \end{eqnarray}
+     where $\widetilde{M}$ is
+     an $(k-r) \times l$ matrix, $M_\zeta$ is a $(k-r) \times p$ matrix, and the dimension
+     of $V_{.2}$ is $k\times (k-r)$. The solution is unique if $k = r$ and $V_{.2}$
+     is zero.
+    	
+
+
+** Proposition
+If there exists a solution to Eq. (\ref{eq_stabcond}) that expresses the forecast errors as function of the
+fundamental shocks $\epsilon_t$ and sunspot shocks $\zeta_t$, it is of the form
+\begin{eqnarray}
+	\eta_t &=& \eta_1 \epsilon_t + \eta_2 \zeta_t  \label{eq_etasol} \\
+	&=& ( - V_{.1}D_{11}^{-1} U_{.1}^{\prime}\Psi_x^J + V_{.2} \widetilde{M}) \epsilon_t +
+	V_{.2} M_\zeta \zeta_t,	 \notag
+\end{eqnarray}
+where $\widetilde{M}$ is
+an $(k-r) \times l$ matrix, $M_\zeta$ is a $(k-r) \times p$ matrix, and the dimension
+of $V_{.2}$ is $k\times (k-r)$. The solution is unique if $k = r$ and $V_{.2}$
+is zero.
+
+
+** At the End of the Day...
+   - We obtain a transition equation for the vector $s_t$:
+     \[
+     s_{t} = T(\theta) s_{t-1} + R(\theta) \epsilon_{t}.
+     \]
+   - The coefficient matrices $T(\theta)$ and $R(\theta)$ are
+     functions of the parameters of the DSGE model.
+
+
+
+** Measurement Equation
+   - Relate model variables $s_t$ to observables $y_t$.
+   - In NK model:
+     \begin{eqnarray*}
+     YGR_t  &=& \gamma^{(Q)} + 100(\hat y_t - \hat y_{t-1} + \hat z_t) \label{eq_dsge1measure}\\
+     INFL_t &=& \pi^{(A)} + 400 \hat \pi_t  \nonumber \\
+     INT_t  &=& \pi^{(A)} + r^{(A)} + 4 \gamma^{(Q)} + 400 \hat R_t . \nonumber
+     \end{eqnarray*}
+     where
+     \[
+     \gamma = 1+ \frac{\gamma^{(Q)}}{100}, \quad \beta = \frac{1}{1+ r^{(A)}/400}, \quad
+     \pi = 1 + \frac{\pi^{(A)}}{400} .
+     \]
+   - More generically: 
+     \[
+     y_t = D(\theta) + Z(\theta) s_t \underbrace{+u_t}_{\displaystyle \mbox{optional}}.
+     \]
+     The state and measurement equations define a /State Space Model/.
+
+* State Space Models and The Kalman Filter 
+** State Space Models
+   - State space models form a very general class of models that
+     encompass many of the specifications that we encountered earlier.
+   - ARMA models and linearized DSGE models can be written in state space form.
+   
+   {{{NEWLINE}}}
+   A state space model consists of
+   - a measurement equation that relates an /unobservable/ state vector $s_t$ to the /observables/ $y_t$,
+   - a transition equation that describes the evolution of the state vector $s_t$.
+ 
+
+
+
+** Measurement Equation
+   The measurement equation is of the form
+   \begin{eqnarray}
+        y_t = Z_{t|t-1} s_t + d_{t|t-1} + u_t , \quad t=1,\ldots,T
+   \end{eqnarray}
+   where $y_t$ is a $n \times 1$ vector of observables, $s_t$ is a $m
+   \times 1$ vector of state variables, $Z_{t|t-1}$ is an $n \times m$
+   vector, $d_{t|t-1}$ is a $n\times 1$ vector, and $u_t$ are
+   innovations (or often ``measurement errors'') with mean zero and
+   $\mathbb{E}_{t-1}[ u_t u_t'] = H_{t|t-1}$.
+   {{{NEWLINE}}}
+   - The matrices $Z_{t|t-1}$, $d_{t|t-1}$, and $H_{t|t-1}$ are in many applications constant.
+   - However, it is sufficient that they are predetermined at $t-1$. They could be functions of $y_{t-1}, y_{t-2}, \ldots$.
+   - To simplify the notation, we will denote them by $Z_t$, $d_t$, and $H_t$, respectively.
+
+
+  
+** Transition Equation
+   The transition equation is of the form
+   \begin{eqnarray}
+        s_t = T_{t|t-1} s_{t-1} + c_{t|t-1} + R_{t|t-1} \eta_t
+   \end{eqnarray}
+   where $R_t$ is $m \times g$, and $\eta_t$ is a $g \times 1$ vector of innovations
+   with mean zero and variance $\mathbf{E}_{t|t-1}[ \eta_t \eta_t'] = Q_{t|t-1}$.
+   {{{NEWLINE}}}
+   - The assumption that $s_t$ evolves according to an VAR(1) process
+     is not very restrictive, since it could be the companion form to a
+     higher order VAR process.
+   - It is furthermore assumed that (i) expectation and variance of the initial state vector are given by $\mathbf [s_0] = A_0$ and $var[s_0] = P_0$;
+   - $u_t$ and $\eta_t$ are uncorrelated with each other in all time periods , and uncorrelated with the initial state. [not really necessary]
+ 
+** Adding it all up
+   If the system matrices $Z_t, d_t, H_t, T_t, c_t, R_t, Q_t$ are non-stochastic
+   and predetermined, then the system is linear and $y_t$ can be expressed
+   as a function of present and past $u_t$'s and $\eta_t$'s.
+   {{{NEWLINE}}}
+   1. calculate predictions $y_t|Y^{t-1}$, where $Y^{t-1} = [ y_{t-1}, \ldots, y_1]$,
+   2. obtain a likelihood function
+         \[
+              p(Y^T| \{Z_t, d_t, H_t, T_t, c_t, R_t, Q_t \})
+         \]
+   3. back out a sequence
+      \[
+          \left\{ p(s_t |Y^t, \{Z_\tau, d_\tau, H_\tau, T_\tau,
+                  c_\tau, R_\tau, Q_\tau \} ) \right\}
+      \]
+       
+   The algorithm is called the /Kalman Filter/ and was originally adopted
+   from the engineering literature.
+
+
+
+** A Useful Lemma
+   /Let $(x',y')'$ be jointly normal with/
+   \[
+     \mu = \left[ \begin{array}{c} \mu_x \\ \mu_y \end{array} \right]
+     \quad \mbox{and} \quad
+     \Sigma = \left[ \begin{array}{cc} \Sigma_{xx} & \Sigma_{xy} \\
+              \Sigma_{yx} & \Sigma_{yy} \end{array} \right]
+   \]
+   Then the $pdf(x|y)$ is multivariate normal with
+   \begin{eqnarray}
+     \mu_{x|y} &=& \mu_x + \Sigma_{xy} \Sigma_{yy}^{-1}(y - \mu_y) \\
+     \Sigma_{xx|y} &=& \Sigma_{xx} - \Sigma_{xy} \Sigma_{yy}^{-1} \Sigma_{yx}
+   \end{eqnarray}
+   $\Box$
+
+** A Bayesian Interpretation to the Kalman Filter
+  - Although the idea of the algorithm is based on linear projections,
+    it has a very straightforward Bayesian interpretation.
+  - We will assume that the conditional distributions of $s_t$ and $y_t$ given time $t-1$ information are Gaussian.
+  - Since the system is linear, all the conditional and marginal distributions that we calculate when we move from period $t-1$ to period $t$ will also be Gaussian.
+  - Since the state vector $s_t$ is unobservable, it is natural in Bayesian framework to regard it as a random vector.
+
+  {{{NEWLINE}}} 
+  *Note:* The subsequent analysis is conditional on the system
+  matrices $Z_t, d_t, H_t, T_t, c_t, R_t, Q_t$.  For notational
+  convenience we will, however, drop the system matrices from the
+  conditioning set.
+
+
+** 
+
+  The calculations will be based on the following conditional distribution, represented by densities:
+  1. *Initialization*: $p(s_{t-1}|Y^{t-1})$
+  2. *Forecasting*:
+     \begin{eqnarray*}
+       p(s_t|Y^{t-1}) &=& \int p(s_t|s_{t-1}, Y^{t-1} ) p(s_{t-1}|Y^{t-1}) ds_{t-1} \\
+       p(y_t|Y^{t-1}) & = & \int p(y_t | s_t, Y^{t-1} ) p(s_t|Y^{t-1}) d s_t
+     \end{eqnarray*}
+  3. *Updating*:
+     \[
+        p(s_t|Y^t) = \frac{ p(y_t|s_t, Y^{t-1} ) p(s_t|Y_{t-1}) }{ p(y_t|Y^{t-1} )}
+     \]
+
+
+  - The integrals look troublesome.
+  - However, since the state space model is linear, and the
+    distribution of the innovations $u_t$ and $\eta_t$ are Gaussian
+    $\implies$ everything is Gaussian!
+  - Hence, we only have to keep track of conditional means and
+    variances.
+
+** Initialization
+   - In period zero, we will start with a prior distribution for the initial state $s_0$.
+     {{{NEWLINE}}}
+   - This prior is of the form $s_0 \sim {\cal N}(A_0,P_0)$.
+     {{{NEWLINE}}}
+   - If the system matrices imply that the state vector has a stationary distribution, we could choose $A_0$ and $P_0$ to be the mean and variance of this stationary distribution.
+
+
+
+** Forecasting
+   - At $(t-1)^+$, that is, after observing $y_{t-1}$, the belief
+     about the state vector has the form \(s_{t-1}|Y^{t-1} \sim {\calN}(A_{t-1}, P_{t-1})\).
+     {{{NEWLINE}}}
+   - Thus, the ``posterior'' from period $t-1$ turns into a prior for $(t-1)^+$.
+     {{{NEWLINE}}}
+
+   Since $s_{t-1}$ and $\eta_t$ are independent multivariate normal random
+   variables, it follows that
+   \begin{eqnarray}
+   s_t |Y^{t-1} \sim {\cal N}( \hat{s}_{t|t-1}, P_{t|t-1})
+   \end{eqnarray}
+   where
+   \begin{eqnarray*}
+     \hat{s}_{t|t-1} & = & T_t A_{t-1} + c_t \\
+     P_{t|t-1} & = & T_t P_{t-1} T_t' + R_t Q_t R_t'
+   \end{eqnarray*}
+
+
+** Forecasting $y_t$
+   The conditional distribution of $y_t|s_t, Y^{t-1}$ is of the form
+   \begin{eqnarray}
+      y_t|s_t, Y^{t-1} \sim {\cal N}(Z_t s_t + d_t, H_t)
+   \end{eqnarray}
+   Since $s_t|Y^{t-1} \sim {\cal N}( \hat{s}_{t|t-1}, P_{t|t-1})$, we
+   can deduce that the marginal distribution of $y_t$ conditional on $Y^{t-1}$
+   is of the form
+   \begin{eqnarray}
+       y_t | Y_{t-1} \sim {\cal N} (\hat{y}_{t|t-1}, F_{t|t-1})
+   \end{eqnarray}
+   where
+   \begin{eqnarray*}
+       \hat{y}_{t|t-1} & = & Z_t \hat{s}_{t|t-1} + d_t \\
+       F_{t|t-1} & = & Z_t P_{t|t-1} Z_t' + H_t
+   \end{eqnarray*}
+
+
+** Updating
+  To obtain the posterior distribution of $s_t | y_t, Y^{t-1}$ note that
+\begin{eqnarray}
+     s_t & = & \hat{s}_{t|t-1} + (s_t - \hat{s}_{t|t-1}) \\
+     y_t      & = & Z_t \hat{s}_{t|t-1} + d_t + Z_t(s_t - \hat{s}_{t|t-1}) + u_t
+\end{eqnarray}
+and the joint distribution of $s_t$ and $y_t$ is given by
+\begin{eqnarray}
+   \left[ \begin{array}{c} s_t \\ x_t \end{array} \right] \Big| Y^{t-1}
+   \sim
+   {\cal N} \left(
+   \left[ \begin{array}{c} \hat{s}_{t|t-1} \\ \hat{y}_{t|t-1} \end{array} \right],
+   \left[ \begin{array}{cc} P_{t|t-1} & P_{t|t-1} Z_t' \\
+                            Z_t P_{t|t-1}' & F_{t|t-1}
+   \end{array} \right]
+   \right)
+\end{eqnarray}
+\begin{eqnarray}
+    s_t | y_t , Y^{t-1} \sim {\cal N}(A_t, P_t)
+\end{eqnarray}
+where
+\begin{eqnarray*}
+  A_t & = & \hat{s}_{t|t-1} + P_{t|t-1}Z_t'F_{t|t-1}^{-1}(y_t - Z_t\hat{s}_{t|t-1} - d_t)\\
+  P_t & = & P_{t|t-1} - P_{t|t-1} Z_t'F_{t|t-1}^{-1}Z_tP_{t|t-1} \\
+\end{eqnarray*}
+The conditional mean and variance $\hat{y}_{t|t-1}$ and $F_{t|t-1}$ were given
+above. This completes one iteration of the algorithm. The posterior $s_t|Y^t$
+will serve as prior for the next iteration. $\Box$
+
+
+** Likelihood Function
+We can define the one-step ahead forecast error
+\begin{eqnarray}
+     \nu_t = y_t - \hat{y}_{t|t-1} =  Z_t (s_t - \hat{s}_{t|t-1}) + u_t
+\end{eqnarray}
+The likelihood function is given by
+\begin{eqnarray}
+  p(Y^T | \mbox{parameters} )
+    & = & \prod_{t=1}^T p(y_t|Y^{t-1}, \mbox{parameters}) \nonumber \\
+    & = & ( 2 \pi)^{-nT/2} \left( \prod_{t=1}^T |F_{t|t-1}| \right)^{-1/2} \nonumber \\
+    & ~ & \times \exp \left\{ - \frac{1}{2} \sum_{t=1}^T \nu_t F_{t|t-1} \nu_t' \right\}
+\end{eqnarray}
+This representation of the likelihood function is often called prediction
+error form, because it is based on the recursive prediction one-step ahead
+prediction errors $\nu_t$. $\Box$
+
+
+** Multistep Forecasting
+The Kalman Filter can also be used to obtain multi-step ahead forecasts.
+For simplicity, suppose that the system matrices are constant over time.
+Since
+\begin{eqnarray}
+   s_{t+h-1|t-1} = T^h s_{t-1} + \sum_{s=0}^{h-1} T^s c
+                        + \sum_{s=0}^{h-1} T^s R \eta_t
+\end{eqnarray}
+it follows that
+\begin{eqnarray*}
+  \hat{s}_{t+h-1|t-1} &=& \EE[s_{t+h-1|t-1}|Y^{t-1} ]  =  T^h A_{t-1} + \sum_{s=0}^{h-1} T^s c \\
+  P_{t+h-1|t-1} & = &   var[s_{t+h-1|t-1}|Y^{t-1} ]  = T^hP_{t-1}T^h + \sum_{s=0}^{h-1} T^s RQR'T^{s'}
+\end{eqnarray*}
+which leads to
+\begin{eqnarray}
+    y_{t+h-1} | Y_{t-1} \sim {\cal N} (\hat{y}_{t+h-1|t-1}, F_{t+h-1|t-1})
+\end{eqnarray}
+where
+\begin{eqnarray*}
+    \hat{y}_{t+h-1|t-1} & = & Z \hat{s}_{t+h-1|t-1} + d \\
+    F_{t+h-1|t-1} & = & Z P_{t+h-1|t-1} Z' + H
+\end{eqnarray*}
+The multi-step forecast can be computed recursively, simply by omitting the
+updating step in the algorithm described above. $\Box$
+
+
+** Example 1: New Keynesian DSGE
+   - We can solve the New Keynesian DSGE model described earlier.
+     {{{NEWLINE}}}
+   - Obtain state space representation
+
+
+** Observables
+  \includegraphics[width=4in]{dsge1_observables}
+
+
+** Impulse Responses
+  \begin{center}
+    \includegraphics[width=3.5in]{dsge1_all_irf}
+  \end{center}
+
+
+** Filtered Technology Shock (Mean)
+  \begin{center}
+    \includegraphics[width=3.5in]{filtered_technology_shock}
+  \end{center}
+
+
+** Log Likelihood Increments
+  \begin{center}
+    \includegraphics[width=3.5in]{log_lik}
+  \end{center}
+
+
+** Forecast of Output Growth
+  \begin{center}
+    \includegraphics[width=3.5in]{ygr_forecast}
+  \end{center}
+
+
+** Forecast of Inflation
+  \begin{center}
+    \includegraphics[width=3.5in]{infl_forecast}
+  \end{center}
+
+
+** Forecast of Interest Rate
+  \begin{center}
+    \includegraphics[width=3.5in]{int_forecast}
+  \end{center} 
+
+
+
+** Example 2 -- ARMA models
+  Consider the ARMA(1,1) model of the form
+  \begin{eqnarray}
+         y_t = \phi y_{t-1} + \epsilon_t + \theta \epsilon_{t-1} \quad \epsilon_t \sim iid{\cal N}(0,\sigma^2)
+  \end{eqnarray}
+  The model can be rewritten in state space form
+  \begin{eqnarray}
+         y_t & = & [ 1 \; \theta] \left[ \begin{array}{c} \epsilon_t \\ \epsilon_{t-1} \end{array} \right] + \phi y_{t-1}\\
+         \left[ \begin{array}{c} \epsilon_t \\ \epsilon_{t-1} \end{array} \right]
+           & = &
+           \left[ \begin{array}{cc} 0 & 0 \\ 1 & 0 \end{array} \right]
+           \left[ \begin{array}{c} \epsilon_{t-1} \\ \epsilon_{t-2} \end{array} \right]
+           +
+           \left[ \begin{array}{c} \eta_t \\ 0 \end{array} \right]
+  \end{eqnarray}
+  where $\eta_t \sim iid{\cal N}(0,\sigma^2)$. Thus, the state vector is composed
+  of $\alpha_t = [\epsilon_t, \epsilon_{t-1}]'$ and $d_{t|t-1} = \rho y_{t-1}$.
+  The Kalman filter can be used to
+  compute the likelihood function of the ARMA model conditional on the
+  parameters $\phi, \theta, \sigma^2$. A numerical optimization routine has to
+  be used to find the maximum of the likelihood function. $\Box$
+
+
+** A Model with Time Varying Coefficients
+   Consider the following regression model with time varying coefficients
+   \begin{eqnarray}
+    y_t & = & x_t' \beta_t + u_t \\
+    \beta_t & = & T \beta_{t-1} + c + \eta_t
+   \end{eqnarray}
+   There are many reasons to believe that macroeconomic relationships are
+   not stable over time. An entire branch of the econometrics literature
+   is devoted to tests for structural breaks, that is, tests for changes
+   in the parameter values. However, to be able to predict future changes
+   in the parameter values it is important to model the time variation in
+   the parameters. The state variable $\alpha_t$ corresponds now to the
+   vector of regression parameters $\beta_t$. It is often assumed that
+   the regression coefficients follow univariate random walks of the form
+   \begin{eqnarray}
+      \beta_{j,t} = \beta_{j,t-1} + \eta_{j,t}
+   \end{eqnarray}
+   Hence, the only unknown parameters are $var[u_t]$ and $var[\eta_{j,t}]$.
+   The Kalman filter can provide us with a sequence of estimates
+   for the time varying coefficients.
+   \[
+      \{ \EE[\beta_t|Y^t,X^t] \}_{t=1}^T, \quad \{ var[\beta_t|Y^t,X^t] \}_{t=1}^T
+   \]
+   and the likelihood of the data conditional on $\mathbf E[u_t u_t']$, $\mathbf E[\eta_t \eta_t']$,
+   $T$ and $c$. $\Box$
+
+
+* Bibliography
+** References
+  :PROPERTIES:
+  :BEAMER_OPT: fragile,allowframebreaks,label=
+  :END:   
+#+latex: \bibliographystyle{apalike}
+[[bibliography:../../../ref/ref.bib]]
+
+
+

@@ -24,15 +24,13 @@
 #+HUGO_SECTION: teaching/bank-of-colombia-smc
 #+hugo_custom_front_matter: :math true
 #+hugo_auto_set_lastmod: t
-#+LaTeX_HEADER: \usepackage{fontawesome}
 #+LATEX_HEADER: \newfontfamily{\FA}{FontAwesome Regular}	
-#+LATEX_HEADER: \def\calendar{{\FA \faCalendar} }
+#+LATEX_HEADER: \def\calendar{{\FA \symbol{"F073}}}
 
 #+DATE: \today
 
 
 * Abstract
-  #+latex:\twitter
   The goal of this course is to understand Bayesian methods used in
   macroeconometrics with an emphasis on the estimation of Dynamic
   Stochastic General Equilibrium (DSGE) models.  The course will cover
@@ -75,6 +73,10 @@
    #+latex: \vspace{-0.1in} \calendar 
    [2020-11-09 Mon 10:00-12:00]
 
+
+   /Slides/: [[file:lectures/01-a-crash-course-in-bayesian-inference][A Crash Course]]
+
+
    /Topics/: Introduction, decision theory, prior, posterior, credible
    sets, hypothesis testing.
 
@@ -84,9 +86,6 @@
    #+latex: \vspace{-0.1in}
    - bibentry:Schorfheide2008a
    - bibentry:delnegroschorfheide2010
-
-**** slides                                                        :noexport:
-   /Slides/: [[file:lectures/01-a-crash-course-in-bayesian-inference][A Crash Course in Bayesian Inference]]
 
 
 ** Lecture 2: (Linear) Bayesian DSGE Models

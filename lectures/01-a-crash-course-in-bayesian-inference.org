@@ -4,16 +4,19 @@
 #+HUGO_SECTION: teaching/bank-of-colombia-smc/lectures
 #+hugo_custom_front_matter: :math true
 #+hugo_auto_set_lastmod: t
+#+OPTIONS: toc:nil H:2
 
 * Introduction
 
-** Modes of Interence
+  These notes are available as slides and a Jupyter notebook.
+
+** Modes of Inference
  
- - Previously, we focussed on frequentist inference (repeated sampling prodecures)
+ - /Frequentist inference/ is based on repeated sampling procedures
    #+latex:\\~\\
- - measures of accuracy and performance that we used to assess the statistical procedures were pre-experimental
+ - measures of accuracy and performance used to assess statistical procedures were pre-experimental
    #+latex:\\~\\
- - However, many statisticians and econometricians believed that
+ - However, many statisticians and econometricians believe that
    post-experimental reasoning should be used to assess inference
    procedures
    #+latex:\\~\\
@@ -61,7 +64,7 @@
 
    The combination of the quite reasonable *Conditionality Principle* and
    the *Sufficiency Principle* lead to the more controversial
-   *Likelihood Principle* (see discussion in Robert (1994)).
+   *Likelihood Principle* (see discussion in cite:Robert1994).
    #+latex:\\~\\
    *Likelihood Principle:* All the information about an unknown
    parameter $\theta$ obtainable from an experiment is contained in
@@ -99,8 +102,9 @@
 
    - think of the parameter $\theta$ as ``cause'' and the data $Y^T$ as ``effect''
 
-   - formula allows the calculation of the probability of a particular ``cause'' given the observed ``effect'' based on
-   the probability of the ``effect'' given the possible ``causes''
+   - formula allows the calculation of the probability of a particular
+     ``cause'' given the observed ``effect'' based on the probability
+     of the ``effect'' given the possible ``causes''
    #+latex:\\~\\
    Unlike in the frequentist framework, the parameter $\theta$ is regarded as a random variable.
    #+latex:\\~\\
@@ -125,31 +129,30 @@
 ** Introduction to Bayesian Statistics
    
    - denote the sample space by ${\cal Y}$ with elements $Y^T$.
-
+     #+latex:\\~\\
    - Probability distribution $P$ will be defined on the product space $\Theta \otimes {\cal Y}$.
-
+     #+latex:\\~\\
    - The conditional distribution of $\theta$ given $Y^T$ is denoted by $P_{Y^T}$
-
+     #+latex:\\~\\
    - $P_\theta$ denotes the conditional distribution of $Y^T$ given $\theta$
-
+     #+latex:\\~\\
 ** An Example
    The parameter space is $\Theta = \{ 0,1\}$,
    #+latex:\\~\\
    the sample space is ${\cal Y}=\{0,1,2,3,4\}$.
-   \begin{center}
-   \begin{tabular}{l|ccccc}
-    & 0 & 1 & 2 & 3 & 4 \\ \hline
-    $P_{\theta=0}(Y)$ & .75 & .140 & .04 & .037 & .033 \\
-    $P_{\theta=1}(Y)$ & .70 & .251 & .04 & .005 & .004
-    \end{tabular}
-    \end{center}
+   |-------------------+-----+------+-----+------+------|
+   |                   |   0 |    1 |   2 |    3 |    4 |
+   |-------------------+-----+------+-----+------+------|
+   | $P_{\theta=0}(Y)$ | .75 | .140 | .04 | .037 | .033 |
+   | $P_{\theta=1}(Y)$ | .70 | .251 | .04 | .005 | .004 |
+   |-------------------+-----+------+-----+------+------|
    Suppose we consider $\theta = 0$ and $\theta=1$ as equally
-   likely a priori. Moreover, suppose that the observed
+   likely /a priori/. Moreover, suppose that the observed
    value is $Y=1$. The marginal probability of $Y=1$ is
-   \begin{eqnarray}
-   \lefteqn{ P \{ Y=1|\theta=0 \} P\{\theta=0\} +P \{ Y=1|\theta=1 \} P\{\theta=1\} } \nonumber \\
-     &=& 0.140 \cdot 0.5 + 0.251 \cdot 0.5 = 0.1955
-  \end{eqnarray}
+   \begin{multline}
+    P \{ Y=1|\theta=0 \} P\{\theta=0\} +P \{ Y=1|\theta=1 \} P\{\theta=1\} \\
+     = 0.140 \cdot 0.5 + 0.251 \cdot 0.5 = 0.1955
+  \end{multline}
 
 ** Example, Continued
 
@@ -158,7 +161,7 @@
    \begin{eqnarray*}
    P \{ \theta=0|Y=1 \} &=& \frac{ P \{Y=1|\theta=0 \} P\{ \theta = 0\} }{ P \{Y=1\} }
                          = \frac{0.07}{0.1955} = 0.358 \\
- P \{ \theta=1|Y=1 \} &=& \frac{ P\{Y=1|\theta=1 \} P\{ \theta = 1\} }{ P \{Y=1\} }
+   P \{ \theta=1|Y=1 \} &=& \frac{ P\{Y=1|\theta=1 \} P\{ \theta = 1\} }{ P \{Y=1\} }
                          = \frac{0.1255}{0.1955} = 0.642
   \end{eqnarray*}
 Thus, the observation $Y=1$ provides evidence in favor of $\theta = 1$. 
@@ -248,6 +251,26 @@ and its asymptotic (frequentist) sampling variance is $T^{-1} Q_{XX}^{-1}$.
    \begin{eqnarray}
     \theta |Y,X \stackrel{approx}{\sim} {\cal N} \bigg( \hat{\theta}_{mle}, T^{-1} Q_{XX}^{-1} \bigg). \quad \Box
     \end{eqnarray}
+
+** Example 2 
+#+NAME: HAAVELMO
+#+CAPTION: Haavelmo's Data on Income and Investment \vspace*{0.1in}
+|------+--------+------------+------+--------+------------+
+| Year | Income | Investment | Year | Income | Investment |
+|------+--------+------------+------+--------+------------+
+| 1922 |    433 |	  39 | 1932 |	 372 |	       22 |
+| 1923 |    483 |	  60 | 1933 |	 381 |	       17 |
+| 1924 |    479 |	  42 | 1934 |	 419 |	       27 |
+| 1925 |    486 |	  52 | 1935 |	 449 |	       33 |
+| 1926 |    494 |	  47 | 1936 |	 511 |	       48 |
+| 1927 |    498 |	  51 | 1937 |	 520 |	       51 |
+| 1928 |    511 |	  45 | 1938 |	 477 |	       33 |
+| 1929 |    534 |	  60 | 1939 |	 517 |	       46 |
+| 1930 |    478 |	  39 | 1940 |	 548 |	       54 |
+| 1931 |    440 |	  41 | 1941 |	 629 |	      100 |
+|------+--------+------------+------+--------+------------+
+The data  come from T. Haavelmo, "Methods of Measuring the Marginal Propensity to
+Consume," /J. Am. Statist. Assoc/, 42, p. 88 (1947).
 
 ** Estimation and Inference
    
@@ -620,9 +643,9 @@ regions of the parameter space $\Theta$.
    where $[ \tilde{V}_T]_{jj}$ is the $j$'th diagonal element of $\tilde{V}_T$,
    and $z_{crit}$ is the $\alpha/2$ critical value of a ${\cal N}(0,1)$. 
    #+latex:\\~\\
-   In the Gaussian linear
-   regression model the Bayesian
-   interval is very similar to the classical confidence interval, but its statistical interpretation
-   is quite different. $\Box$
+   In the Gaussian linear regression model the Bayesian interval is
+   very similar to the classical confidence interval, but its
+   statistical interpretation is quite different. $\Box$
 
 
+[[bibliography:../../../ref/ref.bib]]

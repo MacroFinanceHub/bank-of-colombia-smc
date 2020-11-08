@@ -1,10 +1,19 @@
-#+TITLE: Introduction
+#+TITLE: Linear DSGE Models and the Kalman Filter
 #+DATE: \today
 #+HUGO_BASE_DIR: /home/eherbst/Dropbox/www/
 #+HUGO_SECTION: teaching/bank-of-colombia-smc/lectures
 #+hugo_custom_front_matter: :math true
 #+hugo_auto_set_lastmod: t
 #+MACRO: NEWLINE @@latex:\\~\\~@@ @@html:<br>@@ @@ascii:|@@
+#+OPTIONS: toc:nil H:2
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{helvet}
+#+LaTEX_HEADER: \usepackage{natbib}
+#+LaTEX_HEADER: \beamertemplatenavigationsymbolsempty
+#+LaTeX_HEADER: \usepackage{bibentry}
+#+LaTeX_HEADER: \nobibliography*
+#+LaTeX_HEADER: \makeatletter\renewcommand\bibentry[1]{\nocite{#1}{\frenchspacing\@nameuse{BR@r@#1\@extra@b@citeb}}}\makeatother
+#+LaTeX_CLASS: beamer
 
 * Intro
 ** Background
@@ -422,48 +431,48 @@ is zero.
 ** Measurement Equation
    The measurement equation is of the form
    \begin{eqnarray}
-        y_t = Z_{t|t-1} s_t + d_{t|t-1} + u_t , \quad t=1,\ldots,T
+        y_t = D_{t|t-1} + Z_{t|t-1} s_t + \eta_t , \quad t=1,\ldots,T
    \end{eqnarray}
-   where $y_t$ is a $n \times 1$ vector of observables, $s_t$ is a $m
-   \times 1$ vector of state variables, $Z_{t|t-1}$ is an $n \times m$
-   vector, $d_{t|t-1}$ is a $n\times 1$ vector, and $u_t$ are
+   where $y_t$ is a $n_y \times 1$ vector of observables, $s_t$ is a $n_s
+   \times 1$ vector of state variables, $Z_{t|t-1}$ is an $n_y \times n_s$
+   vector, $D_{t|t-1}$ is a $n_y\times 1$ vector, and $u_t$ are
    innovations (or often ``measurement errors'') with mean zero and
-   $\mathbb{E}_{t-1}[ u_t u_t'] = H_{t|t-1}$.
+   $\mathbb{E}_{t-1}[ \eta_t \eta_t'] = H_{t|t-1}$.
    {{{NEWLINE}}}
-   - The matrices $Z_{t|t-1}$, $d_{t|t-1}$, and $H_{t|t-1}$ are in many applications constant.
+   - The matrices $Z_{t|t-1}$, $D_{t|t-1}$, and $H_{t|t-1}$ are in many applications constant.
    - However, it is sufficient that they are predetermined at $t-1$. They could be functions of $y_{t-1}, y_{t-2}, \ldots$.
-   - To simplify the notation, we will denote them by $Z_t$, $d_t$, and $H_t$, respectively.
+   - To simplify the notation, we will denote them by $Z_t$, $D_t$, and $H_t$, respectively.
 
 
   
 ** Transition Equation
    The transition equation is of the form
    \begin{eqnarray}
-        s_t = T_{t|t-1} s_{t-1} + c_{t|t-1} + R_{t|t-1} \eta_t
+        s_t = C_{t|t-1} + T_{t|t-1} s_{t-1} + R_{t|t-1} \epsilon_t
    \end{eqnarray}
    where $R_t$ is $m \times g$, and $\eta_t$ is a $g \times 1$ vector of innovations
-   with mean zero and variance $\mathbf{E}_{t|t-1}[ \eta_t \eta_t'] = Q_{t|t-1}$.
+   with mean zero and variance $\mathbf{E}_{t|t-1}[ \epsilon_t \epsilon_t'] = Q_{t|t-1}$.
    {{{NEWLINE}}}
    - The assumption that $s_t$ evolves according to an VAR(1) process
      is not very restrictive, since it could be the companion form to a
      higher order VAR process.
    - It is furthermore assumed that (i) expectation and variance of the initial state vector are given by $\mathbf [s_0] = A_0$ and $var[s_0] = P_0$;
-   - $u_t$ and $\eta_t$ are uncorrelated with each other in all time periods , and uncorrelated with the initial state. [not really necessary]
+   - $\epsilon_t$ and $\eta_t$ are uncorrelated with each other in all time periods , and uncorrelated with the initial state. [not really necessary]
  
 ** Adding it all up
-   If the system matrices $Z_t, d_t, H_t, T_t, c_t, R_t, Q_t$ are non-stochastic
+   If the system matrices $Z_t, D_t, H_t, T_t, C_t, R_t, Q_t$ are non-stochastic
    and predetermined, then the system is linear and $y_t$ can be expressed
-   as a function of present and past $u_t$'s and $\eta_t$'s.
+   as a function of present and past $\epsilon_t$'s and $\eta_t$'s.
    {{{NEWLINE}}}
    1. calculate predictions $y_t|Y^{t-1}$, where $Y^{t-1} = [ y_{t-1}, \ldots, y_1]$,
    2. obtain a likelihood function
          \[
-              p(Y^T| \{Z_t, d_t, H_t, T_t, c_t, R_t, Q_t \})
+              p(Y^T| \{Z_t, D_t, H_t, T_t, C_t, R_t, Q_t \})
          \]
    3. back out a sequence
       \[
-          \left\{ p(s_t |Y^t, \{Z_\tau, d_\tau, H_\tau, T_\tau,
-                  c_\tau, R_\tau, Q_\tau \} ) \right\}
+          \left\{ p(s_t |Y^t, \{Z_t, d_t, H_t, T_t,
+                  c_t, R_t, Q_t \} ) \right\}
       \]
        
    The algorithm is called the /Kalman Filter/ and was originally adopted
@@ -481,10 +490,10 @@ is zero.
    \]
    Then the $pdf(x|y)$ is multivariate normal with
    \begin{eqnarray}
-     \mu_{x|y} &=& \mu_x + \Sigma_{xy} \Sigma_{yy}^{-1}(y - \mu_y) \\
-     \Sigma_{xx|y} &=& \Sigma_{xx} - \Sigma_{xy} \Sigma_{yy}^{-1} \Sigma_{yx}
+     \mu_{x|y} &=& \mu_x + \Sigma_{xy} \Sigma_{yy}^{-1}(y - \mu_y) \nonumber \\
+     \Sigma_{xx|y} &=& \Sigma_{xx} - \Sigma_{xy} \Sigma_{yy}^{-1} \Sigma_{yx} \quad $\Box$\nonumber.
    \end{eqnarray}
-   $\Box$
+
 
 ** A Bayesian Interpretation to the Kalman Filter
   - Although the idea of the algorithm is based on linear projections,
@@ -495,7 +504,7 @@ is zero.
 
   {{{NEWLINE}}} 
   *Note:* The subsequent analysis is conditional on the system
-  matrices $Z_t, d_t, H_t, T_t, c_t, R_t, Q_t$.  For notational
+  matrices $Z_t, D_t, H_t, T_t, C_t, R_t, Q_t$.  For notational
   convenience we will, however, drop the system matrices from the
   conditioning set.
 
@@ -528,8 +537,6 @@ is zero.
    - This prior is of the form $s_0 \sim {\cal N}(A_0,P_0)$.
      {{{NEWLINE}}}
    - If the system matrices imply that the state vector has a stationary distribution, we could choose $A_0$ and $P_0$ to be the mean and variance of this stationary distribution.
-
-
 
 ** Forecasting
    - At $(t-1)^+$, that is, after observing $y_{t-1}$, the belief
@@ -686,58 +693,6 @@ updating step in the algorithm described above. $\Box$
     \includegraphics[width=3.5in]{int_forecast}
   \end{center} 
 
-
-
-** Example 2 -- ARMA models
-  Consider the ARMA(1,1) model of the form
-  \begin{eqnarray}
-         y_t = \phi y_{t-1} + \epsilon_t + \theta \epsilon_{t-1} \quad \epsilon_t \sim iid{\cal N}(0,\sigma^2)
-  \end{eqnarray}
-  The model can be rewritten in state space form
-  \begin{eqnarray}
-         y_t & = & [ 1 \; \theta] \left[ \begin{array}{c} \epsilon_t \\ \epsilon_{t-1} \end{array} \right] + \phi y_{t-1}\\
-         \left[ \begin{array}{c} \epsilon_t \\ \epsilon_{t-1} \end{array} \right]
-           & = &
-           \left[ \begin{array}{cc} 0 & 0 \\ 1 & 0 \end{array} \right]
-           \left[ \begin{array}{c} \epsilon_{t-1} \\ \epsilon_{t-2} \end{array} \right]
-           +
-           \left[ \begin{array}{c} \eta_t \\ 0 \end{array} \right]
-  \end{eqnarray}
-  where $\eta_t \sim iid{\cal N}(0,\sigma^2)$. Thus, the state vector is composed
-  of $\alpha_t = [\epsilon_t, \epsilon_{t-1}]'$ and $d_{t|t-1} = \rho y_{t-1}$.
-  The Kalman filter can be used to
-  compute the likelihood function of the ARMA model conditional on the
-  parameters $\phi, \theta, \sigma^2$. A numerical optimization routine has to
-  be used to find the maximum of the likelihood function. $\Box$
-
-
-** A Model with Time Varying Coefficients
-   Consider the following regression model with time varying coefficients
-   \begin{eqnarray}
-    y_t & = & x_t' \beta_t + u_t \\
-    \beta_t & = & T \beta_{t-1} + c + \eta_t
-   \end{eqnarray}
-   There are many reasons to believe that macroeconomic relationships are
-   not stable over time. An entire branch of the econometrics literature
-   is devoted to tests for structural breaks, that is, tests for changes
-   in the parameter values. However, to be able to predict future changes
-   in the parameter values it is important to model the time variation in
-   the parameters. The state variable $\alpha_t$ corresponds now to the
-   vector of regression parameters $\beta_t$. It is often assumed that
-   the regression coefficients follow univariate random walks of the form
-   \begin{eqnarray}
-      \beta_{j,t} = \beta_{j,t-1} + \eta_{j,t}
-   \end{eqnarray}
-   Hence, the only unknown parameters are $var[u_t]$ and $var[\eta_{j,t}]$.
-   The Kalman filter can provide us with a sequence of estimates
-   for the time varying coefficients.
-   \[
-      \{ \EE[\beta_t|Y^t,X^t] \}_{t=1}^T, \quad \{ var[\beta_t|Y^t,X^t] \}_{t=1}^T
-   \]
-   and the likelihood of the data conditional on $\mathbf E[u_t u_t']$, $\mathbf E[\eta_t \eta_t']$,
-   $T$ and $c$. $\Box$
-
-
 * Bibliography
 ** References
   :PROPERTIES:
@@ -745,6 +700,4 @@ updating step in the algorithm described above. $\Box$
   :END:   
 #+latex: \bibliographystyle{apalike}
 [[bibliography:../../../ref/ref.bib]]
-
-
 

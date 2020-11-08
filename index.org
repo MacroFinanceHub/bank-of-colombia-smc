@@ -1,4 +1,4 @@
-#+TITLE: Advanced Monte Carlo for Macroeconometrics \newline Part 1: Theory
+#+TITLE: Advanced Monte Carlo for Macroeconometrics  Part 1: Theory
 #+OPTIONS: toc:nil H:3 num:nil
 #+description: syllabus
 #+LaTeX_CLASS_OPTIONS: [12pt]
@@ -55,7 +55,7 @@
   Universities.  The material should be self-contained on the slides,
   but I've added background readings and academic papers to each of
   the lectures.
- 
+
 * Computation
   Macroeconometrics is an intensely computational field.  It is
   important to be proficient in at least one interpeted programming
@@ -65,6 +65,7 @@
   on the first day.
 
 #+latex: \bibliographystyle{plainnat}
+#+BIBLIOGRAPHY: /home/eherbst/Dropbox/ref/ref.bib
 [[nobibliography:/home/eherbst/Dropbox/ref/ref.bib]]
 
 * (Tentative) Calendar 

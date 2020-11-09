@@ -8,6 +8,7 @@
 #+LATEX_HEADER: \usepackage[utf8]{inputenc}
 #+LATEX_HEADER: \usepackage{helvet}
 #+LaTEX_HEADER: \usepackage{natbib}
+#+LaTEX_HEADER: \bibliographystyle{ecta}
 #+LaTEX_HEADER: \beamertemplatenavigationsymbolsempty
 #+LaTeX_HEADER: \usepackage{bibentry}
 #+LaTeX_HEADER: \nobibliography*
@@ -79,9 +80,9 @@
    contain the same information about $\theta$ if they are
    proportional to another.
    #+latex:\\~\\
-   Frequentist maximum-likelihood estimation and inference typically violates the LP!
+   Frequentist estimation and inference typically violates the LP!
    #+latex:\\~\\
-   *Bayesian* methods do not
+   *Bayesian* methods do not.
 
 ** Bayesian Models
 
@@ -184,7 +185,7 @@ The dimension of $\theta$ is $k$.
 The likelihood function is of
 the form
 \begin{eqnarray}
-  p(Y|X,\theta) = (2\pi)^{-T/2} \exp \left\{ Y - X\theta)'(Y-X\theta) \right\}.
+  p(Y|X,\theta) = (2\pi)^{-T/2} \exp \left\{ -\frac12 (Y - X\theta)'(Y-X\theta) \right\}.
 \end{eqnarray}
 Suppose the prior distribution is of the form
 \begin{eqnarray}
@@ -253,7 +254,9 @@ and its asymptotic (frequentist) sampling variance is $T^{-1} Q_{XX}^{-1}$.
    \end{eqnarray}
    If $\tau \longrightarrow 0$ the prior becomes *dogmatic* and the sample information is dominated by the prior information. The posterior converges to a point mass that concentrates at $\theta = 0$.
    #+latex:\\~\\
-   In large samples (fixed $\tau$, $T \longrightarrow \infty$) the effect of the prior becomes negligibleand the sample information dominates
+   In large samples (fixed $\tau$, $T \longrightarrow \infty$) the
+   effect of the prior becomes negligible and the sample information
+   dominates
    \begin{eqnarray}
     \theta |Y,X \stackrel{approx}{\sim} {\cal N} \bigg( \hat{\theta}_{mle}, T^{-1} Q_{XX}^{-1} \bigg). \quad \Box
     \end{eqnarray}
@@ -653,5 +656,6 @@ regions of the parameter space $\Theta$.
    very similar to the classical confidence interval, but its
    statistical interpretation is quite different. $\Box$
 
+** References 
 
 [[bibliography:../../../ref/ref.bib]]

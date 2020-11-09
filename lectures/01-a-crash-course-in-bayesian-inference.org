@@ -97,7 +97,7 @@
    with fixed $Y^T$ is the *likelihood function.*     
    #+latex:\\~\\
    The *posterior distribution* of the parameter $\theta$, that is,
-   the conditional distribution of $\theta$ given $Y_T$, can be
+   the conditional distribution of $\theta$ given $Y^T$, can be
    obtained through Bayes theorem:
    \begin{eqnarray*}
       p(\theta|Y^T) = \frac{ p(Y^T|\theta) p(\theta)}{ \int p(Y^T|\theta) p(\theta) d\theta}
@@ -307,7 +307,7 @@ Consume," /J. Am. Statist. Assoc/, 42, p. 88 (1947).
    #+latex:\\~\\
    The goal is to find decisions that minimize the posterior expected loss $E_{Y^T} [ L(\theta, \delta(Y^T)) ]$. 
    #+latex:\\~\\
-   The expectation is taken conditional on the data $x$, and integrates out the parameter $\theta$.
+   The expectation is taken conditional on the data $Y^T$, and integrates out the parameter $\theta$.
 
 * Point Estimation
 

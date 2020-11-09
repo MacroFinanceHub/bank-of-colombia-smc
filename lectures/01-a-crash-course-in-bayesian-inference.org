@@ -393,14 +393,6 @@ Note that the parameters $a_1$ and $a_2$ are part of the econometricians
 preferences.
 
 ** Optimal Decision Rule
-\begin{eqnarray}
-     \delta(Y^T) = \left\{
-     \begin{array}{l@{\quad}l}
-        1 & P_{Y^T}\{\theta \in \Theta_0\} \ge a_1/(a_0+a_1) \\
-        0 & \mbox{otherwise}
-     \end{array}
-     \right.
-\end{eqnarray}
 The expected loss is
 \begin{eqnarray*}
   E_{Y^T} L(\theta,\delta)
@@ -410,6 +402,15 @@ Thus, one should accept the hypothesis $\theta \in \Theta_0$ (choose $\delta=1$)
 \begin{eqnarray}
     a_1 P_{Y^T} \{ \theta \in \Theta_1 \}
      = a_1 [1- P_{Y^T} \{\theta \in \Theta_0\}] \le a_0 P_{Y^T}\{\theta \in \Theta_0\}
+\end{eqnarray}
+That is: 
+\begin{eqnarray}
+     \delta(Y^T) = \left\{
+     \begin{array}{l@{\quad}l}
+        1 & P_{Y^T}\{\theta \in \Theta_0\} \ge a_1/(a_0+a_1) \\
+        0 & \mbox{otherwise}
+     \end{array}
+     \right.
 \end{eqnarray}
 
 

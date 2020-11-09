@@ -93,17 +93,17 @@
    #+latex: \vspace{-0.1in} \calendar 
    [2020-11-10 Tue 10:00-12:00]
 
-    /Topics/: State space models, the kalman filter, prior
-    specification, prior and posterior predictive checks, linear
-    rational expectations, impulse response functions, variance decompositions
+   /Topics/: State space models, the kalman filter, prior
+   specification, prior and posterior predictive checks, linear
+   rational expectations, impulse response functions, variance decompositions
 
-    /Some background readings/: [[citeauthor:HerbstSchorfheide2015][Chapter 3]]
-    
-    /A few related papers/:
-    #+latex: \vspace{-0.1in}
-    #+ATTR_LATEX: :options [noitemsep]
-    - bibentry:Sims2002
-    - bibentry:An2007b
+   /Some background readings/: [[citeauthor:HerbstSchorfheide2015][Chapter 3]]
+   
+   /A few related papers/:
+   #+latex: \vspace{-0.1in}
+   #+ATTR_LATEX: :options [noitemsep]
+   - bibentry:Sims2002
+   - bibentry:An2007b
    
 ** Lecture 3: Monte Carlo Simulation
    #+latex: \vspace{-0.1in} \calendar 

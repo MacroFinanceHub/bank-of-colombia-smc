@@ -262,7 +262,7 @@
 ** How Can One Solve Linear Rational Expectations Systems? A Simple Example
    - Consider
      \begin{eqnarray}
-     y_t = \frac{1}{\theta} \EE_t[y_{t+1}] + \epsilon_t,
+     y_t = \frac{1}{\theta} \mathbb E_t[y_{t+1}] + \epsilon_t,
      \label{eq_yex}
      \end{eqnarray}
      where $\epsilon_t \sim iid(0,1)$ and $\theta \in \Theta = [0,2]$.
@@ -655,42 +655,42 @@ updating step in the algorithm described above. $\Box$
 
 
 ** Observables
-  \includegraphics[width=4in]{dsge1_observables}
+  \includegraphics[width=4in]{static/dsge1_observables}
 
 
 ** Impulse Responses
   \begin{center}
-    \includegraphics[width=3.5in]{dsge1_all_irf}
+    \includegraphics[width=3.5in]{static/dsge1_all_irf}
   \end{center}
 
 
 ** Filtered Technology Shock (Mean)
   \begin{center}
-    \includegraphics[width=3.5in]{filtered_technology_shock}
+    \includegraphics[width=3.5in]{static/filtered_technology_shock}
   \end{center}
 
 
 ** Log Likelihood Increments
   \begin{center}
-    \includegraphics[width=3.5in]{log_lik}
+    \includegraphics[width=3.5in]{static/log_lik}
   \end{center}
 
 
 ** Forecast of Output Growth
   \begin{center}
-    \includegraphics[width=3.5in]{ygr_forecast}
+    \includegraphics[width=3.5in]{static/ygr_forecast}
   \end{center}
 
 
 ** Forecast of Inflation
   \begin{center}
-    \includegraphics[width=3.5in]{infl_forecast}
+    \includegraphics[width=3.5in]{static/infl_forecast}
   \end{center}
 
 
 ** Forecast of Interest Rate
   \begin{center}
-    \includegraphics[width=3.5in]{int_forecast}
+    \includegraphics[width=3.5in]{static/int_forecast}
   \end{center} 
 
 * Bibliography

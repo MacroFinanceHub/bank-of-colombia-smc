@@ -1,0 +1,615 @@
+#+TITLE: Some Notes on the Kalman Filter
+#+OPTIONS: toc:nil num:nil
+#+LaTeX_HEADER: \linespread{1.4}
+#+LaTeX_HEADER: \usepackage[margin=1.00in]{geometry}
+#+LaTeX_HEADER: \bibliographystyle{ecta}
+#+LaTeX_HEADER: \usepackage{natbib}
+#+LaTeX_HEADER: \usepackage{minted}
+#+LaTeX_HEADER: \usepackage{xcolor}
+#+LaTeX_HEADER: \definecolor{ll}{rgb}{0.95,0.95,0.95}
+#+LATEX_HEADER_EXTRA: \usepackage{mdframed}
+#+LATEX_HEADER_EXTRA: \setminted{fontsize=\small,baselinestretch=0,bgcolor=ll,breaklines=true}
+State space models form a very general class of models that encompass
+many of the specifications that we encountered earlier.  VARMA models,
+linearized DSGE models, and more can be written in state space form.
+State space models are particularly popular at the FRB.  For example,
+the models in the $r^*$ suite can all be written in state space form.  
+   
+A state space model can be described by two different equations: a
+measurement equation that relates an /unobservable/ state vector $s_t$
+to the /observables/ $y_t$, and a transition equation that describes
+the evolution of the state vector $s_t$.  For now, we'll restrict
+attention to the case in which both of these equations are linear. 
+
+#+latex:\noindent
+*Measurement.* The measurement equation is of the form
+\begin{eqnarray}
+    \label{eq:obs}
+    y_t = D_{t|t-1} + Z_{t|t-1} s_t  + \eta_t , \quad t=1,\ldots,T
+\end{eqnarray}
+where $y_t$ is an $n_y \times 1$ vector of observables, $s_t$ is an $n_s
+\times 1$ vector of state variables, $Z_{t|t-1}$ is an $n_y \times n_s$
+vector, $D_{t|t-1}$ is a $n_y\times 1$ vector, and $\eta_t$ are
+innovations (or often ``measurement errors'') with mean zero and
+$\mathbb{E}_{t-1}[ \eta_t \eta_t'] = H_{t|t-1}$.
+
+- The matrices $Z_{t|t-1}$, $D_{t|t-1}$, and $H_{t|t-1}$ are in many applications constant ("time-invariant.")
+- However, it is sufficient that they are predetermined at $t-1$. They could be functions of $y_{t-1}, y_{t-2}, \ldots$.
+- To simplify the notation, we will denote them by $Z_t$, $D_t$, and $H_t$, respectively.
+
+#+latex:\noindent
+*Transition.* The transition equation is of the form
+\begin{eqnarray}
+     \label{eq:transition}
+     s_t = C_{t|t-1} + T_{t|t-1} s_{t-1}  + R_{t|t-1} \epsilon_t
+\end{eqnarray}
+where $R_t$ is $n_s \times n_\epsilon$, and $\epsilon$ is a $n_\epsilon \times 1$ vector of innovations
+with mean zero and variance $\mathbb{E}_{t|t-1}[ \epsilon_t \epsilon_t'] = Q_{t|t-1}$.
+- The assumption that $s_t$ evolves according to an VAR(1) process
+  is not very restrictive, since it could be the companion form to a
+  higher order VAR process.
+- It is furthermore assumed that (i) expectation and variance of the
+  initial state vector are given by \(\mathbb E[s_0] = A_0\) and
+  $\mathbb V[s_0] = P_0$;
+- $\eta_t$ and $\epsilon_t$ are uncorrelated with each other in all
+  time periods , and uncorrelated with the initial state. This
+  assumption is not really necessary, but it simplies things
+  considerable. 
+The collection of matrices in ([[ref:eq:obs]]) and ([[ref:eq:transition]])
+define the state space system.  For that reason, they are often
+referred to as the "system matrices."
+
+#+latex:\noindent
+/Example./ Consider the ARMA(1,1) model of the form
+\begin{eqnarray}
+       y_t = \phi y_{t-1} + \epsilon_t + \theta \epsilon_{t-1} \quad \epsilon_t \sim iid{\cal N}(0,\sigma^2)
+\end{eqnarray}
+The model can be rewritten in state space form
+\begin{eqnarray}
+       y_t & = & [ 1 \; \theta] \left[ \begin{array}{c} \epsilon_t \\ \epsilon_{t-1} \end{array} \right] + \phi y_{t-1}\\
+       \left[ \begin{array}{c} \epsilon_t \\ \epsilon_{t-1} \end{array} \right]
+         & = &
+         \left[ \begin{array}{cc} 0 & 0 \\ 1 & 0 \end{array} \right]
+         \left[ \begin{array}{c} \epsilon_{t-1} \\ \epsilon_{t-2} \end{array} \right]
+         +
+         \left[ \begin{array}{c} \eta_t \\ 0 \end{array} \right]
+\end{eqnarray}
+where $\epsilon_t \sim iid{\cal N}(0,\sigma^2)$. Thus, the state
+vector is composed of $s_t = [\epsilon_t, \epsilon_{t-1}]'$ and $D_{t}
+= \rho y_{t-1}$.  This construction is not unique. We could also write
+the model as:
+\begin{eqnarray}
+       y_t & = & [ 1 \; 0] \left[ \begin{array}{c} y_t \\ \epsilon_{t} \end{array} \right] \\
+       \left[ \begin{array}{c} y_t \\ \epsilon_{t} \end{array} \right]
+         & = &
+         \left[ \begin{array}{cc} \phi & \theta \\ 0 & 0 \end{array} \right]
+         \left[ \begin{array}{c} y_{t-1} \\ \epsilon_{t-1} \end{array} \right]
+         +
+         \left[ \begin{array}{c} 1\\ 1 \end{array} \right]\epsilon_t.
+\end{eqnarray}
+Notice in this formulation the state vector \(s_t = [y_t,\epsilon_t]\)
+is partially observed.  So it's not true, strictly speaking, that the
+entire $s_t$ vector must be unobserved. $\Box$
+
+If the system matrices \(D_t, Z_t, H_t, C_t, T_t, R_t, Q_t\) are
+non-stochastic and predetermined, then the system is linear and $y_t$
+can be expressed as a function of present and past $\eta_t$'s and
+$\epsilon_t$'s.  We've done some work on linear systems previously
+(VARs), so the natural next step is to expand our toolkit to do the
+kinds of things we liked to do with VARs:
+- Calculate predictions $y_t|Y^{t-1}$, where $Y^{t-1} = [ y_{t-1}, \ldots, y_1]$,
+- Obtain a likelihood function
+  \begin{eqnarray}
+       \label{eq:likelihood}
+       p(Y^T| \{Z_t, D_t, H_t, T_t, C_t, R_t, Q_t \}),
+  \end{eqnarray}
+- and, /something we didn't do with VARs/, back out a sequence
+   \[
+       \left\{ p(s_t |Y^t, \{Z_t, D_t, H_t, T_t,
+               C_t, R_t, Q_t \} ) \right\}_{t=1}^T.
+   \]
+Now, if the state vector was observed, it would be easy to combine
+equation ([[ref:eq:obs]]) and ([[ref:eq:transition]]) to obtain a VAR jointly
+in \([y_t, s_t]\).  Thus, it would be straightforward to obtain the
+(perhaps conditional) likelihood: 
+\[ 
+p(Y^T,S^T | \{Z_t, D_t, H_t, T_t, C_t, R_t, Q_t \}).  
+\] 
+But life is hard, and we don't get to observe $S^T$.  We need to
+compute the likelihood for the data we have, i.e., the likelihood in
+([[ref:eq:likelihood]]).  We have to marginalize out $S^T$.  It turns out
+that their is an algorithm that does this, and fulfills the three
+desiderata above.  The algorithm is called the /Kalman Filter/ and was
+originally adopted from the engineering literature.
+
+** The Kalman Filter
+   For this presentation of the Kalman filter, we're going to assume
+   that the system matrices are time invariant, that is, they do not
+   depend on $t$.  So we drop these subscripts from our notation.
+   Furthermore, we're going to collect them in the vector \(\theta =
+   [C,T,R,Q,D,Z,H]\), where the \(vec\) operator is being implicitly
+   applied to each matrix.
+
+   We're also going to assume that the innovations $\eta_t$ and
+   $\epsilon_t$ are normally distributed.  We need to this to obtain
+   an exact likelihood, although the Kalman filter can
+   be used to obtain an optimal---in terms of MSE---predictor $y_{t+h}$
+   given $Y^T$ for $h \ge 1$ using linear projections, regardless of
+   the parametric distributions for $\eta_t$ and $\epsilon_t$.  The
+   chapter on state space models in cite:Hamilton derives this. In
+   this case the likelihood calculation delivers a quasi-likelihood.
+
+   With our normality assumption, the derivation of the Kalman filter
+   has a natural Bayesian interpretation.  Before we proceed, we're
+   going to state some results about multivariate normal
+   distributions, which will help later on.  
+
+   #+latex: \noindent
+   /Lemma./ Let $(x',y')'$ be jointly normal with
+   \[
+     \mu = \left[ \begin{array}{c} \mu_x \\ \mu_y \end{array} \right]
+     \quad \mbox{and} \quad
+     \Sigma = \left[ \begin{array}{cc} \Sigma_{xx} & \Sigma_{xy} \\
+              \Sigma_{yx} & \Sigma_{yy} \end{array} \right]
+   \]
+   Then the $pdf(x|y)$ is multivariate normal with
+   \begin{eqnarray}
+     \mu_{x|y} &=& \mu_x + \Sigma_{xy} \Sigma_{yy}^{-1}(y - \mu_y) \\
+     \Sigma_{xx|y} &=& \Sigma_{xx} - \Sigma_{xy} \Sigma_{yy}^{-1} \Sigma_{yx}
+   \end{eqnarray}
+   Note that the converse is not necessarily true. $\Box$
+   
+   In both theory and practice, the Kalman filter proceeds
+   recursively, using the natural prior-posterior sequencing, after an
+   initialization.
+
+   #+latex:\noindent
+   /Initialization./ We're going to start at period $t=0$, that is,
+   the period before we first observe \(y\).  We assume that $s_0$ is
+   normally distributed:
+   \begin{align}
+   s_0 | \theta \sim \mathcal N\left(A_0, P_0\right). 
+   \end{align}
+   Importantly, we conceptualize this distribution as prior
+   distribution.  We'll discuss possible ways to select \(A_0\) and
+   \(P_0\) in a bit.
+  
+   #+latex:\noindent
+   /Prediction./ We can combine our prior distribution for $s_0$ with
+   the state transition equation ([[ref:eq:transition]]).  Since $s_0$ is
+   normally distributed and $\epsilon_1$ is also normally distributed
+   (and independent of \(s_0\)), \(s_1\) is also normally distributed, 
+   \[
+   s_1 | \theta \sim \mathcal N\left(A_{1|0}, P_{1|0}\right)
+   \]
+   where
+   \[
+    A_{1|0} = C+T A_{0} \mbox{ and } P_{1|0} = T P_0 T' + RQR'.
+   \]
+   Note that this is the unconditional distribution of $s_1$, a prior
+   distribution for $s_1$ before seeing $y_1$.  We write the mean
+   $A_{1|0}$ and $P_{1|0}$ as conditional on time $t=0$.  
+
+   Next consider the prediction of $y_1$.  The conditional
+   distribution of $y_1$ is of the form
+   \begin{eqnarray}
+      y_1|s_1,\theta  \sim {\cal N}(D+Z s_1, H)
+   \end{eqnarray}
+   Since $s_1 \sim {\cal N}( A_{1|0}, P_{1|0})$, we can deduce that
+   the marginal distribution of $y_1$ is of the form
+   \begin{eqnarray}
+       y_1|\theta  \sim {\cal N} (\hat{y}_{1|0}, F_{1|0})
+   \end{eqnarray}
+   where
+   \begin{eqnarray*}
+       \hat{y}_{1|0} = D + Z A_{1|0} \mbox{ and }  F_{1|0} =  Z P_{1|0} Z' + H.
+   \end{eqnarray*}
+   Here we've been explicit in going \(s_0 \rightarrow s_1 \rightarrow
+   y_1\).  
+
+   #+latex:\noindent
+   /Updating./ Another way to see this is to rewrite the
+   observation equation ([[ref:eq:obs]]) in terms of $s_{t-1}$ and
+   $\epsilon_t$.  If $s_{0}$ is normally distributed as above it's
+   easy to see that $s_1$ and $y_1$ are jointly normally distributed with
+   the marginal and conditional distributions mentioned above.  We have:
+   \begin{eqnarray}
+        s_1 &=& C + T s_0 + R\epsilon_t \\
+        y_1 &=& D + Z T s_0 + Z\epsilon_t + \eta_t.
+   \end{eqnarray}
+   Direct calculation yields:
+   \begin{eqnarray}
+       \begin{bmatrix}s_1 \\ y_1 \end{bmatrix} \bigg| \theta \sim \mathcal N \left( \begin{bmatrix} A_{1|0} \\ \hat y_{1|0} \end{bmatrix}, \begin{bmatrix} P_{1|0} & P_{1|0} Z' \\ Z P_{1|0} & F_{1|0} \end{bmatrix}\right).
+   \end{eqnarray}
+   Consider the third goal of toolbox: delivering
+   $p(s_1|y_1,\theta)$. Well, we can get that easily using the formula
+   for the conditional normal distribution:
+   \begin{align}
+     \label{eq:update}
+     s_1 | y_1 \sim N\left( A_{1|0} + P_{1|0} Z' F_{1|0}^{-1} \left(y_1 - \hat y_{1|0}\right), P_{1|0} - P_{1|0} Z' F_{1|0}^{-1} Z P_{1|0}\right). 
+   \end{align}
+   Note that we could have instead obtained this using: 
+   \begin{align}
+     \label{eq:bayes}
+      p(s_1 | y_1,\theta) \propto p(y_1|s_1,\theta) p(s_1|\theta),
+   \end{align}
+   i.e., our good friend Bayes rule!  Note the conjugacy
+   (normal-normal) likelihood-prior relationship yields a normally
+   distributed posterior.  Finally, let's call give our updated state mean and variance: 
+   \begin{align}
+     \label{eq:ms}
+      A_1 = A_{1|0} + P_{1|0} Z' F_{1|0}^{-1} \left(y_1 - \hat y_{1|0}\right) \mbox{ and } P_1 = P_{1|0} - P_{1|0} Z' F_{1|0}^{-1} Z P_{1|0}.
+   \end{align}
+
+   #+latex:\noindent
+   /Generalization./ Now, with the distribution form
+   \(s_1|y_1,\theta\), we're back where we started!  So all we have to
+   do is construct $s_2|y_1,\theta$ and $y_2 | s_2, y_1, \theta$ in an
+   identical fashion as above, and so on for \(t = 2,\ldots,T\).  We
+   can summarize the recursions:
+   1. *Initialization.*  Set \(s_0 \sim N(A_0,P_0).\)
+   2. *Recursions.* For \(t=1,\ldots,T\):
+      \begin{align}
+            \label{eq:state-prediction}
+            \mbox{state prediction}&: A_{t|t-1} = C+T A_{t-1} \mbox{ and } P_{t|t-1} = T P_{t-1} T' + RQR'.\\
+            \label{eq:obs-prediction}
+            \mbox{observation prediction}&: \hat y_{t|t-1} = D + Z A_{t|t-1} \mbox{ and } F_{t|t-1} = Z P_{t|t-1} Z' + H. \\
+            \label{eq:state-update}
+            \mbox{state update}&: A_t = A_{t|t-1} + P_{t|t-1} Z' F_{t|t-1}^{-1} \left(y_t - \hat y_{t|t-1}\right) \mbox { and } \nonumber \\
+                               &~~ P_t = P_{t|t-1} - P_{t|t-1} Z' F_{t|t-1}^{-1} Z P_{t|t-1}. 
+      \end{align}
+   
+   #+latex:\noindent
+   /Likelihood function./ We can define the one-step ahead forecast error
+   \begin{eqnarray}
+        \nu_t = y_t - \hat{y}_{t|t-1} =  Z (s_t - A_{t|t-1}) + \eta_t.
+   \end{eqnarray}
+   The likelihood function is given by
+   \begin{eqnarray}
+     p(Y^T | \theta )
+       & = & \prod_{t=1}^T p(y_t|Y^{t-1}, \theta) \nonumber \\
+       & = & ( 2 \pi)^{-n_yT/2} \left( \prod_{t=1}^T |F_{t|t-1}| \right)^{-1/2} \times \exp \left\{ - \frac{1}{2} \sum_{t=1}^T \nu_t F_{t|t-1}^{-1} \nu_t' \right\}
+   \end{eqnarray}
+   This representation of the likelihood function is often called prediction
+   error form, because it is based on the recursive prediction one-step ahead
+   prediction errors $\nu_t$. $\Box$
+
+*** Discussion
+   /Initialization./ First, on the initialization step, if the
+   system-matrices are time-invariant and the process for \(s_t\) is
+   stationary (i.e., all the eigenvalues of \(T\) are less than one in
+   magnitude), it might make sense to initialize the Kalman filter
+   from the invariant distribution, i.e., we have $A_0$ and $P_0$ such that
+   \[
+   A_0 = (I_{n_s} - T)^{-1} C \mbox{ and } P_0 = T P_0 T' + RQR'.
+   \]
+   If the system is not too big, you can solve for $P_0$ directly
+   using the \(vec\) operator:
+   \[
+   vec(P_0) = \left(I_{n_s^2} - (T' \otimes T)\right)^{-1} RQR'.
+   \]
+   Otherwise, there are algorithms available for computing $P_0$
+   reliably and quickly.  
+
+   If the system is not stationary, it's common practice to set the
+   variance of \(P_0\) be extremely large, like \(1000\times I_{n_s}\). 
+
+   #+latex:\noindent
+   /Kalman Gain./ In ([[ref:eq:state-update]]), the matrix that maps the
+   prediction errors, \(\nu_t\), into the state revision is important
+   enough to warrant it's own name: the Kalman Gain.  The Kalman Gain,
+   \[
+   K_t = P_{t|t-1} Z F_{t|t-1}^{-1},
+   \]
+   is an $n_s\times n_y$ matrix that maps the "surprises" (forecast
+   errors) in the observed data to changes in our beliefs about the
+   underlying unobserved states.  Essentially, the gain tells us how
+   we learn about the states from the data.
+
+   #+latex:\noindent
+   /Time-varying system matrices and missing data./ The Kalman filter
+   recursions in ([[ref:eq:state-prediction]]), ([[ref:eq:obs-prediction]]),
+   and ([[ref:eq:state-update]]) are valid if the system matrices are
+   time-varying (but pre-determined.)  In practice, it is simply a
+   matter of adding the relevant subscripts onto the system matrices.
+   An important case of time-varying system matrices is when they are
+   constant except for the fact that some of the observations are
+   missing; i.e, for some $t$, at least one element of \(y_t\) is
+   missing.  In this case, we simply modify the observation equation
+   ([[ref:eq:obs]])---and hence, ([[ref:eq:obs-prediction]]) and
+   ([[ref:eq:state-update]])---in order to account for the fact that we
+   observe fewer series at some periods.  Suppose in period \(t\) we
+   observe $n_{y_t}$, which is less than or equal to $n_y$.  Define the
+   $n_{y_t} \times n_y$ select matrix $M_t$, to be the matrix whose
+   columns are comprised of \(\{e_i : i\mbox{th series is
+   observed}\}\), where \(e_i\) is the \(n_y\times 1\) vector with a
+   one in the \(i\)th position and zeros elsewhere.  Then,
+   \begin{align}
+     \label{eq:missing}
+     D_t = M_t D,~~ Z_t = M_t Z, \mbox{ and } H_t = M_t H M_t'.  
+   \end{align}
+   The ability to handle missing data is an extremely powerful feature
+   of the Kalman filter, as it allows us to both handle estimating
+   models with missing data, and make inference about the missing data
+   itself.  More on this later.  Most programmed Kalman filter
+   routines can handle missing data without an modification of the
+   system matrices on the part of the user.  Simply code your missing
+   data as ~nan~.  Finally, note that the likelihood calculation in
+   ([[ref:eq:likelihood]]) needs to be modified (i.e., \(n_y\) needs to be
+   replaced by \(n_{y_t}\).)  Again, preprogrammed routines should
+   handle this without user intervention.  
+
+   #+latex:\noindent
+   /"Steady-state" Kalman filter./ Suppose the system matrices are constant. If we combine
+   ([[ref:eq:state-prediction]]), ([[ref:eq:obs-prediction]]) ([[ref:eq:state-update]]) for the state
+   variance, we obtain
+   \begin{eqnarray}
+   P_{t+1|t} = T P_{t|t-1}T' + RQR - T P_{t|t-1} Z' (Z P_{t|t-1} Z' + H)^{-1} Z P_{t|t-1}T' 
+   \end{eqnarray}
+   with \(P_{0|-1} = P_0.\) This equation is known as the /matrix
+   Riccati recursion/, a discrete time analogue to the popular set of
+   ODEs.  Under some regularity conditions, as $t$ gets sufficiently
+   large, \(P_{t+1|t} \rightarrow \bar P\), i.e., there is an
+   invariant solution to the Riccati equation.  Some people refer to
+   this as the "steady-state" prediction variance (and
+   correspondingly, the "steady-state" Kalman gain.)  It can be useful
+   in computation as well: after a sufficiently amount of time, one
+   does not need to continue to update \(P_{t|t-1}\), which is the
+   typically the costliest part of evaluating the Kalman filter.  Note
+   this also makes clear that the variances in the Kalman filter to
+   not depend on the observed data. 
+
+   # #+latex:\noindent
+   # /Innovations representation of the Kalman Filter./ TBD
+
+   #+latex:\noindent 
+   /Caution./ Some authors adopt a slightly different timing
+   convention with the Kalman Filter; specifically,
+   cite:DurbinKoopman2001.  The initialization of the filter changes
+   slightly.  It's all very tedious. 
+   
+
+*** Kalman Smoothing 
+    Note that the Kalman filter is a /filter/: it delivers the
+    sequence of smoothed distribution \(\{s_t | Y^{t}\}_{t=1}^T\),
+    which since they are normal, are simply described by the sequence
+    \(\{A_t,P_t\}_{t=1}^T\).  Sometimes, we interested in the
+    /smoothed/ distributions, \(\{s_t | Y^T\}_{t=1}^T\), that is
+    distributions of the unobserved states conditional on all of the
+    data.  These distributions are also normally distributed, and can
+    be found another recursive algorithm known as the Kalman smoother.  
+
+    The Kalman smoother is more or less the Kalman filter in reverse.
+    Let's define \[ A_{t|T} = \mathbb E[s_{t}|Y^T] \mbox{ and }
+    P_{t|T} = \mathbb V[S_t|Y^T].  \] The Kalman smoother delivers to
+    the sequence \(\{A_{t|T},P_{t|T}\}_{t=1}^T\).  Clearly, \(A_{T|T}
+    = A_T\) and \(P_{T|T} = P_T\).  Consider next computing the
+    smoothed distribution at time \(T-1\).  Consider the joint
+    distribution of the form 
+
+   \begin{eqnarray}
+       \label{eq:smoother}
+       \begin{bmatrix}s_{T-1} \\ s_T \\ y_T \end{bmatrix} \bigg| Y^{T-1}, \theta 
+         \sim \mathcal N \left( \begin{bmatrix} A_{T-1} \\ A_{T|T-1} \\ \hat y_{T|T-1} \end{bmatrix}, \begin{bmatrix} P_{T-1} & P_{T-1}T' & P_{T-1} T' Z'  \\
+                                                                                                                      T P_{T-1} & P_{T|T-1} & P_{T|T-1} Z' \\ 
+                                                                                                                      Z T P_{T-1} & Z P_{T|T-1} & F_{T|T-1} \end{bmatrix}\right).
+   \end{eqnarray}
+   Thus, the mean of $s_{T-1} | Y^T, \theta$ is given by: 
+   \begin{align}
+   A_{T-1|T} &= A_{T-1} + P_{T-1} T' Z' F_{T|T-1}^{-1} (y_T - \hat y_{T|T-1})  &  \nonumber \\ 
+             &= A_{T-1} + \underbrace{P_{T-1} T' P_{T|T-1}^{-1}}_{J_{T-1}} (A_T - A_{T|T-1}) & \mbox{using (\ref{eq:state-update})}. 
+   \end{align}
+   The variance is similarly calculated as: 
+   \begin{align}
+   P_{T-1|T} &= P_{T-1} - P_{T-1} T' Z' F_{T|T-1}^{-1} Z T P_{T-1} & \nonumber \\
+             &= P_{T-1} - J_{T-1}  (P_T - P_{T|T-1}) J_{T-1} ' & \mbox{using (\ref{eq:state-update})}. 
+   \end{align}
+   To extend this to \(T-2\) and so on simply modify
+   (\ref{eq:smoother}).  Note that the procedure sketched here can be
+   numerically unstable, most packaged software will take care of this. 
+    
+
+*** Drawing from the Smoothed Distribution
+
+    Often times one wants to simulate from the smoothed distribution.
+    Conceptually this is straightforward, but note that our sequence
+    of smoothed distributions we derived above does not include the
+    joint distribution of the \(s_t\)s. Drawing from the joint
+    distribution \(S^T|Y^T\) is known as /simulation smoothing/.
+    Doing this quickly and accurately has been a topic of research of
+    the past few decades.  cite:fruhwirth1994data and cite:CaKohn94
+    independently developed methods of drawing samples of $S^T | Y^T$
+    using a recursive technique consisting of first sampling $s_T|Y^T$
+    and then sampling $S_{T-1}| Y^T, s^T$ and so on.  Importance
+    computational improvements were made first by cite:Jong1995 and
+    then cite:Durbin2002. 
+    
+
+** An Example: GDP+
+
+   Here I'm going to through a simple state space model described in
+   cite:Aruoba_2016.  Since GDP data is inherently noisy, the authors
+   use both income-side \((GDP_{It})\) and expenditure-side
+   \((GDP_{Et})\) data on GDP growth to infer the true (unobserved) growth rate,
+   \(GDP_t\).  The authors posit that the true growth rate follows an AR(1): 
+   \begin{align}
+     \label{eq:gdp}
+    GDP_t = \mu (1-\rho) + \rho GDP_{t-1} + \epsilon_t, \quad \epsilon_t \sim IID N(0, \sigma^2).
+   \end{align}
+   An that both income- and expenditure-side estimates are mismeasured versions of this: 
+   \begin{align}
+     \label{eq:gdp-measure}
+     \begin{array}{c}
+      GDP_{Et} \\ GDP_{It} 
+     \end{array}
+     \bigg| GDP_t
+     \sim IID N \left(
+    \left[
+  \begin{array}{c}
+    GDP_t \\ GDP_t
+  \end{array}
+  \right],
+    \left[
+  \begin{array}{cc}
+    \sigma_{E}^2 & 0 \\ 0 & \sigma_{I}^2
+  \end{array}
+  \right]\right)
+   \end{align}
+   We can cast this into state space form with $n_y = 2$ and $n_s = n_\epsilon = 1$.  We have 
+   \begin{align}
+   C = \mu(1-\rho),~~ T = \rho,~~ R = 1, \mbox{ and } Q = \sigma^2, \nonumber \\
+   D = \begin{bmatrix}0 \\ 0 \end{bmatrix}, ~~ Z = \begin{bmatrix}1 \\ 1 \end{bmatrix}, \mbox{ and } H =     \left[
+  \begin{array}{cc}
+    \sigma_{E}^2 & 0 \\ 0 & \sigma_{I}^2
+  \end{array}
+  \right].
+  \end{align}
+  Here's a look at the data:
+     #+BEGIN_SRC jupyter-python :session ps4  :ipyfile gdps.png :exports results :results raw drawer
+       %matplotlib inline
+       import matplotlib.pyplot as plt
+
+       from pandas_datareader.data import DataReader
+
+       # get the data from FRED
+       series = ['A261RX1Q020SBEA', # real gross domestic income
+                 'GDPC1', # real gross domestic product
+                 'CNP16OV'] # population
+
+       data = DataReader(series,
+                         data_source='fred',
+                         start='1960',
+                         end='2016Q3').resample('Q').mean()
+
+       data['gdpe'] = 100*(data.GDPC1 / data.CNP16OV).pct_change()
+       data['gdpi'] = 100*(data.A261RX1Q020SBEA / data.CNP16OV).pct_change()
+       data = data['1965':'2015']
+       ax=data[['gdpe', 'gdpi']].plot(); ax.set_xlabel=''
+     #+END_SRC
+
+     #+RESULTS:
+     [[file:./.ob-jupyter/2b8bece5ece6f1499320a15f640aab87d1456995.png]]
+   We can use the Kalman filter to maximize the likelihood function,
+   since we haven't quite worked out how to elicit the posterior of
+   this model just yet.  
+     #+BEGIN_SRC jupyter-python :session ps4  :exports results :results output
+       # to install use conda:
+       # conda install dsge -c eherbst
+       from dsge.DSGE import DSGE
+
+       gdp_plus = DSGE.read('/home/eherbst/Dropbox/teaching/econ-616-fall-2017/problem-sets/gdp_plus.yaml')
+       mod = gdp_plus.compile_model()
+       mod.yy = data[['gdpe', 'gdpi']]
+
+       x0 = gdp_plus.p0()
+       print('Initial likelihood: ', mod.log_lik(x0))
+
+       from scipy.optimize import minimize
+
+       x0 = minimize(lambda x: -mod.log_lik(x), x0, method='L-BFGS-B')
+       #print(x0)
+       x1 = x0.x
+       print('Maximized Likelihood: ', mod.log_lik(x1))
+       print(dict(zip(gdp_plus.parameters, x1)))
+     #+END_SRC
+
+     #+RESULTS:
+     : /home/eherbst/anaconda3/lib/python3.6/site-packages/dsge/DSGE.py:436: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
+     :   model_yaml = yaml.load(txt)
+     : Initial likelihood:  -4295.194454033076
+     :       fun: 358.6576555307997
+     :  hess_inv: <5x5 LbfgsInvHessProduct with dtype=float64>
+     :       jac: array([-4.26325641e-04,  8.52651283e-05, -4.94537744e-04, -1.40403245e-03,
+     :        -5.40012479e-04])
+     :   message: b'CONVERGENCE: REL_REDUCTION_OF_F_<=_FACTR*EPSMCH'
+     :      nfev: 102
+     :       nit: 13
+     :    status: 0
+     :   success: True
+     :         x: array([0.50928686, 0.39572733, 0.28135205, 0.40318565, 0.64130141])
+     : Maximized Likelihood:  -358.6576555307997
+     : {rho: 0.50928686065337, mu: 0.39572732722385195, sige: 0.2813520545284143, sigi: 0.4031856485391094, sig: 0.6413014140257065}
+
+  We these point estimates, we can use the kalman filter to extract
+  \(\{ A_t\}_{t=1}^T\), the filtered means of the "true" GDP series.
+  We'll plot them along with the observables, and the simple average
+  of expenditure-side and income-side GDP estimates.
+
+     #+BEGIN_SRC jupyter-python :session ps4  :exports results :ipyfile filtered_states.png :results raw drawer
+       f = mod.kf_everything(x1)['filtered_means']
+
+       fig,ax=plt.subplots()
+       (f['gdp'] + x1[1]).plot(color='black', linestyle='dashed', linewidth=3,ax=ax)
+       data.gdpe.plot(ax=ax, linewidth=2)
+       data.gdpi.plot(ax=ax, linewidth=2)
+       (0.5*data.gdpe+0.5*data.gdpi).plot(color='grey')
+       ax.legend(['Filted GDP', 'GDPE', 'GDPI', 'Average'])
+       fig.set_size_inches(16,9)
+     #+END_SRC
+
+     #+RESULTS:
+     [[file:./.ob-jupyter/8a012e4f059bc433c7bf18a0ebb7411c735172fb.png]]
+
+     To make it a bit easier to see, let's look at the last five or so years.
+     #+BEGIN_SRC jupyter-python :session ps4  :ipyfile filtered_recent.png :exports results  :results raw drawer
+       fig,ax=plt.subplots()
+       (f['gdp'] + x1[1])['2011':].plot(color='black', linestyle='dashed', linewidth=3,ax=ax)
+       data.gdpe['2011':].plot(ax=ax, linewidth=2)
+       data.gdpi['2011':].plot(ax=ax, linewidth=2)
+       (0.5*data.gdpe+0.5*data.gdpi)['2011':].plot(color='grey')
+       ax.legend(['Filted GDP', 'GDPE', 'GDPI', 'Average'])
+       fig.set_size_inches(16,9)
+     #+END_SRC
+
+     #+RESULTS:
+     [[file:./.ob-jupyter/1df184eae48d871aceae06ae7fbf9f5610fe7daf.png]]
+     You can see the average is different form the filtered estimate.
+     Why is that?  The Kalman Gain matrix places different weights on
+     the income- and expenditure-side GDP data. 
+
+     #+begin_src jupyter-python :session ps4  :display latex :exports none
+      import sympy 
+      from IPython.display import Latex
+      pbar, rho, sigma, sigma_I, sigma_E = sympy.symbols('pbar, rho, sigma, sigma_I, sigma_E')
+
+      s = -pbar + rho**2*pbar + sigma**2 - (rho**2*pbar**2* (sympy.Matrix([[1,1]]) * (sympy.Matrix([[pbar + sigma_I**2, pbar], [pbar, pbar + sigma_E**2]])).inv() * sympy.Matrix([[1],[1]]))[0,0]).simplify()
+      Latex(sympy.printing.latex(sympy.solve(s,pbar)[1].simplify()))
+     #+end_src
+
+     #+RESULTS:
+     #+begin_export latex
+     \frac{\rho^{2} \sigma_{E}^{2} \sigma_{I}^{2} + \sigma^{2} \sigma_{E}^{2} + \sigma^{2} \sigma_{I}^{2} - \sigma_{E}^{2} \sigma_{I}^{2} + \sqrt{\left(\rho^{2} \sigma_{E}^{2} \sigma_{I}^{2} - 2 \rho \sigma_{E}^{2} \sigma_{I}^{2} + \sigma^{2} \sigma_{E}^{2} + \sigma^{2} \sigma_{I}^{2} + \sigma_{E}^{2} \sigma_{I}^{2}\right) \left(\rho^{2} \sigma_{E}^{2} \sigma_{I}^{2} + 2 \rho \sigma_{E}^{2} \sigma_{I}^{2} + \sigma^{2} \sigma_{E}^{2} + \sigma^{2} \sigma_{I}^{2} + \sigma_{E}^{2} \sigma_{I}^{2}\right)}}{2 \left(\sigma_{E}^{2} + \sigma_{I}^{2}\right)}
+     #+end_export
+     
+     #+begin_src jupyter-python :session ps4   :exports none
+       import numpy as np
+       t = sympy.solve(s,pbar)
+       tt = [ti.subs({rho:0.51,sigma_E:0.28,sigma_I:0.40,sigma:0.64}) for ti in t]
+
+
+       def riccati(p0):
+           rho=0.51
+           sigma_E=0.28
+           sigma_I=0.40
+           sigma=0.64
+
+           Z = np.array([[1],[1]])
+
+           for _ in range(100):
+               p0 = rho*p0*rho + sigma**2 - rho*p0 * (Z.T @ np.linalg.inv([[p0+sigma_E**2, p0],[p0,p0+sigma_I**2]]) @ Z)[0,0] * p0 * rho
+           return p0
+      
+      riccati(2),tt[1]
+     #+end_src
+
+     
+
+     #+begin_src jupyter-python :session ps4   :exports none
+       (pbar* sympy.Matrix([[1,1]]) * (sympy.Matrix([[pbar + sigma_I**2,
+                                                      pbar], [pbar, pbar + sigma_E**2]])).inv() )[1].simplify()
+     #+end_src
+
+     #+RESULTS:
+     : -pbar*sigma_I**2/(pbar**2 - (pbar + sigma_E**2)*(pbar + sigma_I**2))
+
+[[bibliography:../../../ref/ref.bib]]

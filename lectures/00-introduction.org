@@ -4,5 +4,38 @@
 #+HUGO_SECTION: teaching/bank-of-colombia-smc/lectures
 #+hugo_custom_front_matter: :math true
 #+hugo_auto_set_lastmod: t
+#+OPTIONS: toc:nil H:2
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{helvet}
+#+LaTEX_HEADER: \usepackage{natbib}
+#+LaTEX_HEADER: \beamertemplatenavigationsymbolsempty
+#+LaTeX_HEADER: \usepackage{bibentry}
+#+LaTeX_HEADER: \nobibliography*
+#+LaTeX_HEADER: \makeatletter\renewcommand\bibentry[1]{\nocite{#1}{\frenchspacing\@nameuse{BR@r@#1\@extra@b@citeb}}}\makeatother
+#+LaTeX_CLASS: beamer
 
-* Hello
+* Introduction
+
+** Hello!
+   
+   My name is *Ed Herbst.*  I'm currently an economist at the Federal
+   Reserve Board.  
+   #+LATEX: \\~\\~\\
+   I'm interested in (Bayesian) macroeconometrics, and I'm excited to
+   spend the next two weeks talking about it with you!
+   
+** The next two weeks
+   The syllabus has a rough plan of where we're going. 
+   #+LATEX: \\~\\~\\
+   But, in my experience, there is usually some re-optimization.
+   #+LATEX: \\~\\~\\
+   If there's something you'd like to talk about, or spend more (or
+   less) time on, just let me know. 
+   
+** A note on teaching   
+   This is my first time teaching over the internet.  
+   #+LATEX: \\~\\~\\
+   If it's anything like work meetings, there will be hiccups.  Please bear with me!
+   #+LATEX: \\~\\~\\
+   In-person or remote, these kinds of courses work best with
+   participation, so don't be shy!

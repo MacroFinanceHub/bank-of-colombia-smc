@@ -5,10 +5,16 @@
 #+hugo_custom_front_matter: :math true
 #+hugo_auto_set_lastmod: t
 #+OPTIONS: toc:nil H:2
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{helvet}
+#+LaTEX_HEADER: \usepackage{natbib}
+#+LaTEX_HEADER: \beamertemplatenavigationsymbolsempty
+#+LaTeX_HEADER: \usepackage{bibentry}
+#+LaTeX_HEADER: \nobibliography*
+#+LaTeX_HEADER: \makeatletter\renewcommand\bibentry[1]{\nocite{#1}{\frenchspacing\@nameuse{BR@r@#1\@extra@b@citeb}}}\makeatother
+#+LaTeX_CLASS: beamer
 
 * Introduction
-
-  These notes are available as slides and a Jupyter notebook.
 
 ** Modes of Inference
  
@@ -252,7 +258,7 @@ and its asymptotic (frequentist) sampling variance is $T^{-1} Q_{XX}^{-1}$.
     \theta |Y,X \stackrel{approx}{\sim} {\cal N} \bigg( \hat{\theta}_{mle}, T^{-1} Q_{XX}^{-1} \bigg). \quad \Box
     \end{eqnarray}
 
-** Example 2 
+** Example 2                                                       :noexport:
 #+NAME: HAAVELMO
 #+CAPTION: Haavelmo's Data on Income and Investment \vspace*{0.1in}
 |------+--------+------------+------+--------+------------+
@@ -502,7 +508,7 @@ The marginal density of $Y^T$ can be derived as follows
 
 ** Evidence for $\theta=0$
 The posterior probability of $\theta=0$ is given by
-{\tiny
+\tiny
 \begin{eqnarray}
   P_{Y^T}\{\theta=0\}
     &=& \lim_{\epsilon \longrightarrow 0} \; P_{Y^T} \{ 0 \le \theta \le \epsilon \} \label{eq_pTth0} \\
@@ -513,7 +519,7 @@ The posterior probability of $\theta=0$ is given by
     &=& \frac{ \lambda p(Y^T| 0) }{
             \lambda p(Y^T|0) + (1-\lambda) \int p(Y^T|\theta)p(\theta)d\theta}.
 \end{eqnarray}
-}
+
 
 ** Example 2, Continued
    Assume that $\lambda = 1/2$.

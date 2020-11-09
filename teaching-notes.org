@@ -1,0 +1,52 @@
+* A Crash Course in Bayesian Inference
+** Confidence Set
+Confidence "Set" for θ
+|---------+------+-----|
+| (Y₁,Y₂) | θ-1  | θ+1 |
+|---------+------+-----|
+| θ-1     |θ-2   |θ    |
+| θ+1     |θ     |θ    |
+|---------+------+-----|
+
+** The 0-1 Loss
+  
+  min(δ) ∫L(θ,δ)p(θ|Y)dθ
+  
+  Suppose Y = 1
+  
+  p(θ = 0 | Y = 1) = 0.358
+  p(θ = 1 | Y = 1) = 0.642
+  
+  what happens if δ = 0?
+  E[L(θ,δ=0)] = 0 × p(θ=0|Y=1) + 1 × p(θ=1|Y=1) 
+              = p(θ = 1|Y = 1)
+  what happens if δ = 1?
+  E[L(θ,δ=1)] = 1 × p(θ=0|Y=1) + 0 × p(θ=1|Y=1) 
+              = p(θ = 0|Y = 1)  
+
+  Since p(θ=0|Y=1) < p(θ=1|Y=1)
+  choose δ = 1!!
+
+** Quadratic Loss  
+  E[(θ-δ)²|Yᵀ] = ∫(θ-δ)²p(θ|Yᵀ)dθ
+               = ∫(θ² - 2δθ + δ²)p(θ|Yᵀ)dθ
+  
+  Taking first order condition
+  
+  2δ = 2∫θp(θ|Yᵀ)dθ
+  => δ = E[θ|Yᵀ]
+                 
+** Hypothesis Testing 
+  δ = 1 ("Accept the Null")
+
+  Four Cases:
+  1. δ = 1, θ ∈ Θ₀ (good!): Loss = 0
+  2. δ = 1, θ ∈ Θ₁ (bad!) : Loss = a₁
+  3. δ = 0, θ ∈ Θ₀ (bad!) : Loss = a₀
+  4. δ = 0, θ ∈ Θ₁ (good!): Loss = 0
+  
+  E[L(θ,δ=1)] = 0 × P(θ∈Θ₀) + a₁×P(θ∈Θ₁)
+
+  E[L(θ,δ=0)] = a₀ × P(θ∈Θ₀) + 0×P(θ∈Θ₁)
+  
+  

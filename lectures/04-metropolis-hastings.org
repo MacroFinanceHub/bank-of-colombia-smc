@@ -50,8 +50,8 @@
   {{{NEWLINE}}} 
 - We are going to care a lot about this correlation.  Why? 
   \[
-    \sqrt{n}( \bar{X} - \mathbb{E}[\bar{X}]) \Longrightarrow N \bigg( 0, \, \frac{1}{n} \sum_{i=1}^n \mathbb{V}[X_i]
-                  + {\color{red} \frac{1}{n} \sum_{i=1}^n \sum_{j \not=i} COV(X_i,X_j)} \bigg).
+    \sqrt{n}( \bar{X} - \mathbb{E}[\bar{X}]) \Longrightarrow N \bigg( 0, \frac{1}{n} \sum_{i=1}^n \mathbb{V}[X_i] + 
+    {\color{red} \frac{1}{n} \sum_{i=1}^n \sum_{j \not=i} COV(X_i,X_j)} \bigg)
   \]
 
 
@@ -98,7 +98,7 @@ iteration $i-1$.
     p(\theta|Y) = \int K(\theta | \tilde{\theta}) p(\tilde{\theta} |Y) d \tilde{\theta}.
     \label{eq_mhinvariance}
   \end{eqnarray}
-  Show this property using {\bf reversibility of the Markov Chain}
+  Show this property using *reversibility of the Markov Chain*
   {{{NEWLINE}}}
   Not sufficient for SLLN or CLT, these things depend on $q$ and $\pi$. 
   {{{NEWLINE}}}

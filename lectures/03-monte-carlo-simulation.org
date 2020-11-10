@@ -316,6 +316,48 @@
   - Very bad for  highly irregular and non-elliptical posteriors...
 
 
+** Importance Sampling in a DSGE Model                             :noexport:
+   
+
+   #+begin_src jupyter-python :session is :eval no-export
+     from scipy.optimize import minimize
+     from dsge.DSGE import DSGE
+
+     dsge1 = DSGE.read('/home/eherbst/Dropbox/archive/DSGE Book (1)/dsge-book/code/models/dsge1/dsge1.yaml')
+     dsge1['__data__']['estimation']['data'] = '/home/eherbst/Dropbox/archive/DSGE Book (1)/dsge-book/code/models/dsge1/us.txt'
+     dsge1_lin = dsge1.compile_model()
+
+
+     p0 = [2.83, 0.78, 1.80, 0.63, 0.77, 0.98, 0.88, 0.42, 3.30, 0.52, 0.22, 0.71, 0.31]
+     objfun = lambda x: -dsge1_lin.log_post(x)
+
+     results = minimize(objfun, p0, method='Nelder-Mead')
+     results = minimize(objfun, p0)
+   #+end_src
+
+   #+RESULTS:
+   : /home/eherbst/anaconda3/lib/python3.6/site-packages/dsge/gensys.py:59: UserWarning: 5 unstable roots, but only 4  RE errors! No solution.
+   :   f"{nunstab} unstable roots, but only {len(bigev)} "
+
+#+begin_src jupyter-python :session is :eval no-export
+  from scipy.stats import multivariate_normal
+  N = 1000
+  is_distribution = multivariate_normal(mean=results.x, cov=0.2*results.hess_inv,allow_singular=True) 
+  is_sample = is_distribution.rvs(size=N)
+
+  weights = np.array([dsge1_lin.log_post(para)/is_distribution.pdf(para) for para in is_sample])
+  weights = weights / weights.sum()
+  1 / (weights**2).sum()
+
+  (is_sample * weights[:,np.newaxis]).sum(0)
+#+end_src
+
+#+RESULTS:
+: array([2.64802392, 1.00087381, 1.95690643, 0.41061811, 0.77402402,
+:        1.00085795, 0.88569908, 0.20333216, 3.34714949, 0.63309187,
+:        0.21045311, 0.68451808, 0.28409454])
+
+
 ** References
    
 [[bibliography:/home/eherbst/Dropbox/ref/ref.bib]]

@@ -49,4 +49,58 @@ Confidence "Set" for θ
 
   E[L(θ,δ=0)] = a₀ × P(θ∈Θ₀) + 0×P(θ∈Θ₁)
   
+** Model Selection  
+   Encompassing model has two parameters α and θ
+   
+   M₁ : θ = 0, M₂ : θ ≠ 0
+
+   p(M₁|Y) vs. p(M₂|Y)
+   
+   p(M₁|Y) = p(Y|M₁)p(M₁) / p(Y)
+
+   p(M₂|Y) = p(Y|M₂)p(M₂) / p(Y) 
+
+   p(M₁|Y) / p(M₂|Y) = p(Y|M₁)p(M₁)/(p(Y|M₂)p(M₂))
+
+   p(M₁) and p(M₂) are user supplied
+   
+   p(Y|M₁) = ∫p(Y|α,θ=0)p(α)dα
+   p(Y|M₂) = ∫p(Y|α,θ)p(α,θ)dαdθ
+
+* Solving DSGE Models  
+** Local Approximation  
+   yₜ = f(yₜ₋₁, σεₜ)
+   
+   guess
+   yₜ = yₜ⁰ + σ yₜ¹ + o(σ)
+   
+   At steady state
+
+** LRE   
+   
+   yₜ = 1/θ * Eₜ[yₜ₊₁] + εₜ
+   
+   ξₜ = Eₜ[yₜ₊₁] and ηₜ = yₜ - ξₜ₋₁
+
+   thus:
+   ηₜ + ξₜ₋₁ = 1/θ ξₜ + εₜ  ⇔
+   ξₜ = θξₜ₋₁ - θεₜ + θηₜ
+   
+   
+   if θ > 1
+
+* Kalman Filter   
   
+** Iterating Through
+  Let's from Time 0 to Time 1
+  
+  s₀|{no data} ~ N(A₀, P₀)
+  
+  s₁ = C + Ts₀ + Rεₜ
+
+  => s₁ ~ N(A₁₀, P₁₀}
+ 
+  A₁₀ = C + TA₀
+  P₁₀ = T P₀ T' + RQR'
+  
+  Now consider

@@ -252,7 +252,7 @@
      \]
    - Define rational expectations forecast errors forecast errors for inflation and output. Let
      \[
-     \eta_{y,t} = y_t - \mathbb{E}_{t-1}[\hat{y}_t], \quad \eta_{\pi,t} = \pi_t - \mathbb{E}_{t-1}[\hat{\pi}_t].
+     \eta_{y,t} = \hat y_t - \mathbb{E}_{t-1}[\hat{y}_t], \quad \eta_{\pi,t} = \hat \pi_t - \mathbb{E}_{t-1}[\hat{\pi}_t].
      \]
    - Write system in canonical form cite:Sims2002:
      \[
@@ -358,7 +358,7 @@
      &=&\underbrace{U_{.1}}_{m\times r}\underbrace{D_{11}}_{r\times r}\underbrace{V_{.1}^{\prime }}_{r\times k}. \nonumber
      \end{eqnarray}
 
-   - If there exists a solution to Eq.~(\ref{eq_stabcond}) that expresses the forecast errors as function of the fundamental shocks $\epsilon_t$ and sunspot shocks $\zeta_t$, it is of the form
+   - If there exists a solution to Eq. (\ref{eq_stabcond}) that expresses the forecast errors as function of the fundamental shocks $\epsilon_t$ and sunspot shocks $\zeta_t$, it is of the form
      \begin{eqnarray}
      \eta_t &=& \eta_1 \epsilon_t + \eta_2 \zeta_t  \label{eq_etasol} \\
      &=& ( - V_{.1}D_{11}^{-1} U_{.1}^{\prime}\Psi_x^J + V_{.2} \widetilde{M}) \epsilon_t +

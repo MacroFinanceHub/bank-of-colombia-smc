@@ -410,7 +410,7 @@ is zero.
      \]
    - More generically: 
      \[
-     y_t = D(\theta) + Z(\theta) s_t \underbrace{+u_t}_{\displaystyle \mbox{optional}}.
+     y_t = D(\theta) + Z(\theta) s_t + \underbrace{\eta_t}_{\displaystyle \mbox{optional}}.
      \]
      The state and measurement equations define a /State Space Model/.
 
@@ -435,7 +435,7 @@ is zero.
    \end{eqnarray}
    where $y_t$ is a $n_y \times 1$ vector of observables, $s_t$ is a $n_s
    \times 1$ vector of state variables, $Z_{t|t-1}$ is an $n_y \times n_s$
-   vector, $D_{t|t-1}$ is a $n_y\times 1$ vector, and $u_t$ are
+   vector, $D_{t|t-1}$ is a $n_y\times 1$ vector, and $\eta_t$ are
    innovations (or often ``measurement errors'') with mean zero and
    $\mathbb{E}_{t-1}[ \eta_t \eta_t'] = H_{t|t-1}$.
    {{{NEWLINE}}}
@@ -450,13 +450,13 @@ is zero.
    \begin{eqnarray}
         s_t = C_{t|t-1} + T_{t|t-1} s_{t-1} + R_{t|t-1} \epsilon_t
    \end{eqnarray}
-   where $R_t$ is $m \times g$, and $\eta_t$ is a $g \times 1$ vector of innovations
-   with mean zero and variance $\mathbf{E}_{t|t-1}[ \epsilon_t \epsilon_t'] = Q_{t|t-1}$.
+   where $R_t$ is $n_s \times n_\epsilon$, and $\epsilon_t$ is a $n_\epsilon \times 1$ vector of innovations
+   with mean zero and variance $\mathbb{E}_{t|t-1}[ \epsilon_t \epsilon_t'] = Q_{t|t-1}$.
    {{{NEWLINE}}}
    - The assumption that $s_t$ evolves according to an VAR(1) process
      is not very restrictive, since it could be the companion form to a
      higher order VAR process.
-   - It is furthermore assumed that (i) expectation and variance of the initial state vector are given by $\mathbf [s_0] = A_0$ and $var[s_0] = P_0$;
+   - It is furthermore assumed that (i) expectation and variance of the initial state vector are given by $\mathbb E [s_0] = A_0$ and $var[s_0] = P_0$;
    - $\epsilon_t$ and $\eta_t$ are uncorrelated with each other in all time periods , and uncorrelated with the initial state. [not really necessary]
  
 ** Adding it all up
@@ -471,7 +471,7 @@ is zero.
          \]
    3. back out a sequence
       \[
-          \left\{ p(s_t |Y^t, \{Z_t, d_t, H_t, T_t,
+          \left\{ p(s_t |Y^t, \{Z_t, D_t, H_t, T_t,
                   c_t, R_t, Q_t \} ) \right\}
       \]
        
@@ -560,7 +560,7 @@ is zero.
 ** Forecasting $y_t$
    The conditional distribution of $y_t|s_t, Y^{t-1}$ is of the form
    \begin{eqnarray}
-      y_t|s_t, Y^{t-1} \sim {\cal N}(Z_t s_t + d_t, H_t)
+      y_t|s_t, Y^{t-1} \sim {\cal N}(Z_t s_t + D_t, H_t)
    \end{eqnarray}
    Since $s_t|Y^{t-1} \sim {\cal N}( \hat{s}_{t|t-1}, P_{t|t-1})$, we
    can deduce that the marginal distribution of $y_t$ conditional on $Y^{t-1}$
@@ -579,7 +579,7 @@ is zero.
   To obtain the posterior distribution of $s_t | y_t, Y^{t-1}$ note that
 \begin{eqnarray}
      s_t & = & \hat{s}_{t|t-1} + (s_t - \hat{s}_{t|t-1}) \\
-     y_t      & = & Z_t \hat{s}_{t|t-1} + d_t + Z_t(s_t - \hat{s}_{t|t-1}) + u_t
+     y_t      & = & Z_t \hat{s}_{t|t-1} + D_t + Z_t(s_t - \hat{s}_{t|t-1}) + u_t
 \end{eqnarray}
 and the joint distribution of $s_t$ and $y_t$ is given by
 \begin{eqnarray}
@@ -647,6 +647,66 @@ where
 The multi-step forecast can be computed recursively, simply by omitting the
 updating step in the algorithm described above. $\Box$
 
+** Some Discussion
+   
+   - /Initialization/. If \(s_t\) is covariance stationary, can set
+     \((A_0, P_0)\), based on invariant distribution, otherwise, $P_0$
+     is typically extremely large, like \(1000\times I_n\) 
+     {{{NEWLINE}}}
+   - /Kalman Gain/.     
+     \[
+     K_t = P_{t|t-1} Z F_{t|t-1}^{-1},
+     \]
+     is an $n_s\times n_y$ matrix that maps the "surprises" (forecast
+     errors) in the observed data to changes in our beliefs about the
+     underlying unobserved states.
+     {{{NEWLINE}}}
+   - /Missing data./ KF easily handles missing data through a change
+     in the observation equation.
+     {{{NEWLINE}}}
+   - /Kalman Smoother/ delivers distributions, \(\{s_t | Y^T\}_{t=1}^T\). 
+
+** Relationship between State Space and VAR Models?
+
+*Question*: Can we write the state space model as a VAR?
+
+Assume the system matrices are time invariant, \(C = D = H = 0\), and \(n_y = n_\epsilon\). 
+
+Let's write the model slightly differently:
+\begin{eqnarray}
+  s_t &=& {\mathbf A}s_{t-1} + {\mathbf B} \epsilon_t \\
+  y_t &=& {\mathbf C}s_{t-1} + {\mathbf D} \epsilon_t
+\end{eqnarray}
+${\mathbf A} = T, {\mathbf B} = R, {\mathbf C} = ZT, {\mathbf D} = ZR$
+
+This means that
+\[
+\epsilon_t = ({\mathbf D})^{-1}(y_t - {\mathbf C}s_{t-1}).
+\]
+Using the state equation
+\[
+s_t = ({\mathbf A} - {\mathbf B}{\mathbf D}^{-1}{\mathbf C})s_{t-1} + {\mathbf B}{\mathbf D}^{-1} y_t.
+\]
+
+** 
+Solving backwards,
+\[
+  s_t = ({\mathbf A} - {\mathbf B}{\mathbf D}^{-1}{\mathbf C})^{t-1} s_0 + \sum_{j=0}({\mathbf A} - {\mathbf B}{\mathbf D}^{-1}{\mathbf C})^{j-1} {\mathbf B}{\mathbf D}^{-1} y_{t-j}
+\]
+If eigenvalues of $({\mathbf A} - {\mathbf B}{\mathbf D}^{-1}{\mathbf C})$ are less than one in modulus, then
+\[
+lim_{t\rightarrow\infty} ({\mathbf A} - {\mathbf B}{\mathbf D}^{-1}{\mathbf C})^{t} \rightarrow 0
+\]
+And we can write the states as a combination of the history of observations.  So
+\[
+  y_t \approx {\mathbf C} \sum_{j=0}^{\infty} ({\mathbf A} - {\mathbf B}{\mathbf D}^{-1}{\mathbf C})^{j-1} {\mathbf B}{\mathbf D}^{-1} y_{t-1-j} + {\mathbf D} \epsilon_t.
+\]
+We have a VAR($\infty$) representation for $y_t$ whose innovations coincide with the structural shocks of our DSGE model!
+{{{NEWLINE}}}
+The condition that /eigenvalues of $({\mathbf A} - {\mathbf B}({\mathbf D})^{-1}{\mathbf C})$ are less than one in modulus/ is known as the *Poor Man's Invertibility Condition*, see
+cite:Fern_ndez_Villaverde_2007. 
+
+   
 
 ** Example 1: New Keynesian DSGE
    - We can solve the New Keynesian DSGE model described earlier.

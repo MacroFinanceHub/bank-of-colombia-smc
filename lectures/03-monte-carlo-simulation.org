@@ -1,0 +1,321 @@
+#+TITLE: Monte Carlo Simulation
+#+DATE: \today
+#+HUGO_BASE_DIR: /home/eherbst/Dropbox/www/
+#+HUGO_SECTION: teaching/bank-of-colombia-smc/lectures
+#+hugo_custom_front_matter: :math true
+#+hugo_auto_set_lastmod: t
+#+MACRO: NEWLINE @@latex:\\~\\~@@ @@html:<br>@@ @@ascii:|@@
+#+OPTIONS: toc:nil H:2
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{helvet}
+#+LaTEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \bibliographystyle{ecta}
+#+LaTEX_HEADER: \beamertemplatenavigationsymbolsempty
+#+LaTeX_HEADER: \usepackage{bibentry}
+#+LaTeX_HEADER: \nobibliography*
+#+LaTeX_HEADER: \makeatletter\renewcommand\bibentry[1]{\nocite{#1}{\frenchspacing\@nameuse{BR@r@#1\@extra@b@citeb}}}\makeatother
+#+LaTeX_CLASS: beamer
+
+* Importance Sampling 
+  
+  
+** The main event
+  
+  - Inference: Need to characterize posterior $p(\theta|Y)$.
+    {{{NEWLINE}}}
+  - Unfortunately, for many interesting models it is not possible to
+    evaluate the moments and quantiles of the posterior $p(\theta|Y)$
+    analytically.
+
+    {{{NEWLINE}}}
+  - *Rules of game*: we can only numerically evaluate prior $p(\theta)$
+    and likelihood $p(Y|\theta)$.
+
+    {{{NEWLINE}}}
+  - To evaluate posterior moments of function $h(\theta)$, we need numerical
+    techniques.
+  
+** Estimating Posterior Moments
+   - We will often abbreviate posterior distributions
+     $p(\theta|Y)$ by $\pi(\theta)$ and posterior expectations of $h(\theta)$ by
+     \[
+     \mathbb{E}_\pi[h] = \mathbb{E}_\pi[h(\theta)] = \int h(\theta) \pi(\theta) d\theta = \int h(\theta) p(\theta|Y) d\theta.
+     \]
+   - We will focus on algorithms that generate draws
+     $\{\theta^i\}_{i=1}^N$ from posterior distributions of parameters
+     in time series models.
+
+   - These draws can then be transformed into objects of interest,
+     $h(\theta^i)$, and under suitable conditions a Monte Carlo
+     average of the form \[ \bar{h}_N = \frac{1}{N} \sum_{i=1}^N
+     h(\theta^i) \approx \mathbb{E}_\pi[h].  \]
+   - Strong law of large numbers (SLLN), central limit theorem (CLT)...
+** Direct Sampling
+
+- In the simple linear regression model with Gaussian posterior it is
+  possible to sample directly.
+  {{{NEWLINE}}}
+- For $i=1$ to $N$, draw $\theta^i$ from $\mathcal N \big( \tilde{\theta}_T, \tilde{V}_T \big)$.
+  {{{NEWLINE}}}
+- Provided that $\mathbb{V}_\pi[h(\theta)] < \infty$ we can deduce
+  from Kolmogorov's SLLN and the Lindeberg-Levy CLT that
+  \begin{eqnarray}
+    \bar{h}_N  &\stackrel{a.s.}{\longrightarrow} & \mathbb{E}_\pi[h]  \nonumber \\
+    \sqrt{N} \left( \bar{h}_N - \mathbb{E}_\pi[h] \right) & \Longrightarrow & N \big( 0, \mathbb{V}_\pi[h(\theta)] \big).
+  \end{eqnarray}
+
+
+** Decision Making
+   - The posterior expected loss associated with a decision
+     $\delta(\cdot)$ is given by
+     \[
+     \rho\big( \delta(\cdot) | Y \big) = \int_{\Theta} L \big(\theta,\delta(Y) \big) p(\theta|Y) d\theta.
+     \]
+
+   - A Bayes decision is a decision that minimizes
+     the posterior expected loss:
+     \[
+     \delta^*(Y) = \mbox{argmin}_{d} \; \rho\big( \delta(\cdot) | Y \big).
+     \]
+   - Since in most applications it is not feasible to derive
+     the posterior expected risk analytically, we replace
+     $\rho\big( \delta(\cdot) | Y \big)$ by a Monte Carlo approximation
+     of the form
+     \[
+     \bar{\rho}_N \big( \delta(\cdot) | Y \big) = \frac{1}{N} \sum_{i=1}^N L \big(\theta^i,\delta(\cdot) \big).
+     \]
+   - A numerical approximation to the Bayes decision $\delta^*(\cdot)$ is then
+     given by
+     \[
+     \delta_N^*(Y) = \mbox{argmin}_{d} \; \bar{\rho}_N \big( \delta(\cdot) | Y \big).
+     \]
+
+
+** Importance Sampling
+   \begin{equation}
+     \pi(\theta) =  \frac{f(\theta)}{Z} = \frac{p(Y|\theta)p(\theta)}{p(\theta)}
+   \end{equation}
+   $f(\cdot)$ is the function we can evaluate numerically.
+   {{{NEWLINE}}}
+   References: cite:Hammersley_1964, cite:KloekVanDijk, and cite:Geweke_1989.
+   {{{NEWLINE}}}
+   Let \textcolor{blue}{$g$} be an arbitrary, easy-to-sample pdf over $\theta$ (think normal distribution).
+   {{{NEWLINE}}}
+   Importance sampling (IS) is based on the following identity:
+   \begin{equation}
+           \label{eq_isidentity}
+           \mathbb{E}_{\pi}[h(\theta)]
+           = \int h(\theta) \pi(\theta) d\theta
+           = \frac{1}{Z} \int_{\Theta}h(\theta)\frac{f(\theta)}{g(\theta)}g(\theta)d\theta.
+   \end{equation}
+   Since $\mathbb{E}_\pi[1]=1$, 
+   \[
+   Z = \int_{\Theta}\frac{f(\theta)}{g(\theta)}g(\theta)d\theta.
+   \]
+
+
+** Importance Sampling
+   *(Unnormalized) Importance weight*: 
+   \[
+   w(\theta) = \frac{f(\theta)}{g(\theta)} 
+   \]
+   *Normalized Importance Weight*: 
+   \begin{eqnarray}
+   v(\theta) = \frac{ w(\theta)}{\int w(\theta) g(\theta) d\theta} = \frac{ w(\theta) }{ \int Z \pi(\theta) d\theta} = \frac{w(\theta)}{Z}.
+   \label{eq_defvtheta}
+   \end{eqnarray}
+   {{{NEWLINE}}}
+   Can show:
+   \begin{equation}
+   \mathbb{E}_\pi[h(\theta)] = \int v(\theta) h(\theta) g(\theta) d\theta.
+   \end{equation}
+
+
+** The Details
+- For $i=1$ to $N$, draw $\theta^i \stackrel{iid}{\sim} g(\theta)$  and
+  compute the unnormalized importance weights
+  \begin{equation}
+  w^i = w(\theta^i) = \frac{f(\theta^i)}{g(\theta^i)}.
+  \end{equation}
+- Compute the normalized importance weights
+  \begin{equation}
+  W^i = \frac{w^i}{\frac{1}{N} \sum_{i=1}^N w^i}.
+  \end{equation}
+  An approximation of $\mathbb{E}_\pi[h(\theta)]$ is given by
+  \begin{equation}
+  \bar{h}_N = \frac{1}{N} \sum_{i=1}^N W^i h(\theta^i).
+  \label{eq_hbar}
+  \end{equation}
+  Note $W^i$ is (slightly) different from $v$ in previous slide.
+
+
+** The Details
+- Refer to the collection of pairs $\{(\theta^{i}, W^i)\}_{i=1}^N$ as a
+  *particle approximation* of $\pi(\theta)$.
+  {{{NEWLINE}}}
+- The accuracy of the approximation is driven by the ``closeness'' of
+  $g(\cdot)$ to $f(\cdot)$ and is reflected in the distribution of the
+  weights.
+  {{{NEWLINE}}}
+- If the distribution of weights is very uneven, the Monte Carlo approximation $\bar{h}$ is
+  inaccurate. 
+  {{{NEWLINE}}}
+- Uniform weights arise if $g(\cdot)\propto f(\cdot)$, which means
+  that we are sampling directly from $\pi(\theta)$.
+
+
+
+** Effectiveness of IS depends on similarity of $f$ and $g$
+  $f = \mathcal N(0,1),\quad g_1 = t(0,1,5),\quad g_2 = \mathcal N(2,1)$
+  \includegraphics[width=4in]{static/is.pdf}
+
+  Only a few draws from $N(2,1)$ have meaningful weight. \\
+  $\implies$ estimate is based on small sample. \\
+  $\implies$ estimate will be noisy.
+
+
+** Convergence
+  
+  - *SLLN:* If $\mathbb{E}_g [|h f/g|] < \infty$ and $\mathbb{E}_g
+    [|f/g|] < \infty$, see \cite{Geweke_1989}, the Monte Carlo estimate
+    $\bar{h}_N$ defined in (\ref{eq_hbar}) converges almost surely (a.s.) to
+    $E_{\pi}[h(\theta)]$ as $N \longrightarrow \infty$.
+    {{{NEWLINE}}}
+  - *CLT:* A bit more complicated.
+
+** Central Limit Theorem 
+   
+   Define the population analogue of the normalized importance weights as $v(\theta) = w(\theta)/Z$
+   and write
+   \begin{equation}
+   \bar{h}_N = \frac{ \frac{1}{N} \sum_{i=1}^N (w^i/Z) h(\theta^i)}{ \frac{1}{N} \sum_{i=1}^N (w^i/Z) }
+   = \frac{ \frac{1}{N} \sum_{i=1}^N v(\theta^i) h(\theta^i)}{ \frac{1}{N} \sum_{i=1}^N v(\theta^i) }.
+   \end{equation}
+   Now consider a first-order Taylor series expansion in terms of
+   deviations of the numerator from $\mathbb{E}_\pi[h]$ and deviations of
+   the denominator around 1: 
+   \begin{eqnarray}
+	\lefteqn{\sqrt{N}(\bar{h}_N - \mathbb{E}_\pi[h]) } \\
+	&=& \sqrt{N} \left( \frac{1}{N} \sum_{i=1}^N v(\theta^i) h(\theta^i) - \mathbb{E}_\pi[h] \right) \nonumber \\
+	&&  - \mathbb{E}_\pi[h] \sqrt{N} \left( \frac{1}{N} \sum_{i=1}^N  v(\theta^i) - 1 \right) + o_p(1) \nonumber \\
+	&=&  (I) - \mathbb{E}_\pi[h] \cdot (II) + o_p(1). \nonumber
+   \end{eqnarray}
+   
+** Central Limit Theorem   
+   Under some regularity conditions, we can apply a multivariate
+   extension of the Lindeberg-Levy CLT to the terms $(I)$ and $(II)$.
+   {{{NEWLINE}}}
+   The variances and covariance of $(I)$ and $(II)$ are given by
+   \begin{eqnarray*}
+           \mathbb{V}_g[hv] &=& \mathbb{E}_\pi [ (\pi/g) h^2 ] - \mathbb{E}^2_\pi[h],\\
+           \mathbb{V}_g[v]  &=& \mathbb{E}_\pi [ (\pi/g) ]  - 1, \\
+           COV_g(hv,v) &=& \big( \mathbb{E}_\pi [ (\pi/g) h ] - \mathbb{E}_\pi[h] \big).
+   \end{eqnarray*}
+   In turn we can deduce that
+   \begin{equation}
+   \sqrt{N}(\bar{h}_N - \mathbb{E}_\pi[h])
+   \Longrightarrow N \big( 0, \Omega(h) \big), \label{eq_isomegah}
+   \end{equation}
+   where
+   \[
+   \Omega(h) = \mathbb{V}_g[(\pi/g)(h-\mathbb{E}_\pi[h])].
+   \]
+   
+
+** Accuracy
+  
+  - Assess the accuracy by computing a Monte Carlo approximation $\bar{h}_N$
+    multiple times and examine its variability across repeated runs of the
+    posterior sampler.
+    {{{NEWLINE}}}
+  - If $\bar{h}_N$ satisfies a CLT and the number of draws $N$ is
+    sufficiently large, then the variance across repeated runs of the algorithm
+    (provided this variance is finite for the given $N$) will approximately
+    coincide with the asymptotic variance implied by the CLT.
+    {{{NEWLINE}}}
+  - Define *inefficiency factor* relative to IID sampling,
+    \[
+    \mbox{InEff}_\infty = \frac{\Omega(h)}{\mathbb{V}_\pi[h]}.
+    \]
+    If $\mbox{Ineff}_{\infty} > 1$ we are worse than iid sampling.
+
+
+
+** Numerical Illustration
+  
+  - Let's take a harder $\pi(\theta)$, the set-identified posterior from Moon-Schorfheide (2013).  
+    {{{NEWLINE}}}
+  - Consider *diffuse* and *concentrated* importance sample densities $g$. 
+  
+
+  \begin{center}
+  \includegraphics[width=4.3in]{static/IS_proposal}
+  \end{center}
+
+
+** Experiment
+
+  
+  - Using various $N$, generate $IS$ approximations for $h(\theta) =
+    \theta$ and $h(\theta) = \theta^2$.
+    
+    {{{NEWLINE}}}
+  - Calculate estimate of $\mbox{InEff}_{\infty}$ using $N_{run} = 1000$ Monte Carlo
+    simulations, as well as the exact value [by sampling from $\pi(\theta)$.]  Estimates come from:
+
+    \begin{equation}
+      \mbox{InEff}_N = \frac{\mathbb{V}[\bar{h}_N]}{\mathbb{V}_\pi[h]/N}.  
+    \end{equation}
+    {{{NEWLINE}}}
+  - Also calculate poor man's version of Inefficiency Factor, because everyone uses it.
+    \begin{equation}
+      \mbox{InEff}_\infty \approx 1+ \mathbb{V}_g[\pi/g].
+      \label{eq_IS_InEff_approx}
+    \end{equation}
+
+
+
+** Concentrated IS Density
+  
+  - solid line = estimates of $\mbox{InEff}_{\infty}[h]$, dashed = truth
+  - triangles = $h(\theta) = \theta$, circles = $h(\theta) = \theta^2$
+  - grey line = poor man's inefficiency
+  
+
+  \begin{center}
+  \includegraphics[width=4.3in]{static/IS_ineff0125}
+  \end{center}
+
+
+** Concentrated IS Density
+  
+  - Solid line = estimates of $\mbox{InEff}_{\infty}[h]$, dashed = truth
+  - triangles = $h(\theta) = \theta$, circles = $h(\theta) = \theta^2$
+  - grey line = poor man's inefficiency
+  
+
+  \begin{center}
+  \includegraphics[width=4.3in]{static/IS_ineff05}
+  \end{center}
+
+
+** Take aways
+
+  - It is important that the importance density $g$ is well-tailored toward the target distribution \index{target distribution}
+    $\pi$!
+    {{{NEWLINE}}}
+  - Everything is $h$ specific!
+    {{{NEWLINE}}}
+  - with approximately elliptical posterior, a good importance density
+    can be obtained by centering a fat-tailed $t$ distribution at the
+    mode of $\pi$ and using a scaled version of the inverse
+    \index{Hessian matrix} Hessian of $\ln \pi$ at the mode to align
+    the contours of the importance density with the contours of the
+    posterior $\pi$.
+    {{{NEWLINE}}}
+  - Very bad for  highly irregular and non-elliptical posteriors...
+
+
+** References
+   
+[[bibliography:/home/eherbst/Dropbox/ref/ref.bib]]

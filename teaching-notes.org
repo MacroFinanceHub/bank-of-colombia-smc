@@ -76,7 +76,7 @@ Confidence "Set" for θ
    
    At steady state
 
-** LRE   
+** LRE 
    
    yₜ = 1/θ * Eₜ[yₜ₊₁] + εₜ
    
@@ -96,7 +96,7 @@ Confidence "Set" for θ
   
   s₀|{no data} ~ N(A₀, P₀)
   
-  s₁ = C + Ts₀ + Rεₜ
+  s₁ = C + Ts₀ + Rε₁
 
   => s₁ ~ N(A₁₀, P₁₀}
  
@@ -104,3 +104,73 @@ Confidence "Set" for θ
   P₁₀ = T P₀ T' + RQR'
   
   Now consider
+  y₁ = D + Z s₁ + η₁ 
+  
+  haty = D+ZA₁₀ 
+  F₁₀ = Z P₁₀ Z' + H
+  
+  y₁|{no data} ~ N(haty, F₁₀) => likelihood!
+  
+
+  y₁ = D + Z(C + Ts₀ + Rε₁) + η₁ 
+     = D + ZC + ZTs₀ + ZRε₁ + η₁
+  s₁ = C + Ts₀ + Rε₁     
+  
+  VAR[y₁,s₁] = Z P₁₀
+  
+  A₁ = A₁₀ + P₁₀Z'F₁₀⁻¹(y₁ - haty)
+  P₁ = P₁₀ - P₁₀Z'F₁₀⁻¹ZP₁₀
+  
+  s₁|Y¹ ~ N(A₁,P₁)
+  
+** Invariant Distribution  
+   
+   sₜ = Tsₜ₋₁ + Rεₜ is stationary
+   
+   unconditional mean = 0 
+     ( with constant = (I - T)⁻¹C  )
+
+   unconditional variance 
+   sₜsₜ' = (Tsₜ₋₁+ Rεₜ)(Tsₜ₋₁+ Rεₜ)'
+        = Tsₜ₋₁sₜ₋₁'T' + Rεₜεₜ'R' + cross
+        
+   => 
+   VAR[sₜ] = T VAR[sₜ₋₁] T' + RQR'
+   
+   P₀ = VAR[sₜ] = VAR[sₜ₋₁]
+   
+   P₀ = TP₀T' + RQR
+   
+** Missing Data
+   
+   (D,Z,H) can time varying!
+   
+   Imagine we have 3 series
+   n_y = 3
+   
+   but at some period t, we 
+   only observe 2 of the series
+   
+   imagine that we observe the
+   2nd and 3rd 
+   
+        [0 1 0]
+   Mt = [0 0 1]
+   
+   Dt = Mt * D 
+   Zt = Mt * Z
+   Ht = Mt * H * Mt'
+   
+** Smoothing   
+   
+   filter delivers p(sₜ | Yᵗ)
+   
+   but we might want 
+   
+   p(sₜ | Yᵀ) [smoothed distribution]
+   
+   draw random variables from
+   p(sₜ | Yᵀ)
+   
+   that's called "simulation smoother"
+   

@@ -566,7 +566,7 @@ is zero.
    can deduce that the marginal distribution of $y_t$ conditional on $Y^{t-1}$
    is of the form
    \begin{eqnarray}
-       y_t | Y_{t-1} \sim {\cal N} (\hat{y}_{t|t-1}, F_{t|t-1})
+       y_t | Y^{t-1} \sim {\cal N} (\hat{y}_{t|t-1}, F_{t|t-1})
    \end{eqnarray}
    where
    \begin{eqnarray*}
@@ -583,7 +583,7 @@ is zero.
 \end{eqnarray}
 and the joint distribution of $s_t$ and $y_t$ is given by
 \begin{eqnarray}
-   \left[ \begin{array}{c} s_t \\ x_t \end{array} \right] \Big| Y^{t-1}
+   \left[ \begin{array}{c} s_t \\ y_t \end{array} \right] \Big| Y^{t-1}
    \sim
    {\cal N} \left(
    \left[ \begin{array}{c} \hat{s}_{t|t-1} \\ \hat{y}_{t|t-1} \end{array} \right],
@@ -608,7 +608,7 @@ will serve as prior for the next iteration. $\Box$
 ** Likelihood Function
 We can define the one-step ahead forecast error
 \begin{eqnarray}
-     \nu_t = y_t - \hat{y}_{t|t-1} =  Z_t (s_t - \hat{s}_{t|t-1}) + u_t
+     \nu_t = y_t - \hat{y}_{t|t-1} =  Z_t (s_t - \hat{s}_{t|t-1}) + \eta_t
 \end{eqnarray}
 The likelihood function is given by
 \begin{eqnarray}

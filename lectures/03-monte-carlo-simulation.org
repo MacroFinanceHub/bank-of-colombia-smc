@@ -93,7 +93,7 @@
 
 ** Importance Sampling
    \begin{equation}
-     \pi(\theta) =  \frac{f(\theta)}{Z} = \frac{p(Y|\theta)p(\theta)}{p(\theta)}
+     \pi(\theta) =  \frac{f(\theta)}{Z} = \frac{p(Y|\theta)p(\theta)}{p(Y)}
    \end{equation}
    $f(\cdot)$ is the function we can evaluate numerically.
    {{{NEWLINE}}}
@@ -287,7 +287,7 @@
   \end{center}
 
 
-** Concentrated IS Density
+** Diffuse IS Density
   
   - Solid line = estimates of $\mbox{InEff}_{\infty}[h]$, dashed = truth
   - triangles = $h(\theta) = \theta$, circles = $h(\theta) = \theta^2$

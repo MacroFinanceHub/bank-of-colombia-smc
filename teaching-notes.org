@@ -174,3 +174,51 @@ Confidence "Set" for θ
    
    that's called "simulation smoother"
    
+* MH   
+** Simple Example  
+   
+   1. Case 1: θⁱ⁻¹ = τ₁. What is 
+      the probability that 
+      the proposal is τ₁? 
+      
+      The answer is q.
+      
+      What is probability that is 
+      accepted?
+      
+      α(τ₁|τ₁) = min{1, [π₁/q]/[π₁/q]}
+              = 1
+              
+      What is the probability that
+      I propose τ₂?
+      
+      The answer is 1-q
+      
+      α(τ₂|τ₁) = min{1,[π₂/(1-q)]/[π₁/(1-q)]}
+              = 1
+
+   2. Case 2: θⁱ⁻¹ = τ₂.  What is the 
+      probability that the 
+      proposal is τ₁?
+      
+      The answer is 1-q
+      
+      What is the probability that
+      is accepted?
+      
+      α(τ₁|τ₂) = min{1, [π₁/(1-q)]/
+                       [π₂/(1-q)]}
+              = min{1, π₁/π₂}
+              = π₁ / π₂
+              
+   What is the probability that I transition
+   from τ₁ to τ₁? 
+   
+q       Probability(Propose τ₁|τ₁) x
+1       Probability that I accept that
++       +
+(1-q)   Probability(Propose τ₂|τ₁) x
+0       Probability that I reject
+   
+   q x 1 + (1-q) x 0 = q [=k11]
+   

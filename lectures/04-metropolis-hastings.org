@@ -277,6 +277,7 @@ In turn, the asymptotic inefficiency factor is given by \index{inefficiency fact
 
 
 
+
 ** Random Walk Metropolis-Hastings
 
   - Most popular $q$ for DSGE Models.  
@@ -330,6 +331,83 @@ In turn, the asymptotic inefficiency factor is given by \index{inefficiency fact
   
 
 
+** From Prior to Posterior
+- Prior distributions are used to describe the state of knowledge about the
+  parameter vector $\theta$ before observing the sample $Y$.
+- In our example, we have to specify a joint probability distribution in
+  13-dimensional parameter space.
+
+\vspace{0.15in}
+Eliciting prior distributions cite:DelNegro2008a: 
+
+- Group parameters by categories: $\theta_{(ss)}$ (related to steady state),
+  $\theta_{(exo)}$ (related to exogenous processes), $\theta_{(endo)}$ (affects
+  mechanisms but not steady state).
+  \begin{eqnarray}
+    \theta_{(ss)} &=& [r^{(A)},\pi^{(A)},\gamma^{(Q)}]' \nonumber\\
+    \theta_{(exo)} &=& [\rho_g,\rho_z,\sigma_g,\sigma_z,\sigma_R]'\nonumber \\
+    \theta_{(endo)} &=& [\tau,\kappa,\psi_1,\psi_2,\rho_R]' \nonumber 
+  \end{eqnarray}
+
+
+
+
+** Priors, Continued
+  
+  - Priors for $\theta_{(ss)}$ are often based on pre-sample averages. If
+    sample starts in 1983:I, the prior distribution for $r^{(A)}$, $\pi^{(A)}$,
+    and $\gamma^{(Q)}$ may be informed by data from the 1970s.
+  - Priors for $\theta_{(endo)}$ may be partly based on microeconometric evidence.
+  - Priors for $\theta_{(exo)}$ are the most difficult to specify.  You
+    could specific indirectly, by looking at the volatility/autocorrelation of
+    observables implied by $\theta_{(exo)}$ given other parameters.
+
+
+  \vspace{0.2in}
+  *Above all:* Generate draws from the prior
+  distribution of $\theta$; compute important transformations of
+  $\theta$ such as steady-state ratios and possibly impulse-response
+  functions or variance decompositions.
+
+    - Marginals may be plausible, while joint is not.
+    - Nonlinear transformations of uniform variables are not uniform!
+
+
+
+** Try not to set priors based $Y$
+  \includegraphics[width=4.3in]{static/swpi}
+
+** $\rho = \frac{x^2}{x^2+y^2}, x\sim U[0, 1], y\sim U[0, 1]$}
+  Density of $\rho$
+  \includegraphics[width=4.3in]{static/rho}
+
+** Bayesian Estimation -- Prior
+  \begin{center}
+  	    \scalebox{0.85}{ 
+		\begin{tabular}{lllcc} \hline\hline
+			Name & Domain & \multicolumn{3}{c}{Prior} \\
+			&  & Density & Para (1) & Para (2)  \\ \hline
+			\multicolumn{5}{c}{Steady State Related Parameters $\theta_{(ss)}$} \\ \hline
+			$r^{(A)}$      & $\mathbb{R}^+$  & Gamma    &  0.50 &  0.50  \\
+			$\pi^{(A)}$    & $\mathbb{R}^+$  & Gamma    &  7.00 &  2.00  \\
+			$\gamma^{(Q)}$ & $\mathbb{R}$    & Normal   &  0.40 &  0.20  \\ \hline
+			\multicolumn{5}{c}{Endogenous Propagation Parameters $\theta_{(endo)}$} \\ \hline
+			$\tau$         &  $\mathbb{R}^+$ & Gamma    &  2.00 &  0.50  \\
+			$\kappa$       &  $[0,1]$ & Uniform  &  0.00 &  1.00  \\
+			$\psi_1$       & $\mathbb{R}^+$  & Gamma    &  1.50 &  0.25  \\
+			$\psi_2$       & $\mathbb{R}^+$  & Gamma    &  0.50 &  0.25  \\
+			$\rho_R$       & $[0,1)$         & Uniform  &  0.00 &  1.00  \\ \hline
+			\multicolumn{5}{c}{Exogenous Shock Parameters $\theta_{(exo)}$} \\ \hline
+			$\rho_G$       & $[0,1)$         & Uniform  &  0.00 &  1.00  \\
+			$\rho_Z$       & $[0,1)$         & Uniform  &  0.00 &  1.00  \\
+			$100 \sigma_R$ & $\mathbb{R}^+$  & InvGamma &  0.40 &  4.00  \\
+			$100 \sigma_G$ & $\mathbb{R}^+$  & InvGamma &  1.00 &  4.00  \\
+			$100 \sigma_Z$ & $\mathbb{R}^+$  & InvGamma &  0.50 &  4.00  \\ \hline \hline
+		\end{tabular}
+	}
+  \end{center}
+
+
 ** Baseline Estimation
   \begin{table}[t!]
 	\caption{Posterior Estimates of DSGE Model Parameters}
@@ -367,6 +445,312 @@ In turn, the asymptotic inefficiency factor is given by \index{inefficiency fact
 
 ** Acceptance Rate vs. Accuracy
 \includegraphics[width=4.3in]{static/dsge1_rwmh_acceptance_v_accuracy}
+
+
+
+** Convergence of Monte Carlo Average $\bar{\tau}_{N|N_0}$
+\begin{center}
+		\includegraphics[width=3.5in]{static/dsge1_recursive_means_tau.pdf} \\
+\end{center}
+/Notes:/ The $x-$axis indicates the number of draws $N$. $N_0$ is set to $0$, $25,000$ and $50,000$, respectively.
+
+
+
+** Improvements to MCMC: Blocking
+
+   - In high-dimensional parameter spaces the RWMH algorithm generates
+     highly persistent Markov chains.
+
+   - What's bad about persistence?
+     \begin{eqnarray*}
+	\lefteqn{ \sqrt{N}( \bar{h}_N - \mathbb{E}[\bar{h}_N]) } \\
+	& \Longrightarrow & N \bigg( 0, \, \frac{1}{N} \sum_{i=1}^n \mathbb{V}[h(\theta^i)]
+		      + {\color{red} \frac{1}{N} \sum_{i=1}^N \sum_{j \not=i} COV\big[ h(\theta^i),h(\theta^j) \big]} \bigg).
+     \end{eqnarray*}
+
+   - Potential Remedy:
+     - Partition $\theta = [\theta_1, \ldots, \theta_K]$.
+     - Iterate over conditional posteriors $p(\theta_k | Y, \theta_{<-k>} )$.
+
+   - To reduce persistence of the chain, try to find partitions such that parameters are strongly correlated within blocks and
+     weakly correlated across blocks or use random blocking.
+
+
+** Block MH Algorithm
+     Draw $\theta^0 \in \Theta$ and then for $i=1$ to $N$:
+     1. Create a partition $B^i$ of the parameter
+	vector into $N_{blocks}$ blocks $\theta_1, \ldots,
+	\theta_{N_{blocks}}$ via some rule (perhaps probabilistic), unrelated
+	to the current state of the Markov chain.
+     2. For $b = 1, \ldots, N_{blocks}$:
+	1. Draw
+           $\vartheta_b \sim q(\cdot|\left[\theta^{i}_{< b}, \theta_b^{i-1}, \theta^{i-1}_{\ge b}\right])$.
+	2. With probability,
+	   \[ \alpha = \max\left\{\frac{p(\left[\theta^{i}_{< b}, \vartheta_{b},
+	           \theta^{i-1}_{>b}\right]|Y) q(\theta^{i-1}_b,|\theta^{i}_{< b},\vartheta_b,\theta^{i-1}_{>
+	           	b})} {p(\theta^{i}_{< b}, \theta_b^{i-1}, \theta^{i-1}_{>
+	           	b}|Y)q(\vartheta_b|\theta^{i}_{< b}, \theta_b^{i-1}, \theta^{i-1}_{>
+	           	b})},1\right\},
+	   \]
+	   set $\theta^i_b = \vartheta_{b}$, otherwise set \(\theta_b^{i} = \theta^{i-1}_b.\)
+  	   
+
+** Random-Block MH Algorithm
+   - Generate a sequence of random partitions $\{ B^i\}_{i=1}^N$ of the
+     parameter vector $\theta$ into $N_{blocks}$ equally sized blocks, denoted
+     by $\theta_b$, $b=1,\ldots,N_{blocks}$ as follows:
+     
+     1. assign an $iid U[0,1]$ draw to each element of $\theta$;
+     2. sort the parameters according to the assigned random number;
+     3. let the $b$'th block consist of parameters $(b-1)N_{blocks},\ldots,b N_{blocks}$.
+     
+     {{{NEWLINE}}}
+   - Execute Algorithm Block MH Algorithm.
+
+
+
+
+** Metropolis-Adjusted Langevin Algorithm
+   - The proposal distribution of Metropolis-Adjusted Langevin (MAL) algorithm is given by
+     \begin{align*}
+              \mu(\theta^{i-1}) &= \theta^{i-1} + \frac{c_1}{2} M_1 \frac{\partial}{\partial \theta}
+              \ln p(\theta^{i-1}|Y) \bigg|_{\theta = \theta^{i-1}},  \\
+              \Sigma(\theta^{i-1}) &= c_2^2M_2. \nonumber
+     \end{align*}
+     that is $\theta^{i-1}$ is adjusted by a step in the direction of the
+     gradient of the log posterior density function.
+   - One standard practice is to set $M_1 = M_2 = M$, with
+     \[
+       M = -\left[\frac{\partial}{\partial \theta \partial \theta'} \ln p(\theta|Y) \bigg|_{\theta = \hat{\theta}}\right]^{-1},
+     \]
+     where $\hat\theta$ is the mode of the posterior distribution obtained
+     using a numerical optimization routine.
+
+** Newton MH Algorithm
+- Newton MH Algorithm replaces the Hessian evaluated at the posterior
+  mode $\hat{\theta}$ by the Hessian evaluated at $\theta^{i-1}$.
+  {{{NEWLINE}}}
+- The proposal distribution is given by 
+  \begin{align*}
+  \mu(\theta^{i-1}) &= \theta^{i-1} - s \left[\frac{\partial}{\partial
+  \theta \partial \theta'} \ln p(\theta|Y) \bigg|_{\theta =
+  \theta^{i-1}}\right]^{-1} \\ & \times\frac{\partial}{\partial
+  \theta} \ln p(\theta^{i-1}|Y) \bigg|_{\theta = \theta^{i-1}}
+  \nonumber \\
+		\hat\Sigma(\theta^{i-1}) &= - c_2^2
+  \left[\frac{\partial}{\partial \theta \partial \theta'} \ln
+  p(\theta|Y) \bigg|_{\theta = \theta^{i-1}}\right]^{-1}. \nonumber
+  \end{align*}	
+  {{{NEWLINE}}}
+- It is useful to let $s$ be independently of $\theta^{i-1}$:
+  \[
+  c_1 = 2s, \quad s\sim iid U[0, \bar s],
+  \]
+  where $\bar s$ is a tuning parameter.
+
+
+** Run Times and Tuning Constants for MH Algorithms
+\begin{center}
+	\begin{tabular}{llll}
+		\hline\hline
+		Algorithm & Run Time & Accpt. & Tuning\\
+		&  [hh:mm:ss] & Rate  & Constants \\
+		\hline
+		1-Block RWMH-I	& 00:01:13 &  0.28 & $c = 0.015$ \\
+		1-Block RWMH-V	& 00:01:13 &  0.37 & $c = 0.400$  \\
+		3-Block RWMH-I	& 00:03:38 &  0.40 & $c = 0.070$  \\
+		3-Block RWMH-V	& 00:03:36 &  0.43 & $c = 1.200$ \\
+		3-Block MAL	& 00:54:12 &  0.43  & $c_1 = 0.4,  c_2 = 0.750$ \\
+		3-Block Newton MH  & 03:01:40 & 0.53 & $\bar s = 0.7,	 c_2 = 0.600$ \\
+		\hline
+	\end{tabular}
+\end{center}
+/Notes:/ In each run we generate $N=100,000$ draws. We report
+the fastest run time and the average acceptance rate across $N_{run}=50$ independent Markov chains.\\
+
+
+
+** Autocorrelation Function of $\tau^{i}$
+	\begin{center}
+	\includegraphics[width=3.5in]{static/dsge1_tau_acf.pdf} 
+    \end{center}		
+    /Notes:/ The autocorrelation functions are computed based on a single
+    run of each algorithm.
+
+
+** Inefficiency Factor $\mbox{InEff}_N[\bar{\tau}]$
+	\begin{center}
+		\includegraphics[width=3.5in]{static/dsge1_relative_variance_tau.pdf} 
+	\end{center}		
+	/Notes:/ The small-sample inefficiency factors  are computed
+	based on $N_{run}=50$ independent runs of each algorithm.
+
+
+
+** IID Equivalent Draws Per Second
+	\[
+	\mbox{$iid$-equivalent draws per second}
+	= \frac{N}{\mbox{Run Time [seconds]}} \cdot \frac{1}{\mbox{InEff}_N}.
+	\]
+
+\begin{center}
+	\begin{tabular}{lr} \hline \hline
+	Algorithm & Draws Per Second \\ \hline
+		1-Block RWMH-V & 7.76 \\
+		3-Block RWMH-V & 5.65 \\			
+		3-Block MAL    & 1.24 \\
+		3-Block RWMH-I & 0.14 \\		
+		3-Block Newton MH & 0.13 \\
+		1-Block RWMH-I & 0.04 \\ \hline
+   \end{tabular}	
+\end{center}	
+
+
+
+** Performance of Different MH Algorithms
+\begin{center}
+	\begin{tabular}{cc}
+		RWMH-V (1 Block) & RWMH-V (3 Blocks) \\
+		\includegraphics[width=1.35in]{static/dsge1_rwmh_one_block_hac.pdf} &
+		\includegraphics[width=1.35in]{static/dsge1_rwmh_three_block_hac.pdf} \\
+		MAL & Newton \\
+		\includegraphics[width=1.35in]{static/dsge1_langevin_hac.pdf} &
+		\includegraphics[width=1.35in]{static/dsge1_newton_hac.pdf}
+	\end{tabular}
+\end{center}
+\tiny
+/Notes:/ Each panel contains scatter plots of the small sample
+variance $\mathbb{V}[\bar{\theta}]$ computed across multiple chains
+(\(x\)-axis) versus the $\mbox{HAC}[\bar{h}]$ estimates of
+$\Omega(\theta)/N$ (\(y\)-axis).
+
+
+** Recall: Posterior Odds and Marginal Data Densities
+- Posterior model probabilities can be computed as follows:
+  \begin{equation}
+  \pi_{i,T} = \frac{ \pi_{i,0} p(Y|{\cal M}_i) }{ \sum_{j} \pi_{j,0} p(Y|{\cal M}_j) }, \quad j=1,\ldots,2,
+  \end{equation}
+  where
+  \begin{equation}
+  p(Y|{\cal M}) = \int p(Y|\theta,{\cal M}) p(\theta|{\cal M}) d\theta
+  \end{equation}
+  {{{NEWLINE}}}
+- Note:
+  \[
+  \ln p(Y_{1:T}|{\cal M})
+  = \sum_{t=1}^T \ln \int p(y_t |\theta, Y_{1:t-1}, {\cal M}) p(\theta|Y_{1:t-1},{\cal M}) d\theta
+  \]
+- Posterior odds and Bayes Factor
+  \begin{equation}
+  \frac{\pi_{1,T}}{\pi_{2,T}}
+  = \underbrace{ \frac{\pi_{1,0}}{\pi_{2,0}} }_{\displaystyle Prior\, Odds}
+  \times \underbrace{ \frac{p(Y|{\cal M}_1)}{p(Y|{\cal M}_2)} }_{\displaystyle Bayes\, Factor}
+  \end{equation}
+		
+
+
+** Computation of Marginal Data Densities
+   - Reciprocal importance sampling: 
+     - Geweke's modified harmonic mean estimator
+     - Sims, Waggoner, and Zha's estimator
+     {{{NEWLINE}}}	
+   - Chib and Jeliazkov's estimator
+     {{{NEWLINE}}}	
+   - For a survey, see Ardia, Hoogerheide, and van Dijk (2009).
+
+
+** Modified Harmonic Mean
+- Reciprocal importance samplers are based on the following identity:
+  \begin{eqnarray}
+  \frac{1}{p(Y ) } = \int \frac{ f(\theta) }{ p(Y|\theta) p(\theta ) } p(\theta |Y) d\theta,
+  \end{eqnarray}
+  where  $\int f(\theta) d\theta = 1$.
+	
+- Conditional on the choice of $f(\theta)$ an obvious estimator is
+  \begin{equation}
+    \hat{p}_{G}(Y) = \left[ \frac{1}{N} \sum_{i=1}^{N} \frac{ f(\theta^{i}) }{ p(Y|\theta^{i}) p(\theta^{i})} \right]^{-1},
+    \label{eq_harmonicmean}
+  \end{equation} 
+  where $\theta^{i}$ is drawn from the posterior $p(\theta|Y)$.
+	
+- Geweke (1999):
+  \begin{eqnarray}
+          f(\theta) &=& \tau^{-1} (2\pi)^{-d/2} |V_{\theta}|^{-1/2} \exp
+          \left[ - 0.5(\theta - \bar{\theta})' V^{-1}_{\theta}
+          (\theta - \bar{\theta}) \right] \nonumber \\
+          && \times \left\{ (\theta - \bar{\theta})' V^{-1}_{\theta}
+          (\theta - \bar{\theta}) \le F_{\chi^2_{d}}^{-1}(\tau) \right\}.
+  \end{eqnarray}
+
+
+** Chib and Jeliazkov
+- Rewrite Bayes Theorem:
+  \begin{equation}
+  p(Y) = \frac{ p(Y|\theta) p(\theta)}{p(\theta|Y)}.
+  \label{eq_csequality}
+  \end{equation}
+- Thus,
+  \begin{equation}
+  \hat{p}_{CS}(Y) = \frac{ p(Y|\tilde{\theta}) p(\tilde{\theta}) }{ \hat{p}(\tilde{\theta}|Y) },
+  \end{equation}
+  where we replaced the generic $\theta$ in~(\ref{eq_csequality})
+  by the posterior mode $\tilde{\theta}$.
+
+
+
+** Chib and Jeliazkov
+   - Use output of Metropolis-Hastings Algorithm.
+   - Proposal density for transition $\theta \mapsto \tilde{\theta}$:
+     $q(\theta,\tilde{\theta}|Y)$.
+   - Probability of accepting proposed draw:
+     \[
+     \alpha(\theta,\tilde{\theta}|Y) = \min \; \left\{ 1, \; \frac{p(\tilde{\theta}|Y)/q(\theta,\tilde{\theta}|Y)}{
+             p(\theta|Y)/q(\tilde{\theta},\theta|Y)} \right\}.
+     \]
+   - Note that
+     \begin{eqnarray*}
+             \lefteqn{ \int \alpha(\theta,\tilde{\theta}|Y) q(\theta,\tilde{\theta}|Y) p(\theta|Y) d\theta } \\
+             &=& \int \min \; \left\{ 1, \; \frac{p(\tilde{\theta}|Y)/q(\theta,\tilde{\theta}|Y)}{
+             	p(\theta|Y)/q(\tilde{\theta},\theta|Y)} \right\} q(\theta,\tilde{\theta}|Y) p(\theta|Y) d\theta \\
+             &=& p(\tilde{\theta}|Y) \int \min \; \left\{ \frac{p(\theta|Y)/q(\tilde{\theta},\theta|Y)}{p(\tilde{\theta}|Y)/q(\theta,\tilde{\theta}|Y)}, \; 1  \right\}
+             q(\tilde{\theta},\theta|Y) d\theta \\
+             &=& p(\tilde{\theta}|Y) \int \alpha(\tilde{\theta},\theta|Y) q(\tilde{\theta},\theta|Y) d\theta
+     \end{eqnarray*}
+
+
+
+** Chib and Jeliazkov
+   - Posterior density at the mode can be approximated as follows
+     \begin{equation}
+     \hat{p}(\tilde \theta|Y)
+     = \frac{ \frac{1}{N} \sum_{i=1}^{N} \alpha (\theta^{i},\tilde{\theta}|Y) q(\theta^{i},\tilde{\theta}|Y) }{
+             \frac{1}{J} \sum_{j=1}^J \alpha (\tilde{\theta},\theta^{j}|Y) },
+     \end{equation}
+   - $\{ \theta^{i} \}$ are posterior draws obtained with the the M-H Algorithm;
+   - $\{ \theta^{j}\}$ are additional draws from $q(\tilde{\theta},\theta|Y)$ given the fixed
+     value $\tilde{\theta}$.
+
+
+** MH-Based Marginal Data Density Estimates
+	    \begin{center}
+			\begin{tabular}{lcc}
+				\hline\hline
+				Model       & Mean($\ln \hat p(Y)$)    & Std. Dev.($\ln \hat p(Y)$) \\
+				\hline
+				Geweke $(\tau = 0.5)$          & -346.17 &  0.03 \\
+				Geweke $(\tau = 0.9)$          & -346.10 &  0.04 \\
+				SWZ $(q = 0.5)$                & -346.29 &  0.03 \\
+				SWZ $(q = 0.9)$                & -346.31 &  0.02 \\
+				Chib and Jeliazkov             & -346.20 &  0.40 \\
+				\hline \hline
+			\end{tabular}
+		\end{center}
+		/Notes:/ Table shows mean and standard deviation of log marginal data density
+		estimators, computed over $N_{run} =50$ runs of the RWMH-V sampler
+		using $N=100,000$ draws, discarding a burn-in sample of $N_0=50,000$ draws.
+		The SWZ estimator uses $J=100,000$ draws to compute $\hat
+		\tau$, while the CJ estimators uses $J=100,000$ to compute the denominator of $\hat{p}(\tilde{\theta}|Y)$.
+
 
 
 ** References

@@ -1,0 +1,577 @@
+#+TITLE: Sequential Monte Carlo
+#+DATE: \today
+#+HUGO_BASE_DIR: /home/eherbst/Dropbox/www/
+#+HUGO_SECTION: teaching/bank-of-colombia-smc/lectures
+#+hugo_custom_front_matter: :math true
+#+hugo_auto_set_lastmod: t
+#+MACRO: NEWLINE @@latex:\\~\\~@@ @@html:<br>@@ @@ascii:|@@
+#+OPTIONS: toc:nil H:2
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{helvet}
+#+LaTEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \bibliographystyle{ecta}
+#+LaTEX_HEADER: \beamertemplatenavigationsymbolsempty
+#+LaTeX_HEADER: \usepackage{bibentry}
+#+LaTeX_HEADER: \nobibliography*
+#+LaTeX_HEADER: \makeatletter\renewcommand\bibentry[1]{\nocite{#1}{\frenchspacing\@nameuse{BR@r@#1\@extra@b@citeb}}}\makeatother
+#+LaTeX_HEADER: \newtheorem{algo}{Algorithm}
+#+LaTeX_CLASS: beamer
+
+
+* Introduction
+** MCMC: What works and what doesn't, Simple Model
+   - State-space representation:
+     \begin{align}
+       y_t = [\begin{array}{cc} 1 & 1 \end{array} ] s_t, \quad
+       s_t = \left[ \begin{array}{cc} {\color{blue} \phi_1} & 0 \\ {\color{blue} \phi_3} & {\color{blue} \phi_2} \end{array} \right] s_{t-1}
+           + \left[ \begin{array}{c} 1 \\ 0 \end{array} \right] \epsilon_t.
+           \label{eq_exss}
+     \end{align}
+   - The state-space model can be re-written as ARMA(2,1) process
+     \[
+        (1- {\color{blue} \phi_1} L)(1-{\color{blue} \phi_2} L) y_t
+         = (1-({\color{blue} \phi_2} - {\color{blue} \phi_3} )L)  \epsilon_t.
+     \]
+   - Relationship between state-space parameters \({\color{blue} \phi}\) and structural parameters ${\color{red} \theta}$:
+     \[
+         {\color{blue} \phi_1} = {\color{red} \theta_1^2}, \quad
+         {\color{blue} \phi_2} = {\color{red} (1-\theta_1^2) }, \quad
+         {\color{blue} \phi_3 - \phi_2} = {\color{red}  - \theta_1 \theta_2 }.
+     \]
+
+** Stylized Example
+\begin{beamerboxesrounded}{Model}
+Reduced form:
+$   (1- {\color{blue} \phi_1} L)(1-{\color{blue} \phi_2} L) y_t
+    = (1-({\color{blue} \phi_2} - {\color{blue} \phi_3} )L)  \epsilon_t. $
+
+\vspace*{0.5cm}
+
+Relationship of ${\color{blue} \phi}$ and ${\color{red} \theta}$:
+$   {\color{blue} \phi_1} = {\color{red} \theta_1^2}, \quad
+    {\color{blue} \phi_2} = {\color{red} (1-\theta_1^2) }, \quad
+    {\color{blue} \phi_3 - \phi_2} = {\color{red}  - \theta_1 \theta_2 }.
+$
+\end{beamerboxesrounded}
+
+- /Local/ identification problem arises as ${\color{red} \theta_1} \longrightarrow 0$.
+  {{{NEWLINE}}}
+- /Global/ identification problem $p(Y|\theta) = p(Y|\tilde{\theta})$:
+  \[
+     {\color{red} \theta_1^2} = \rho, \quad {\color{red} (1-\theta_1^2) } = {\color{red}  \theta_1 \theta_2 }
+  \]
+  versus
+  \[
+     {\color{red} \tilde{\theta}_1^2} = 1-\rho, \quad {\color{red} \tilde{\theta}_1^2 } = {\color{red}  \tilde{\theta}_1 \tilde{\theta}_2 }
+  \]
+
+** Stylized Example: Likelihood Fcn 100 Obs
+Reduced form:
+\(   (1- {\color{blue} \phi_1} L)(1-{\color{blue} \phi_2} L) y_t
+    = (1-({\color{blue} \phi_2} - {\color{blue} \phi_3} )L)  \epsilon_t. \)
+{{{NEWLINE}}}
+Relationship of ${\color{blue} \phi}$ and ${\color{red} \theta}$:
+\(   {\color{blue} \phi_1} = {\color{red} \theta_1^2}, \quad
+    {\color{blue} \phi_2} = {\color{red} (1-\theta_1^2) }, \quad
+    {\color{blue} \phi_3 - \phi_2} = {\color{red}  - \theta_1 \theta_2 }.
+\)
+\begin{center}
+    \includegraphics[width=2in]{static/ss_weakid.pdf}
+\end{center}
+
+** Stylized Example: Likelihood Fcn 100 Obs
+Reduced form:
+\(  (1- {\color{blue} \phi_1} L)(1-{\color{blue} \phi_2} L) y_t
+    = (1-({\color{blue} \phi_2} - {\color{blue} \phi_3} )L)  \epsilon_t. \)
+{{{NEWLINE}}}
+Relationship of ${\color{blue} \phi}$ and ${\color{red} \theta}$:
+\(   {\color{blue} \phi_1} = {\color{red} \theta_1^2}, \quad
+    {\color{blue} \phi_2} = {\color{red} (1-\theta_1^2) }, \quad
+    {\color{blue} \phi_3 - \phi_2} = {\color{red}  - \theta_1 \theta_2 }.
+\)
+\begin{center}
+    \includegraphics[width=2in]{static/ss_noglobalid1}
+\end{center}
+
+** Stylized Example: Likelihood Fcn 500 Obs
+Reduced form:
+\(  (1- {\color{blue} \phi_1} L)(1-{\color{blue} \phi_2} L) y_t
+    = (1-({\color{blue} \phi_2} - {\color{blue} \phi_3} )L)  \epsilon_t. \)
+{{{NEWLINE}}}
+Relationship of ${\color{blue} \phi}$ and ${\color{red} \theta}$:
+\(   {\color{blue} \phi_1} = {\color{red} \theta_1^2}, \quad
+    {\color{blue} \phi_2} = {\color{red} (1-\theta_1^2) }, \quad
+    {\color{blue} \phi_3 - \phi_2} = {\color{red}  - \theta_1 \theta_2 }.
+\)
+\begin{center}
+    \includegraphics[width=2in]{static/ss_noglobalid5.pdf}
+\end{center}
+
+
+** Introduction
+
+- {\color{blue} Posterior expectations can be approximated by Monte Carlo averages.}
+- If we have draws from $\{ \theta^i\}_{i=1}^N$ from $p(\theta|Y)$, then (under some regularity conditions)
+        \[
+            \frac{1}{N} \sum_{i=1}^N h(\theta^i) \stackrel{a.s.}{\longrightarrow} \mathbb{E}[h(\theta)|Y].
+        \]
+-   {\color{blue} ``Standard'' approach in DSGE model literature} (Schorfheide, 2000; Otrok, 2001): use Markov chain Monte Carlo (MCMC) methods to
+        generate a sequence of serially correlated draws  $\{ \theta^i\}_{i=1}^N$.
+
+-   {\color{red} Unfortunately, ``standard'' MCMC can be quite inaccurate}, especially in medium and large-scale DSGE models:
+        
+        - disentangling importance of internal versus external propagation mechanism;
+        - determining the relative importance of shocks.
+        
+
+
+
+
+** Introduction
+
+- {\color{blue} Previously:} Modify MCMC algorithms to overcome weaknesses: blocking of parameters; tailoring of (mixture) proposal
+        densities
+        
+        - Kohn et al. (2010)
+        - Chib and Ramamurthy (2011)
+        - Curdia and Reis (2011)
+        - Herbst (2012)
+        
+
+- {\color{red} Now, we use sequential Monte Carlo (SMC)} (more precisely, sequential importance sampling) instead:
+        
+        - Better suited to handle irregular and multimodal posteriors
+              associated with large DSGE models.
+        - Algorithms can be easily parallelized.
+        
+
+-  SMC = Importance Sampling on Steriods. We build on
+        
+        - Theoretical work: Chopin (2004); Del Moral, Doucet, Jasra (2006)
+        - Applied work: Creal (2007); Durham and Geweke (2011, 2012)
+        
+
+
+
+
+
+
+** Review -- Importance Sampling
+If $\theta^i$'s are draws from $g(\cdot)$ then
+	\[
+	\mathbb{E}_\pi[h] 
+	\approx \frac{  \frac{1}{N} \sum_{i=1}^N h(\theta^i) w(\theta^i)}{
+		\frac{1}{N} \sum_{i=1}^N w(\theta^i) }, \quad
+	w(\theta) = \frac{f(\theta)}{g(\theta)}.
+	\]
+	\begin{center}
+		\includegraphics[width=4in]{figures/is.pdf}
+	\end{center}
+
+
+
+
+** From Importance Sampling to Sequential Importance Sampling
+
+- In general, it's hard to construct a good proposal density $g(\theta)$,
+- especially if the posterior has several peaks and valleys.
+- {\color{blue} Idea - Part 1:} it might be easier to find a proposal density
+      for
+      \[
+         \pi_n(\theta) = \frac{[p(Y|\theta)]^{\phi_n} p(\theta)}{\int [p(Y|\theta)]^{\phi_n} p(\theta) d\theta} = \frac{f_n(\theta)}{Z_n}.
+      \]
+      at least if $\phi_n$ is close to zero.
+- {\color{blue} Idea - Part 2:} We can try to turn a proposal density for $\pi_n$ into a proposal density for $\pi_{n+1}$
+      and iterate, letting $\phi_n \longrightarrow \phi_N = 1$.
+
+
+
+** Illustration:
+	
+		- Our state-space model:
+			\[
+			y_t = [1~ 1]s_t, \quad s_t = \left[\begin{array}{cc}\theta^2_1 & 0 \\ (1-\theta_1^2) - \theta_1 \theta_2 &
+			(1-\theta_1^2)\end{array}\right]s_{t-1} + \left[\begin{array}{c} 1 \\
+			0\end{array}\right]\epsilon_t.
+			\]
+		- Innovation: $\epsilon_t \sim iid N(0,1)$.
+		- Prior: uniform on the square $0\le
+		\theta_1 \le 1$ and $0 \le \theta_2 \le 1$.
+		- Simulate $T = 200$ observations
+		given $\theta = [0.45, 0.45]'$, which is observationally equivalent to $\theta =
+		[0.89, 0.22]'$
+	
+
+
+** Illustration: Tempered Posteriors of $\theta_1$
+\includegraphics[width=.8\linewidth]{figures/smc_ss_density.pdf}
+	\[
+	\pi_n(\theta) = \frac{{\color{blue}[p(Y|\theta)]^{\phi_n}} p(\theta)}{\int {\color{blue}[p(Y|\theta)]^{\phi_n}} p(\theta) d\theta} = \frac{f_n(\theta)}{Z_n}, \quad \phi_n = \left( \frac{n}{N_\phi} \right)^\lambda
+	\]
+
+
+** Illustration: Posterior Draws
+\begin{center}
+   \includegraphics[width=4in]{figures/smc_ss_contour.pdf}
+\end{center}
+
+
+
+** SMC Algorithm: A Graphical Illustration
+		\begin{center}
+			\includegraphics[width=3in]{figures/smc_evolution_of_particles.pdf} 	\end{center}
+		
+			- $\pi_n(\theta)$
+			is represented by a swarm of particles $\{ \theta_n^i,W_n^i \}_{i=1}^N$:
+			\[
+			\bar{h}_{n,N} = \frac{1}{N} \sum_{i=1}^N W_n^i h(\theta_n^i) \stackrel{a.s.}{\longrightarrow} \mathbb{E}_{\pi_n}[h(\theta_n)].
+			\]
+			- C is Correction; S is Selection; and M is Mutation.
+		
+
+
+
+** SMC Algorithm
+   1. *Initialization.* ($\phi_{0} = 0$).
+			Draw the initial particles from the prior: $\theta^{i}_{1} \stackrel{iid}{\sim} p(\theta)$ and
+			$W^{i}_{1} = 1$, $i = 1, \ldots, N$.
+   2. *Recursion.* For $n = 1, \ldots, N_{\phi}$,
+      1. *Correction.*  Reweight the particles from stage $n-1$ by defining
+         the incremental weights
+         \begin{equation}
+         \tilde w_{n}^{i} = [p(Y|\theta^{i}_{n-1})]^{\phi_{n} - \phi_{n-1}}
+         \label{eq_smcdeftildew}
+         \end{equation}
+         and the normalized weights
+      \be
+      \tilde{W}^{i}_{n} = \frac{\tilde w_n^{i} W^{i}_{n-1}}{\frac{1}{N} \sum_{i=1}^N \tilde w_n^{i} W^{i}_{n-1}}, \quad
+      i = 1,\ldots,N.
+      \ee
+      An approximation of $\mathbb{E}_{\pi_n}[h(\theta)]$ is given by
+      \be
+      \tilde{h}_{n,N} = \frac{1}{N} \sum_{i=1}^N \tilde W_n^{i} h(\theta_{n-1}^i).
+      \label{eq_deftildeh}
+      \ee
+      - {\bf Selection.}
+
+
+** SMC Algorithm
+	\begin{enumerate}
+		- {\bf Initialization.} 
+		- {\bf Recursion.} For $n = 1, \ldots, N_{\phi}$,
+		\begin{enumerate}
+			- {\bf Correction.} 
+			
+			- {\bf Selection. (Optional Resampling)}
+			Let $\{ \hat{\theta} \}_{i=1}^N$ denote $N$ $iid$ draws from a multinomial distribution
+			characterized by support points and weights $\{\theta_{n-1}^i,\tilde{W}_n^i \}_{i=1}^N$
+			and set $W_n^i=1$.\\
+			
+			An approximation of $\mathbb{E}_{\pi_n}[h(\theta)]$ is given by
+			\be
+			\hat{h}_{n,N} = \frac{1}{N} \sum_{i=1}^N W^i_n h(\hat{\theta}_{n}^i).
+			\label{eq_defhath}
+			\ee
+			
+			- {\bf Mutation.} Propagate the particles $\{ \hat{\theta}_i,W_n^i \}$ via $N_{MH}$
+			steps of a MH algorithm with transition density $\theta_n^i \sim K_n(\theta_n| \hat{\theta}_n^i; \zeta_n)$
+			and stationary distribution $\pi_n(\theta)$.
+			An approximation of $\mathbb{E}_{\pi_n}[h(\theta)]$ is given by
+			\be
+			\bar{h}_{n,N} = \frac{1}{N} \sum_{i=1}^N h(\theta_{n}^i) W^i_n.
+			\label{eq_defbarh}
+			\ee
+		\end{enumerate}
+	\end{enumerate}
+
+
+
+
+** Remarks
+
+- Correction Step:
+      
+      - reweight particles from iteration $n-1$ to create importance sampling approximation of $\mathbb{E}_{\pi_n}[h(\theta)]$
+      
+- Selection Step: the resampling of the particles
+      
+      - (good) equalizes the particle weights and thereby increases accuracy of subsequent importance sampling approximations;
+      - (not good) adds a bit of noise to the MC approximation.
+      
+- Mutation Step:
+      
+      - adapts particles to posterior $\pi_n(\theta)$;
+      - imagine we don't do it: then we would be
+      using draws from prior $p(\theta)$ to approximate posterior $\pi(\theta)$, which can't be good!
+      
+
+      \includegraphics[width=.3\linewidth]{figures/smc_ss_density.pdf}
+
+
+
+
+
+** Theoretical Properties
+
+- Goal: strong law of large numbers (SLLN) and central limit theorem (CLT)
+        as $N \longrightarrow \infty$ for every iteration $n=1,\ldots,N_\phi$.
+
+- Regularity conditions:
+        
+        -  proper prior;
+        -  bounded likelihood function;
+        -  $2+\delta$ posterior moments of $h(\theta)$.
+        
+
+- Idea of proof (Chopin, 2004): proceed recursively
+        
+        - Initialization: SLLN and CLT for $iid$ random variables because we sample from prior.
+        - Assume that $n-1$ approximation (with normalized weights) yields
+        \[
+         \sqrt{N} \left( \frac{1}{N} \sum_{i=1}^N h(\theta_{n-1}^i) W_{n-1}^i - \mathbb{E}_{\pi_{n-1}}[h(\theta)] \right)
+         \Longrightarrow N\big(0,\Omega_{n-1}(h)\big)
+        \]
+        - Show that 
+        \[
+        \sqrt{N} \left( \frac{1}{N} \sum_{i=1}^N h(\theta_{n}^i) W_{n}^i - \mathbb{E}_{\pi_{n}}[h(\theta)] \right)
+        \Longrightarrow N\big(0,\Omega_{n}(h)\big)
+        \]
+        
+        
+
+
+
+
+** Theoretical Properties: Correction Step
+
+- Suppose that the $n-1$ approximation (with normalized weights) yields
+      \[
+         \sqrt{N} \left( \frac{1}{N} \sum_{i=1}^N h(\theta_{n-1}^i) W_{n-1}^i - \mathbb{E}_{\pi_{n-1}}[h(\theta)] \right)
+         \Longrightarrow N\big(0,\Omega_{n-1}(h)\big)
+      \]
+- Then
+      \begin{eqnarray*}
+         \lefteqn{ \sqrt{N} \left( \frac{ \frac{1}{N} \sum_{i=1}^N h(\theta_{n-1}^i)
+                                   {\color{red} [p(Y|\theta_{n-1}^i)]^{\phi_n - \phi_{n-1}} } W_{n-1}^i}{
+                                   \frac{1}{N} \sum_{i=1}^N {\color{red} [p(Y|\theta_{n-1}^i)]^{\phi_n - \phi_{n-1}} } W_{n-1}^i} - \mathbb{E}_{\pi_{n}}[h(\theta)] \right)} \\
+         &\Longrightarrow& N\big(0, \tilde{\Omega}_n(h) \big)
+      \end{eqnarray*}
+      where
+      \[
+          \tilde{\Omega}_n(h) = \Omega_{n-1}\big( {\color{red} v_{n-1}(\theta)} (h- \mathbb{E}_{\pi_n}[h] ) \big) \quad
+          {\color{red} v_{n-1}(\theta) = [p(Y|\theta)]^{\phi_n - \phi_{n-1}} \frac{Z_{n-1}}{Z_n} }
+      \]
+- {\color{blue} This step relies on likelihood evaluations from iteration $n-1$ that are
+      already stored in memory.}
+
+
+
+** Theoretical Properties: Selection / Resampling
+
+- After resampling by drawing from iid multinomial distribution we obtain
+      \[
+         \sqrt{N} \left( \frac{1}{N} \sum_{i=1}^N h(\hat{\theta}_i) W_n^i - \mathbb{E}_{\pi_n}[h] \right) \Longrightarrow N \big( 0, \hat{\Omega}(h) \big),
+      \]
+      where
+      \[
+         \hat{\Omega}_n(h) = \tilde{\Omega}(h) + {\color{red} \mathbb{V}_{\pi_n}[h]}
+      \]
+- {\color{red} Disadvantage} of resampling: it {\color{red} adds noise}.
+- {\color{blue} Advantage} of resampling: it equalizes the particle weights, reducing the variance
+      of ${\color{blue} v_{n}(\theta)}$ in $\tilde{\Omega}_{n+1}(h) = \Omega_{n}\big( {\color{blue} v_{n}(\theta)} (h- \mathbb{E}_{\pi_{n+1}}[h] )$.
+
+
+
+** Theoretical Properties: Mutation
+
+-   We are using the Markov transition kernel $K_n(\theta|\hat{\theta})$ to
+        transform draws {\color{red} $\hat{\theta}_n^i$} into draws {\color{blue} $\theta_n^i$}.
+- To preserve the distribution of the {\color{red} $\hat{\theta}_n^i$'s} it has to be the case that
+      \[
+          {\color{blue} \pi_n(\theta)} = \int K_n(\theta|\hat{\theta}) {\color{red} \pi_n(\hat{\theta})} d \hat{\theta}.
+      \]
+- It can be shown that the overall asymptotic variance after the mutation is the sum of
+        
+        - the variance of the approximation of the conditional mean $\mathbb{E}_{K_n(\cdot|\theta_{n-1})}[h(\theta)]$
+              which is given by
+              \[
+                 \hat{\Omega} \big(\mathbb{E}_{K_n(\cdot|\theta_{n-1})}[h(\theta)]\big);
+              \]
+        - a weighted average of the conditional variance $\mathbb{V}_{K_n(\cdot|\theta_{n-1})}[h(\theta)]$:
+              \[
+                 \int W_{n-1}(\theta_{n-1}) v_{n-1}(\theta_{n-1}) \mathbb{V}_{K_n(\cdot|\theta_{n-1})}[h(\theta)] \pi_{n-1}(\theta_{n-1}).
+              \]
+        
+-   {\color{blue} This step is {\em embarassingly parallelizable}, well
+        designed for single instruction, multiple data (SIMD) processing.}
+
+
+
+
+
+** More on Transition Kernel in Mutation Step
+
+- {\color{blue} Transition kernel $K_n(\theta|\hat{\theta}_{n-1};\zeta_n)$:}
+        generated by running $M$ steps of a Metropolis-Hastings algorithm.
+
+- {\color{red} Lessons from DSGE model MCMC}:
+        
+        - blocking of parameters can reduces persistence of Markov chain;
+        - mixture proposal density avoids ``getting stuck.''
+        
+
+- {\color{blue} Blocking:} Partition the parameter vector $\theta_n$
+      into $N_{blocks}$ equally sized blocks, denoted by $\theta_{n,b}$,
+      $b=1,\ldots,N_{blocks}$. (We generate the blocks for $n=1,\ldots,N_\phi$
+      randomly prior to running the SMC algorithm.)
+
+- {\color{blue} Example: random walk proposal density:}
+            \begin{eqnarray*}
+                \vartheta_b | (\theta^i_{n,b,m-1}, \theta^i_{n,-b,m}, \Sigma^*_{n,b}) 
+               &\sim& {\color{blue} N \bigg( \theta^i_{n,b,m-1}, c_n^2 \Sigma^*_{n,b} \bigg)}.
+            \end{eqnarray*}
+
+
+
+
+** Adaptive Choice of $\zeta_n = (\Sigma_n^*,c_n)$
+
+- {\color{red} Infeasible adaption:}
+      
+      - Let $\Sigma_n^*=\mathbb{V}_{\pi_n}[\theta]$.
+
+      - Adjust scaling factor according to
+            \[
+                c_{n} = c_{n-1} f \big( 1-R_{n-1}(\zeta_{n-1}) \big),
+            \]
+            where $R_{n-1}(\cdot)$ is population rejection rate from iteration $n-1$ and
+            \[
+                  f(x) = 0.95 + 0.10 \frac{e^{16(x - 0.25)}}{1 + e^{16(x - 0.25)}}.
+            \]
+      
+
+- {\color{blue} Feasible adaption -- use output from stage $n-1$ to replace $\zeta_n$ by $\hat{\zeta}_n$:}
+      
+      - Use particle approximations of $\mathbb{E}_{\pi_n}[\theta]$ and $\mathbb{V}_{\pi_n}[\theta]$
+            based on $\{\theta_{n-1}^i,\tilde{W}_n^i \}_{i=1}^N$.
+      - Use actual rejection rate from stage $n-1$ to
+            calculate $\hat{c}_{n} = \hat{c}_{n-1} f \big( \hat{R}_{n-1}(\hat{\zeta}_{n-1}) \big)$.
+      
+
+
+- {\color{blue} Result:} under suitable regularity conditions replacing $\zeta_n$ by $\hat{\zeta}_n$
+        where $\sqrt{n}(\hat{\zeta}_n - \zeta_n) = O_p(1)$ does not affect the asymptotic variance
+        of the MC approximation.
+
+
+
+
+** Adaption of SMC Algorithm for Stylized State-Space Model
+	\begin{center}
+		\includegraphics[width=2in]{figures/smc_ss.pdf}
+	\end{center}
+	{\em Notes:} The dashed line in the top panel indicates the target acceptance rate of 0.25.
+
+
+** Convergence of SMC Approximation for Stylized State-Space Model
+	\begin{center}
+		\includegraphics[width=3in]{figures/smc_clt_nphi100.pdf}
+	\end{center}
+	{\em Notes:} The figure shows $N \mathbb{V}[\bar\theta_j]$
+	for each parameter as a function of the number of particles $N$. $\mathbb{V}[\bar\theta_j]$
+	is computed based on $N_{run}=1,000$ runs of the SMC algorithm with $N_\phi=100$. The width
+	of the bands is $(2\cdot 1.96) \sqrt{3/N_{run}} (N \mathbb{V}[\bar\theta_j])$.
+
+
+** More on Resampling
+	
+		- So far, we have used {\em multinomial resampling}. It's fairly intuitive and it is straightforward to
+		      obtain a CLT.
+		- But: {\em multinominal resampling is not particularly efficient}.
+		- The book contains a section on alternative resampling schemes ({\em stratified resampling}, {\em residual resampling}...)
+		- These alternative techniques are designed to achieve a variance reduction.
+		- Most resampling algorithms are not parallelizable because they rely on the normalized particle weights.
+	
+
+
+** Application 1: Small Scale New Keynesian Model
+\begin{itemize}
+	\item We will take a look at the effect of various tuning choices on accuracy:
+	\begin{itemize}
+		\spitem Tempering schedule $\lambda$: $\lambda=1$ is linear, $\lambda > 1$ is convex.
+		\spitem Number of stages $N_\phi$ versus number of particles $N$.
+		\spitem Number of blocks in mutation step versus number of particles.
+	\end{itemize}
+\end{itemize}
+** Effect of $\lambda$ on Inefficiency Factors $\mbox{InEff}_N[\bar{\theta}]$
+\begin{center}
+	\includegraphics[width=3in]{figures/smc_lambda.pdf}
+\end{center}
+{\em Notes:} The figure depicts hairs of $\mbox{InEff}_N[\bar{\theta}]$ as function
+of $\lambda$. The inefficiency factors are computed based
+on $N_{run}=50$ runs of the SMC algorithm. Each hair corresponds to a DSGE model parameter.
+** Number of Stages $N_{\phi}$ vs Number of Particles $N$
+\begin{center}	
+	\includegraphics[width=3in]{figures/smc_nphi_vs_npart.pdf}
+\end{center}
+{\em Notes:} Plot of $\mathbb{V}[\bar{\theta}] / \mathbb{V}_\pi[\theta]$ for a
+specific configuration of the SMC algorithm. The inefficiency factors are computed based
+on $N_{run}=50$ runs of the SMC algorithm. $N_{blocks}=1$, $\lambda=2$, $N_{MH}=1$.
+** Number of blocks $N_{blocks}$ in Mutation Step vs Number of Particles $N$
+\begin{center}	
+	\includegraphics[width=3in]{figures/smc_nblocks_vs_npart.pdf}
+\end{center}
+{\em Notes:} Plot of $\mathbb{V}[\bar{\theta}] / \mathbb{V}_\pi[\theta]$ for a
+specific configuration of the SMC algorithm. The inefficiency factors are computed based
+on $N_{run}=50$ runs of the SMC algorithm. $N_{\phi}=100$, $\lambda=2$, $N_{MH}=1$.
+** A Few Words on Posterior Model Probabilities
+\begin{itemize}
+	\item Posterior model probabilities
+	\[
+	\pi_{i,T} = \frac{ \pi_{i,0} p(Y_{1:T}|{\cal M}_i)}{ \sum_{j=1}^M \pi_{j,0} p(Y_{1:T}|{\cal M}_j)}
+	\]
+	where
+	\[
+	p(Y_{1:T}|{\cal M}_i) = \int p(Y_{1:T}|\theta_{(i)}, {\cal M}_i) p(\theta_{(i)}|{\cal M}_i) d\theta_{(i)}
+	\]
+	\item For any model:
+	\[
+	\ln p(Y_{1:T}|{\cal M}_i)
+	= \sum_{t=1}^T \ln \int p(y_t |\theta_{(i)}, Y_{1:t-1}, {\cal M}_i) p(\theta_{(i)}|Y_{1:t-1},{\cal M}_i) d\theta_{(i)}
+	\]
+	\item Marginal data density $p(Y_{1:T}|{\cal M}_i)$ arises as a by-product of SMC.
+\end{itemize}
+** Marginal Likelihood Approximation
+\begin{itemize}
+	\item Recall $\tilde{w}^i_n = [p(Y|\theta_{n-1}^i)]^{\phi_n-\phi_{n-1}}$.
+	\item Then
+	      \begin{eqnarray*}
+	       \frac{1}{N} \sum_{i=1}^N \tilde{w}^i_n W_{n-1}^i
+		&\approx& \int [p(Y|\theta)]^{\phi_n-\phi_{n-1} } 
+		\frac{ p^{\phi_{n-1}}(Y|\theta) p(\theta)}{\int p^{\phi_{n-1}}(Y|\theta) p(\theta)d\theta} d\theta \\
+		&=& \frac{ \int p(Y|\theta)^{\phi_n} p(\theta) d\theta}{\int p(Y|\theta)^{\phi_{n-1}} p(\theta) d\theta }
+	       \end{eqnarray*}
+	\item Thus,
+	      \[
+		 \prod_{n=1}^{N_\phi} \left(\frac{1}{N} \sum_{i=1}^N \tilde{w}^i_n W_{n-1}^i \right)
+		  \approx \int p(Y|\theta)p(\theta)d\theta .
+	      \]
+\end{itemize}
+** SMC Marginal Data Density Estimates
+\begin{center}
+	\begin{tabular}{l@{\hspace*{0.5cm}}cc@{\hspace*{0.5cm}}cc}
+		\hline\hline
+		& \multicolumn{2}{c}{$N_{\phi}=100$} &	\multicolumn{2}{c}{$N_{\phi}=400$} \\
+		$N$	  & Mean($\ln \hat p(Y)$)    & SD($\ln \hat p(Y)$)  & Mean($\ln \hat p(Y)$)    & SD($\ln \hat p(Y)$)\\ \hline
+		500   & -352.19 &   (3.18)  & -346.12 & (0.20) \\
+		1,000 & -349.19 &   (1.98)  & -346.17 & (0.14) \\
+		2,000 & -348.57 &   (1.65)  & -346.16 & (0.12) \\
+		4,000 & -347.74 &   (0.92)  & -346.16 & (0.07) \\
+		\hline
+	\end{tabular}
+\end{center}
+{\em Notes:} Table shows mean and standard deviation of log marginal data density estimates
+as a function of the number of particles $N$ computed over $N_{run}=50$ runs of the SMC sampler with
+$N_{blocks}=4$, $\lambda=2$, and $N_{MH}=1$.
+
+	

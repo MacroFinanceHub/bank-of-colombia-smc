@@ -1,0 +1,433 @@
+#+TITLE: Estimating Three DSGE Models
+#+DATE: \today
+#+HUGO_BASE_DIR: /home/eherbst/Dropbox/www/
+#+HUGO_SECTION: teaching/bank-of-colombia-smc/lectures
+#+hugo_custom_front_matter: :math true
+#+hugo_auto_set_lastmod: t
+#+MACRO: NEWLINE @@latex:\\~\\~@@ @@html:<br>@@ @@ascii:|@@
+#+OPTIONS: toc:nil H:2
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{helvet}
+#+LaTEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \bibliographystyle{ecta}
+#+LaTEX_HEADER: \beamertemplatenavigationsymbolsempty
+#+LaTeX_HEADER: \usepackage{bibentry}
+#+LaTeX_HEADER: \nobibliography*
+#+LaTeX_HEADER: \makeatletter\renewcommand\bibentry[1]{\nocite{#1}{\frenchspacing\@nameuse{BR@r@#1\@extra@b@citeb}}}\makeatother
+#+LaTeX_HEADER: \newtheorem{algo}{Algorithm}
+#+LaTeX_CLASS: beamer
+* Three DSGE Models
+** Application 1: A New Keynesian Model with Correlated Shocks
+   - The assumption that exogenous shocks evolve according to independent AR(1) is to some extent arbitrary.
+
+   - Trying to generalize this assumption seems natural.
+
+   - However, the more elaborate the exogenous propagation mechanism, the more difficult it becomes to disentangle endogenous from exogenous propagation.
+
+   - This generates identification problems.
+ 
+
+** Application 1: A New Keynesian Model with Correlated Shocks
+   - Technology growth shock $\hat{z}_t$, government spending shock \index{government!spending shock}
+     $\hat{g}_t$ evolve:
+     \begin{align*}
+     \left[ \begin{array}{c} \hat{z}_t \\ \hat{g}_t \end{array} \right]
+     &= \left[ \begin{array}{cc} \rho_z &  \rho_{zg}  \\  \rho_{gz}  & \rho_g \end{array} \right]
+     \left[ \begin{array}{c} \hat{z}_{t-1} \\ \hat{g}_{t-1} \end{array} \right]
+     + \left[ \begin{array}{c} \epsilon_{z,t} \\ \epsilon_{g,t} \end{array} \right], \\
+     \left[ \begin{array}{c} \epsilon_{z,t} \\ \epsilon_{g,t} \end{array} \right]
+     &\sim
+     N \left( \left[ \begin{array}{c} 0 \\ 0 \end{array} \right], \,
+     \left[ \begin{array}{cc} \sigma^2_z &  0  \\  0  & \sigma^2_g \end{array} \right] \right). \nonumber
+     \end{align*}
+   - This VAR process is combined with:
+     \begin{eqnarray*}
+             \hat y_{t} &=&  \mathbb{E}_t[\hat y_{t+1}]
+             - \frac{1}{\tau} \bigg( \hat R_t -  \mathbb{E}_t[\hat\pi_{t+1}] - \mathbb{E}_t[\hat{z}_{t+1}] \bigg)\\
+             &&+ \hat{g}_t - \mathbb{E}_t[\hat{g}_{t+1}], \\
+             \hat \pi_t &=& \beta \mathbb{E}_t[\hat \pi_{t+1}] + \kappa (\hat y_t- \hat g_t), \\
+             \hat R_{t} &=& \rho_R \hat R_{t-1} + (1-\rho_R) \psi_1 \hat \pi_{t} + (1-\rho_R) \psi_2 \left( \hat y_{t} - \hat g_t \right)+ \epsilon_{R,t}.
+     \end{eqnarray*}
+   - We use agnostic priors:\( \quad \rho_g, \rho_z \sim U[0,1], \quad \rho_{gz}, \rho_{zg} \sim U[-1,1].\)
+
+
+** Priors and Posteriors of $\rho_{gz}$ and $\rho_{zg}$
+	\begin{center}
+		\includegraphics[width=4in]{static/dsge1_gen_shock_density.pdf} 	
+	\end{center}	
+	/Notes:/ The two panels depict histograms of prior distributions (shaded area) and kernel density estimates of the posterior densities (solid lines).
+
+
+** Impulse Responses (Part 1)
+	\begin{center}
+		\includegraphics[width=4in]{static/dsge1_gen_shock_irfs_exo.pdf} 	
+	\end{center}	
+
+
+** Impulse Responses (Part 2)
+	\begin{center}
+		\includegraphics[width=3in]{static/dsge1_gen_shock_irfs_endo.pdf} 	
+	\end{center}	
+
+
+
+** Algorithm Configuration
+\begin{table}[t!]
+	\begin{center}
+		\begin{tabular}{p{2in}p{2in}} \hline \hline
+			RWMH-V & SMC \\ \hline
+			$N = 100,000$       & $N = 4,800$ \\
+			$N_{burn} = 50,000 $ & $N_\phi = 500$ \\
+			$N_{blocks} = 1$    & $N_{blocks} = 6$, $N_{MH}=1$ \\
+			$c= 0.125      $    & $\lambda = 2$ \\
+			Run Time: 00:28 (1 core) & Run Time: 05:52 (12 cores) \\ \hline \hline\\
+		\end{tabular}
+	\end{center}
+\end{table}		
+	/Note:/ We run each algorithm $N_{run}=50$ times. Run time is reported as mm:ss.
+
+
+
+
+
+** Posterior Probability Approximations
+		\begin{center}
+		\begin{tabular}{cc}
+			$\mathbb{P}_\pi\{\rho_{zg} > 0 \}$ & $\mathbb{P}_\pi\{\partial \hat{\pi}_t / \partial \hat{\epsilon}_{g,t} > 0  \}$ \\
+			\includegraphics[width=0.46\textwidth]{static/dsge1_gen_shock_prob_rhozg.pdf} &			\includegraphics[width=0.46\textwidth]{static/dsge1_gen_shock_prob_pi_g_irf.pdf}\\
+			\end{tabular}
+				\end{center}
+	/Notes:/ Each symbol (50 in total) corresponds to one run of the SMC algorithm (dot) or the RWMH algorithm (triangle).
+
+
+
+** Marginal Data Density Approximations
+	\begin{center}
+		\includegraphics[width=3in]{static/dsge1_gen_shock_log_mdd.pdf} 	
+	\end{center}	
+	/Notes:/ Each symbol (50 in total) corresponds to one run of the SMC algorithm (dot) or the RWMH algorithm (triangle). The SMC algorithm automatically generates an estimate of the MDD; for the RWMH algorithm we use Geweke's modified harmonic mean estimator.
+
+
+** Marginal Data Density
+\begin{table}[t!]
+	\begin{center}
+		\begin{tabular}{lcc}
+			\hline\hline
+			Model       & Mean($\ln \hat p(Y)$)    & Std. Dev.($\ln \hat p(Y)$) \\
+			\hline
+			AR(1) Shocks  & $-346.16$ &   (0.07) \\
+			VAR(1) Shocks  & $-314.45$ &   (0.05) \\
+			\hline \hline\\
+		\end{tabular}
+	\end{center}
+\end{table}
+	/Notes:/ Table shows mean and standard deviation of SMC-based estimate of
+	the log marginal data density, computed over $N_{run}=50$ runs of the SMC sampler. 
+
+
+
+** Application 2: Estimation of Smets and Wouters (2007) Model
+   - Benchmark macro model, has been estimated many (many) times.
+     {{{NEWLINE}}}
+   - ``Core'' of many larger-scale models.
+     {{{NEWLINE}}}
+   - 36 estimated parameters.
+     {{{NEWLINE}}}
+   - SW priors might be considered implausible because they seem to be informed by in-sample information.
+     {{{NEWLINE}}}
+   - How does quality of posterior simulators
+     change as one makes the priors more diffuse?
+     {{{NEWLINE}}}
+   - Replace Beta by Uniform distributions; increase variances of
+     parameters with Gamma and Normal prior by factor of 3.
+
+
+
+** Generating Quantile Estimates
+   - We will focus on the accuracy of the approximation of posterior quantiles.
+     {{{NEWLINE}}}
+   - Quantile estimates can be computed in two different ways:
+     1. Sort the posterior draws $\{\theta_j^i\}_{i=1}^N$ and select
+        the $\lfloor \tau N \rfloor$'th element.
+	{{{NEWLINE}}}		
+     2. Quantile regression (Koenker and Basset, 1978)
+	\begin{eqnarray*}
+	\hat{q}_\tau(\theta_j) &=& \mbox{argmin}_{q} \; \bigg[
+	(1-\tau) \frac{1}{N} \sum_{i: \, \theta^i_j < q} (\theta_j^i - q) \\&&+
+	\tau \frac{1}{N} \sum_{i: \, \theta^i_j \ge q} (\theta_j^i - q)
+	\bigg]. \nonumber
+	\end{eqnarray*}
+
+
+** Accuracy of Quantile Estimates
+
+
+- Accuracy of
+  the quantile estimates is given by the following CLT: 
+  \[
+  \sqrt{N}(\hat{q}_\tau - q_\tau) \Longrightarrow N \left( 0,
+  \frac{\tau(1-\tau)}{\pi^2(q_\tau)} \right),
+  \]
+  where $\pi(\theta)$ is the posterior density. 
+  {{{NEWLINE}}}
+- Finite sample inefficiency:
+  \[ \mbox{InEff}_N = \frac{ \mathbb{V}[\hat{q}_\tau]}{
+	\tau(1-\tau)/ \big( N \pi^2(q_\tau) \big) }
+  \]
+  
+
+	
+	
+** Algorithm Configuration
+\begin{table}[t!]
+	\begin{center}
+		\begin{tabular}{p{2in}p{2in}} \hline \hline
+			RWMH-V & SMC \\ \hline
+			$N = 10,000,000$       & $N = 12,000$ \\
+			$N_{burn} = 5,000,000 $ & $N_\phi = 500$ \\
+			$N_{blocks} = 1$    & $N_{blocks} = 6$, $N_{MH}=1$ \\
+			$c= 0.08      $    & $\lambda = 2.1$ \\
+			Run Time: 14:06 (1 core) & Run Time: 02:32 (24 cores) \\ \hline \hline\\
+		\end{tabular}
+	\end{center}
+\end{table}		
+	/Note:/ We run each algorithm $N_{run}=50$ times. Run time is reported as hh:mm.
+
+
+
+
+** Precision of Quantile Approximations (Part 1)
+
+	\begin{center}
+		\begin{tabular}{cc}			\includegraphics[width=0.35\textwidth]{static/sw_diffuse_density_Neff_alp.pdf} &	\includegraphics[width=0.35\textwidth]{static/sw_diffuse_density_Neff_rdely.pdf} \\	\includegraphics[width=0.35\textwidth]{static/sw_diffuse_density_Neff_xiw.pdf} &	\includegraphics[width=0.35\textwidth]{static/sw_diffuse_density_Neff_iotaw.pdf}
+		\end{tabular}
+	\end{center}
+		/Notes:/ Each panel depicts a Kernel estimate of the posterior
+		density (solid) and $\ln (N_{eff}) = \ln (N/\mbox{InEff}_N)$
+		(light gray hatched bars correspond to RWMH and solid bars
+		correspond to SMC) for various choices of $\tau$ equal to $0.025$,
+		$0.05$, $0.5$, $0.95$, and $0.975$.
+
+
+
+** Precision of Quantile Approximations (Part 2)
+
+	\begin{center}		\includegraphics[width=0.38\textwidth]{static/sw_diffuse_scatter_Neffs_log.pdf}
+	\end{center}
+	/Notes:/ $N_{eff}$ for the RWMH-V and SMC quantile approximations. Each dot corresponds to one parameter.
+	The 45-degree line appears in solid.
+
+
+
+** Application 3: A Fiscal Policy DSGE Model
+
+- Based on Leeper, Plante, and Traum (2010)
+  {{{NEWLINE}}}
+- Incorporate elaborate fiscal policy rules (government spending, labor, capital, and consumption taxes) into DSGE model to study effects of tax and spending changes.
+  {{{NEWLINE}}}
+- Complex specification of fiscal policy creates identification problems.
+  
+
+
+
+
+** Application 3: A Fiscal Policy DSGE Model
+
+- The budget constraint of the households
+  \begin{align*}
+          (1+\tau_t^c)c_t &+ i_t + b_t \\
+          &= (1-\tau_t^l)w_tl_t + (1-\tau_t^k)R_t^ku_tk_{t-1} + R_{t-1}b_{t-1} + z_t. \nonumber
+  \end{align*}
+- The budget constraint for the government, using
+  capital letters to denote aggregate quantities
+  \[
+          B_t + \tau_t^kR_t^ku_tK_{t-1} + \tau_t^l w_t L_t + \tau_t^cC_t = R_{t-1}B_{t-1} + G_t + Z_t.
+  \]
+- The fiscal policy rules ($\hat x_t$: log deviation from steady state of $x_t$)
+  \begin{align*}
+          \hat\tau_t^k &= \varphi_k\hat Y_t + \gamma_k \hat B_{t-1}
+          + \phi_{kl}\hat u_t^l + \phi_{kc} \hat u_t^c + \hat u_t^k, \\
+          \hat\tau_t^l &= \varphi_l\hat Y_t + \gamma_l \hat B_{t-1}
+          + \phi_{lk}\hat u_t^k + \phi_{lc} \hat u_t^c + \hat u_t^l, \\
+          \hat\tau_t^c &= \phi_{ck}\hat u_t^k + \phi_{cl} \hat u_t^l + \hat u_t^c.
+  \end{align*}
+
+
+
+** Application 3: A Fiscal Policy DSGE Model
+
+- The exogenous movements in taxes follow AR(1) processes
+  \begin{align*}
+          \hat u_t^k &= \rho_k \hat u_{t-1}^k + \sigma_k \epsilon_t^k,
+          \quad \epsilon_t^k \sim N(0,1), \\
+          \hat u_t^l &= \rho_l \hat u_{t-1}^l + \sigma_l \epsilon_t^l,
+          \quad \epsilon_t^l \sim N(0,1), \\
+          \hat u_t^c &= \rho_c \hat u_{t-1}^c + \sigma_c \epsilon_t^c,
+          \quad \epsilon_t^c \sim N(0,1).
+  \end{align*}
+- The government spending rule is given by
+  \begin{align*}
+          \hat G_t &= -\varphi_g \hat Y_t - \gamma_g \hat B_{t-1} + \hat u_t^g, \\
+          \hat u_t^g &= \rho_g \hat u_{t-1}^g + \sigma_g \epsilon_t^g,
+          \quad \epsilon_t^g \sim N(0,1).
+  \end{align*}
+- The transfer rule is
+  given by
+  \begin{align*}
+          \hat Z_t &= -\varphi_z \hat Y_t - \gamma_z \hat B_{t-1} + \hat u_t^z, \\
+          \hat u_t^z &= \rho_z \hat u_{t-1}^z + \sigma_z \epsilon_t^z,
+          \quad \epsilon_t^z \sim N(0,1).
+  \end{align*}
+
+
+
+
+** Prior Distributions for Fiscal Rule Parameters
+	\begin{table}[t!]
+	\begin{center}
+		\scalebox{0.93}{
+		\begin{tabular}{lcccccc}
+			\hline\hline
+			& \multicolumn{3}{c}{LPT Prior} & \multicolumn{3}{c}{Diffuse Prior} \\
+			& Type & Para (1) & Para (2) & Type & Para (1) & Para (2)\\
+			\hline
+			\multicolumn{7}{c}{Debt Response Parameters} \\
+			\hline
+			$\gamma_{g}$  & G                &   0.4 &   0.2  & U              &     0 &     5 \\
+			$\gamma_{tk}$ & G                &   0.4 &   0.2  & U              &     0 &     5 \\
+			$\gamma_{tl}$ & G                &   0.4 &   0.2  & U              &     0 &     5 \\
+			$\gamma_{z}$  & G                &   0.4 &   0.2  & U              &     0 &     5 \\
+			\hline
+			\multicolumn{7}{c}{Output Response Parameters} \\
+			\hline
+			$\varphi_{tk}$& G                &   1.0 &   0.3  & N               &   1.0 &     1 \\
+			$\varphi_{tl}$& G                &   0.5 &  0.25  & N               &   0.5 &     1 \\
+			$\varphi_{g}$ & G                &  0.07 &  0.05  & N               &  0.07 &     1 \\
+			$\varphi_{z}$ & G                &   0.2 &   0.1  & N               &   0.2 &     1 \\
+			\hline
+			\multicolumn{7}{c}{Exogenous Tax Comovement Parameters} \\
+			\hline
+			$\phi_{kl}$   & N               &  0.25 &   0.1  & N               &  0.25 &     1 \\
+			$\phi_{kc}$   & N               &  0.05 &   0.1  & N               &  0.05 &     1 \\
+			$\phi_{lc}$   & N               &  0.05 &   0.1  & N               &  0.05 &     1 \\
+			\hline \hline\\
+		\end{tabular}
+		}
+	\end{center}
+	/Notes:/ Para (1) and Para (2) correspond to the mean and standard deviation of the
+	Beta (B), Gamma (G), and Normal (N) distributions and to the upper, lower bounds of the support
+	for Uniform (U) distribution.  \end{table}
+
+
+
+
+** Common Prior Distributions
+	\begin{table}[t!]
+	\begin{center}
+		\scalebox{0.93}{
+		\begin{tabular}{lccccccc} \hline\hline
+			& Type & Para (1) & Para (2) &  & Type & Para (1) & Para (2)\\ \hline
+			\multicolumn{8}{c}{Endogenous Propagation Parameters} \\ \hline
+			$\gamma$      & G                &  1.75 &   0.5  & $s''$         & G                &     5 &   0.5 \\
+			$\kappa$      & G                &   2.0 &   0.5  & $\delta_2$    & G                &   0.7 &   0.5  \\
+			$h$           & B                 &   0.5 &   0.2  &               &                     &       & \\
+			\hline
+			\multicolumn{8}{c}{Exogenous Process Parameters} \\
+			\hline
+			$\rho_{a}$    & B                 &   0.7 &   0.2  & $\sigma_{a}$  & IG           &     1 &     4  \\
+			$\rho_{b}$    & B                 &   0.7 &   0.2  & $\sigma_{b}$  & IG           &     1 &     4  \\
+			$\rho_{l}$    & B                 &   0.7 &   0.2  & $\sigma_{l}$  & IG           &     1 &     4  \\
+			$\rho_{i}$    & B                 &   0.7 &   0.2  & $\sigma_{i}$  & IG           &     1 &     4  \\
+			$\rho_{g}$    & B                 &   0.7 &   0.2  & $\sigma_{g}$  & IG           &     1 &     4  \\
+			$\rho_{tk}$   & B                 &   0.7 &   0.2  & $\sigma_{tk}$ & IG           &     1 &     4  \\
+			$\rho_{tl}$   & B                 &   0.7 &   0.2  & $\sigma_{tl}$ & IG           &     1 &     4  \\
+			$\rho_{tc}$   & B                 &   0.7 &   0.2  & $\sigma_{tc}$ & IG           &     1 &     4  \\
+			$\rho_{z}$    & B                 &   0.7 &   0.2  & $\sigma_{z}$  & IG           &     1 &     4  \\
+			\hline \hline\\
+		\end{tabular}
+	}
+	\end{center}
+	/Notes:/ For the Inv. Gamma (IG) distribution, Para (1) and Para (2) refer to
+	$s$ and $\nu$, where $p(\sigma|\nu, s)\propto \sigma^{-\nu-1}e^{-\nu s^2/2\sigma^2}$.
+\end{table}
+
+
+** SMC Configuration
+\begin{table}[t!]
+	\begin{center}
+		\begin{tabular}{p{4cm}p{2.5cm}} \hline \hline
+			$N = 6,000$       &  $N_\phi = 500$\\
+			$N_{blocks} = 3$ & $N_{MH}=1$ \\
+			$\lambda = 4.0$  & \\
+			\multicolumn{2}{l}{Run Time [mm:ss]: 48:00 (12 cores)}  \\ \hline \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+
+** Posterior Moments
+	\begin{table}[t!]
+	\begin{center}
+		\footnotesize
+		\begin{tabular}{l@{\hspace*{1cm}}cc@{\hspace*{1cm}}cc} \hline\hline
+			& \multicolumn{2}{c}{Based on LPT Prior} & \multicolumn{2}{c}{Based on Diff. Prior} \\
+			& Mean & [5\%, 95\%] Int. & Mean & [5\%, 95\%] Int. \\ \hline
+			\multicolumn{5}{c}{Debt Response Parameters} \\ \hline
+			$\gamma_{g}$         &   0.16 & [  0.07,   0.27]  &   0.10 & [  0.01,   0.23] \\
+			$\gamma_{tk}$        &   0.39 & [  0.22,   0.60]  &   0.38 & [  0.16,   0.62] \\
+			$\gamma_{tl}$        &   0.11 & [  0.04,   0.21]  &   0.04 & [  0.00,   0.11] \\
+			$\gamma_{z}$         &   0.32 & [  0.17,   0.47]  &   0.32 & [  0.14,   0.49] \\
+			\hline \multicolumn{5}{c}{Output Response Parameters} \\ \hline
+			$\varphi_{tk}$          &   1.67 & [  1.18,   2.18]  &   2.06 & [  1.44,   2.69] \\
+			$\varphi_{tl}$          &   0.29 & [  0.11,   0.53]  &   0.11 & [ -0.34,   0.58] \\
+			$\varphi_{g}$           &   0.06 & [  0.01,   0.13]  &  -0.43 & [ -0.87,   0.02] \\
+			$\varphi_{z}$           &   0.17 & [  0.06,   0.33]  &  -0.07 & [ -0.56,   0.41] \\
+			\hline \multicolumn{5}{c}{Exogenous Tax Comovement Parameters} \\ \hline
+			$\phi_{kl}$          &   0.19 & [  0.14,   0.24]  &   1.57 & [  1.29,   1.87] \\
+			$\phi_{kc}$          &   0.03 & [ -0.03,   0.08]  &  -0.33 & [ -2.84,   2.73] \\
+			$\phi_{lc}$          &  -0.02 & [ -0.07,   0.04]  &   0.20 & [ -1.23,   1.40] \\
+			\hline
+			\multicolumn{5}{c}{Innovations to Fiscal Rules} \\ \hline
+			$\sigma_{g}$         &   3.03 & [  2.79,   3.30]  &   2.91 & [  2.66,   3.19] \\
+			$\sigma_{tk}$        &   4.36 & [  4.01,   4.75]  &   1.26 & [  1.08,   1.46] \\
+			$\sigma_{tl}$        &   2.95 & [  2.71,   3.22]  &   2.00 & [  1.71,   2.33] \\
+			$\sigma_{tc}$        &   3.99 & [  3.67,   4.33]  &   1.14 & [  0.96,   1.35] \\
+			$\sigma_{z}$         &   3.34 & [  3.07,   3.63]  &   3.34 & [  3.07,   3.63] \\ \hline \hline
+		\end{tabular}
+		\footnotesize
+		\renewcommand{\baselinestretch}{2}
+		\normalsize
+	\end{center}
+\end{table}
+
+
+** Posterior of Output Response Parameters
+\begin{figure}[t!]
+	\begin{center}
+		\begin{tabular}{cc}
+\includegraphics[width=0.47\textwidth]{static/lpt_varphi_g.pdf} &
+\includegraphics[width=0.47\textwidth]{static/lpt_varphi_z.pdf}
+		\end{tabular}
+	\end{center}
+\end{figure}
+/Notes:/ The figure depicts posterior densities under the LPT prior (solid) and the diffuse prior (dashed).
+
+
+** Posterior of Tax Comovement Parameters
+	\begin{center}
+		\includegraphics[width=2.5in]{static/lpt_phi_scatter.pdf} 	
+	\end{center}
+		/Notes:/ The plots on the diagonal depict posterior densities under the LPT prior (solid) and the diffuse prior (dashed). The plots on the off-diagonals depict draws from the posterior
+		distribution under the LPT prior (circles) and the diffuse prior (triangles).
+		
+
+
+** Impulse Response to a Labor Tax Innovation
+	\begin{center}
+		\includegraphics[width=3in]{static/lpt_etn_irf.pdf} 	
+	\end{center}
+	/Notes:/ Figure depicts posterior mean impulse responses under LPT prior (solid);
+	diffuse prior (dashed); diffuse prior with $\phi_{lc} > 0$, $\phi_{kl} < 0$ (dotted);
+	and diffuse prior with $\phi_{lc} < 0$, $\phi_{kl} > 0$ (dots and short dashes). $\hat{C}_t$,
+	$\hat{I}_t$ and $\hat{L}_t$ are consumption, investment, and hours worked in deviation from steady state.	
+

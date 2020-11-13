@@ -16,6 +16,8 @@
 #+LaTeX_HEADER: \makeatletter\renewcommand\bibentry[1]{\nocite{#1}{\frenchspacing\@nameuse{BR@r@#1\@extra@b@citeb}}}\makeatother
 #+LaTeX_HEADER: \newtheorem{algo}{Algorithm}
 #+LaTeX_CLASS: beamer
+#+LATEX_HEADER: \usepackage{tikz}
+#+LATEX_HEADER: \usetikzlibrary{shapes.geometric, arrows}
 
 
 * Introduction
@@ -76,10 +78,10 @@ Relationship of ${\color{blue} \phi}$ and ${\color{red} \theta}$:
     {\color{blue} \phi_3 - \phi_2} = {\color{red}  - \theta_1 \theta_2 }.
 \)
 \begin{center}
-    \includegraphics[width=2in]{static/ss_weakid.pdf}
+    \includegraphics[width=2in]{static/ss_weakid}
 \end{center}
 
-** Stylized Example: Likelihood Fcn 100 Obs
+** Stylized Example: Likelihood Fcn 100 Obs                        :noexport:
 Reduced form:
 \(  (1- {\color{blue} \phi_1} L)(1-{\color{blue} \phi_2} L) y_t
     = (1-({\color{blue} \phi_2} - {\color{blue} \phi_3} )L)  \epsilon_t. \)
@@ -343,14 +345,17 @@ If $\theta^i$'s are draws from $g(\cdot)$ then
          \Longrightarrow N\big(0,\Omega_{n-1}(h)\big)
       \]
 - Then
+
       \begin{eqnarray*}
-         \lefteqn{ \sqrt{N} \left( \frac{ \frac{1}{N} \sum_{i=1}^N h(\theta_{n-1}^i)
+      \hspace{-0.70in}
+         \sqrt{N} \left( \frac{ \frac{1}{N} \sum_{i=1}^N h(\theta_{n-1}^i)
                                    {\color{red} [p(Y|\theta_{n-1}^i)]^{\phi_n - \phi_{n-1}} } W_{n-1}^i}{
-                                   \frac{1}{N} \sum_{i=1}^N {\color{red} [p(Y|\theta_{n-1}^i)]^{\phi_n - \phi_{n-1}} } W_{n-1}^i} - \mathbb{E}_{\pi_{n}}[h(\theta)] \right)} \\
-         &\Longrightarrow& N\big(0, \tilde{\Omega}_n(h) \big)
+                                   \frac{1}{N} \sum_{i=1}^N {\color{red} [p(Y|\theta_{n-1}^i)]^{\phi_n - \phi_{n-1}} } W_{n-1}^i} - \mathbb{E}_{\pi_{n}}[h(\theta)] \right) 
+         \Longrightarrow& N\big(0, \tilde{\Omega}_n(h) \big)
       \end{eqnarray*}
       where
       \[
+      \hspace{-0.5in}
           \tilde{\Omega}_n(h) = \Omega_{n-1}\big( {\color{red} v_{n-1}(\theta)} (h- \mathbb{E}_{\pi_n}[h] ) \big) \quad
           {\color{red} v_{n-1}(\theta) = [p(Y|\theta)]^{\phi_n - \phi_{n-1}} \frac{Z_{n-1}}{Z_n} }
       \]
@@ -378,28 +383,24 @@ If $\theta^i$'s are draws from $g(\cdot)$ then
 ** Theoretical Properties: Mutation
 
 -   We are using the Markov transition kernel $K_n(\theta|\hat{\theta})$ to
-        transform draws {\color{red} $\hat{\theta}_n^i$} into draws {\color{blue} $\theta_n^i$}.
-- To preserve the distribution of the {\color{red} $\hat{\theta}_n^i$'s} it has to be the case that
+        transform draws @@latex:{\color{red}@@ $\hat{\theta}_n^i$@@latex:}@@ into draws @@latex:{\color{blue}@@ $\theta_n^i$@@latex:}@@.
+- To preserve the distribution of the @@latex:{\color{red}@@ $\hat{\theta}_n^i$'s@@latex:}@@ it has to be the case that
       \[
           {\color{blue} \pi_n(\theta)} = \int K_n(\theta|\hat{\theta}) {\color{red} \pi_n(\hat{\theta})} d \hat{\theta}.
       \]
 - It can be shown that the overall asymptotic variance after the mutation is the sum of
+  - the variance of the approximation of the conditional mean $\mathbb{E}_{K_n(\cdot|\theta_{n-1})}[h(\theta)]$
+        which is given by
+        \[
+           \hat{\Omega} \big(\mathbb{E}_{K_n(\cdot|\theta_{n-1})}[h(\theta)]\big);
+        \]
+  - a weighted average of the conditional variance $\mathbb{V}_{K_n(\cdot|\theta_{n-1})}[h(\theta)]$:
+        \[
+           \int W_{n-1}(\theta_{n-1}) v_{n-1}(\theta_{n-1}) \mathbb{V}_{K_n(\cdot|\theta_{n-1})}[h(\theta)] \pi_{n-1}(\theta_{n-1}).
+        \]
         
-        - the variance of the approximation of the conditional mean $\mathbb{E}_{K_n(\cdot|\theta_{n-1})}[h(\theta)]$
-              which is given by
-              \[
-                 \hat{\Omega} \big(\mathbb{E}_{K_n(\cdot|\theta_{n-1})}[h(\theta)]\big);
-              \]
-        - a weighted average of the conditional variance $\mathbb{V}_{K_n(\cdot|\theta_{n-1})}[h(\theta)]$:
-              \[
-                 \int W_{n-1}(\theta_{n-1}) v_{n-1}(\theta_{n-1}) \mathbb{V}_{K_n(\cdot|\theta_{n-1})}[h(\theta)] \pi_{n-1}(\theta_{n-1}).
-              \]
-        
--   {\color{blue} This step is {\em embarassingly parallelizable}, well
-        designed for single instruction, multiple data (SIMD) processing.}
-
-
-
+-   @@latex:{\color{blue}@@ This step is /embarassingly parallelizable/, well
+        designed for single instruction, multiple data (SIMD) processing.@@latex:}@@
 
 
 ** More on Transition Kernel in Mutation Step
@@ -486,6 +487,69 @@ If $\theta^i$'s are draws from $g(\cdot)$ then
 - Most resampling algorithms are not parallelizable because they rely on the normalized particle weights.
 
 
+** Running Time -- It's all about Mutation
+  - The most time consuming part of (any of) these algorithms, is
+    *evaluating the likelihood function,* which occurs in the
+    mutation step.
+  - But each particle is /mutated independently/ of the other
+    particles.
+  - This is extremely easy to parallelize.
+
+
+How I do it -- distributed memory parallelization in ~Fortran~
+- Use Message Passing Interface (MPI) to scatter particles across
+  many processors (CPUs).
+- Execute mutuation across processors.
+- Use MPI to gather the newly mutated particles. 
+
+
+Could be better with more programming. 
+
+
+** 
+#+begin_export latex
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=gray]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+\begin{tikzpicture}[node distance=2.0cm]
+\node (start) [startstop, label={[align=center]{\bf CPU 0}}] {Correction};
+\node (start0) [right of=start, label={[align=center]{\bf CPU 1}},xshift=2cm,yshift=0.27cm] {\textcolor{white}{Correction}};
+\node (start1) [right of=start0, label={[align=center]{\bf CPU 2}},xshift=2cm] {\textcolor{white}{Correction}};
+\node (selection) [startstop, below of=start] {Selection};
+\node (mut0) [startstop, below of=selection] {Mutation};
+\node (mut1) [startstop, right of=mut0,xshift=2cm] {Mutation};
+\node (mut2) [startstop, right of=mut1,xshift=2cm] {Mutation};
+\node (corx) [startstop, below of=mut0] {Correction};
+\draw [arrow] (start) -- (selection);
+\draw [arrow] (selection) -- (mut0);
+\draw [arrow] (selection) -- (mut1);
+\draw [arrow] (selection) -- (mut2);
+\draw [arrow] (mut0) -- (corx);
+\draw [arrow] (mut1) -- (corx);
+\draw [arrow] (mut2) -- (corx);
+\end{tikzpicture}
+#+end_export
+
+** How well does this work?
+- The extent to which HPC can help us is determined by the amount of algorithm that can be executed in parallel vs. serial. 
+  {{{NEWLINE}}}
+- Suppose a fraction $B\in[0,1]$ must executed in serial fashion for a particular algorithm.  
+  {{{NEWLINE}}}
+- *Amdahls Law*: Theoretical gain from using $N$ processors in an algorithm is given by:
+  \[
+  R(N) = B + \frac{1}{N}(1-B)
+  \]
+- Question: What is $B$ for our SMC algorithm? 
+  
+  @@latex:\textcolor{red}{@@Answer: about 0.1!@@latex:}@@
+
+
+
+** Gains from Parallelization
+\includegraphics[width=4.5in]{static/amdahls_law}
+
+
+
+
 
 ** Application 1: Small Scale New Keynesian Model
    - We will take a look at the effect of various tuning choices on accuracy:
@@ -565,4 +629,177 @@ on $N_{run}=50$ runs of the SMC algorithm. $N_{\phi}=100$, $\lambda=2$, $N_{MH}=
 as a function of the number of particles $N$ computed over $N_{run}=50$ runs of the SMC sampler with
 $N_{blocks}=4$, $\lambda=2$, and $N_{MH}=1$.
 
-	
+* Generalized Data Tempering 	
+** Different Kinds of Tempering
+\begin{align}
+\mbox{\color{red}{Likelihood Tempering:} } p_n(Y|\theta) = [p(Y|\theta)]^{\phi_n}, \quad \phi_n \uparrow 1.
+\label{eq:tempering.lh}
+\end{align}
+- Can easily control how "close" consecutive posteriors are to one another. 
+
+- Need to pick $\phi_n$ (though we have some experience). 
+
+\begin{align}
+    \mbox{\color{blue}{Data Tempering:} } p_n(Y|\theta) = p(y_{1: \lfloor \phi_n T \rfloor}), \quad \phi_n \uparrow 1.
+    \label{eq:tempering.data}
+\end{align}
+- Arguably more natural for time series application.
+
+- Typically produces mores inefficient samples of $\theta$. 
+
+cite:Cai_2019 generalize /both/ likelihood and data tempering! 
+
+** Generalized Data Tempering 
+Imagine one has draws from the posterior 
+\begin{equation}
+\tilde{\pi}(\theta) \propto \tilde{p}(\tilde{Y}|\theta) p(\theta), 
+\end{equation}
+where the posterior $\tilde{\pi}(\theta)$ differs from the posterior $\pi(\theta)$ because of:
+1.  The sample ($Y$ versus $\tilde{Y}$), or,
+2.  the model ($p(Y|\theta)$ versus $\tilde{p}(\tilde{Y}|\theta)$), or,
+3.  of both
+
+Define the stage-$n$ likelihood function:
+\begin{equation}
+p_n(Y|\theta) = [p(Y|\theta)]^{\phi_n}[\tilde{p}(\tilde{Y}|\theta)]^{1-\phi_n}, \quad \phi_n \uparrow 1. 
+\label{eq:tempering.general}
+\end{equation}
+\color{red}{Generalized Data Tempering}: SMC that use this likelihood.
+
+** Some Comments
+   \[p_n(Y|\theta) = [p(Y|\theta)]^{\phi_n}[\tilde{p}(\tilde{Y}|\theta)]^{1-\phi_n} \]
+1. With $\tilde{p}(\cdot)=1$:  identical to likelihood tempering. 
+   #+latex:\\~
+2. With $\tilde{p}(\cdot) = p(\cdot)$,$Y=y_{1: \lfloor \phi_m T
+   \rfloor}$, and $\tilde{Y}=y_{1: \lfloor \phi_{m-1} T \rfloor}$,
+
+   generalizes data tempering by allowing for a gradual transition between $y_{1:   \lfloor \phi_{m-1} T \rfloor}$ and $y_{1: \lfloor \phi_m T
+   \rfloor}$. 
+   #+latex:\\~
+3. By allowing $Y$ to differ from $\tilde{Y}$: incorporate data revisions between time $\lfloor \phi_{m-1} T \rfloor$ and $\lfloor \phi_m T \rfloor$. 
+   #+latex:\\~
+4. $p(\cdot) \ne \tilde p(\cdot)$: one can transition between the posterior distribution of two models with the same parameters. 
+    
+
+** Evergreen Problem: How to Pick Tuning Parameters:
+   The SMC algorithm have a number of tuning parameters:
+   1. \textcolor{gray}{Number of Particles $N$: Chopin (2004) provides a CLT for Monte Carlo averages in $N$.}
+      #+latex:\\~
+   2. \textcolor{gray}{Hyperparameters determining mutation phase. }
+      #+latex:\\~
+   3. \(\mbox{\textcolor{blue}{The number of stages, $N_{\phi}$ and the schedule $\{\phi_n\}_{n=1}^N$ }}\).
+      #+latex:\\~\\
+      
+   This paper: choose $\phi_n$ *adaptively*, with no fixed $N_{\phi}$. 
+   #+latex:\\~\\
+   /Key idea:/ choose $\phi_n$ to target a desired level $\widehat{ESS}_n^*$.
+   #+latex: \\~\\
+   the closer the desired $\widehat{ESS}_n^*$ to the previous
+   $\widehat{ESS}_{n-1}$, the smaller the increment $\phi_n - \phi_{n-1}$
+
+** An implementation of this 
+
+  \begin{align*}
+    w^i(\phi) = [p(Y|\theta^i_{n-1})]^{\phi - \phi_{n-1}}, \quad
+    W^i(\phi) = \frac{w^i(\phi) W^i_{n-1}}{\frac{1}{N}\sum\limits_{i=1}^N w^i(\phi) W^i_{n-1}}, \\
+    \widehat{ESS}(\phi) = N \big/ \left( \frac{1}{N} \sum_{i=1}^N ({W}_n^i(\phi))^2\right)
+  \end{align*}
+  We will choose $\phi$ to target a desired level of ESS: 
+  \begin{align}
+      f(\phi) = \widehat{ESS}(\phi) - \alpha \widehat{ESS}_{n-1} = 0,
+      \label{eq:adaptive.alpha}
+  \end{align}
+  where $\alpha$ ($\le 1$) is a tuning constant: 
+  - everything about the tempering is summarized in $\alpha$
+  - closer $\alpha$ is to 1, the smaller the desired ESS reduction
+  - No fixed runtime!
+
+** Assessing $\alpha$.
+   In time-honored tradition of macroeconometrics, let's estimate the cite:Smets2007 model. 
+   #+latex:\\~\\
+   Compare the accuracy (and precision) of SMC algorithm versus the speed:
+   - \(\alpha\in \{0.9, 0.95, 0.97, 0.98\}\).
+   #+latex: \\~\\
+   - Fixed tempering schedule, $N_{\phi} = 500$, from cite:Herbst_2014.
+   #+latex: \\~\\
+   - Measure of accuracy: /std of log MDD/, computed across 50 runs of SMC algorithm. 
+   #+latex: \\~\\
+   - measure of speed: /average/ runtime across these runs
+
+
+** Trade-Off Between Runtime and Accuracy
+file:static/figure_1_StdVsTime.pdf
+
+
+** Tempering Schedules
+[[file:static/figure_2_tempering_scheds_all.pdf]]
+
+** Some Comments
+
+   - Time-accuracy curve is convex: 
+     - $\alpha = 0.90$ \(\rightarrow\) $\alpha = 0.95$ generates a drastic increase in accuracy, while doubling runtime.
+     - $\alpha = 0.97$ \(\rightarrow\) $\alpha = 0.98$ not much increase in accuracy, with substantial increase in runtime. 
+   - Fixed schedule is slightly inefficient. 
+     
+   #+latex:\\~\\
+   - All of the adaptive schedules are convex.
+   - Very little information (relative to fixed schedule) are added to likelihood function initially. 
+   - Towards the end, a lot of information is added. 
+
+** Illustration of Generalized Data Tempering
+   Scenario 1:
+   - partition the sample into two subsamples: $t=1,\ldots,T_1$ and
+     $t=T_1+1,\ldots,T$
+   - allow for data revisions by the
+     statistical agencies between periods $T_1+1$ and $T$.
+   - Assume that the second part of the sample becomes available
+     after the model has been estimated on the first part of the
+     sample using the data vintage available at the time,
+     $\tilde{y}_{1:T_1}$.
+   - In period $T$ we already have a swarm of particles $\{\theta_{T_1}^i, W_{T_1}^i\}_{i=1}^N$ that approximates the posterior
+     \[
+	p(\theta|\tilde{y}_{1:T_1}) \propto p(\tilde{y}_{1:T_1}|\theta) p(\theta).
+     \]
+
+** More Details
+
+     Let $Y=y_{1:T}$ and $\tilde{Y}=\tilde{y}_{1:T_1}$, define the stage $(n)$ posterior:
+     \[
+     \pi_{n}(\theta) = \frac{p(y_{1:T} | \theta)^{\phi_{n}} p(\tilde{y}_{1:T_1} | \theta)^{1-\phi_{n}} p(\theta) }{\int p(y_{1:T} | \theta)^{\phi_{n}} p(\tilde{y}_{1:T_1} | \theta)^{1-\phi_{n}}p(\theta) d\theta}. \label{eq:lttpost_2}
+     \]
+     The incremental weights are given by
+     \[
+     \tilde{w}^i_{n}(\theta) =  p(y_{1:T} | \theta)^{\phi_{n}-\phi_{n-1}} p(\tilde{y}_{1:T_1} | \theta)^{\phi_{n-1}-\phi_{n}}
+     \]
+     Define the *Conditional Marginal Data Density (CMDD)*
+     \begin{align}
+     \text{CMDD}_{2|1} =\prod_{n=1}^{N_\phi} \left( \frac{1}{N} \sum\limits_{i=1}^{N} \tilde{w}^i_{(n)} W^i_{(n-1)} \right)
+     \label{eq:CMDD1}
+     \end{align}
+     Thus:
+     \begin{align}
+     \text{CMDD}_{2|1} \approx \frac{\int p(y_{1:T} | \theta) p(\theta) d\theta}{\int  p(\tilde{y}_{1:T_1} | \theta)	 p(\theta) d\theta} = \frac{ p(y_{1:T})}{p(\tilde{y}_{1:T_1})}. \label{eq:CMDD2}
+     \end{align}
+
+
+
+** An experiment 
+   - We assume that the DSGE model has been estimated using likelihood
+     tempering based on the sample $y_{1:T_1}$, where $t=1$
+     corresponds to 1966:Q4 and $t=T_1$ corresponds to 2007:Q1.
+     #+latex:\\~
+   - The second sample, $y_{T_1+1:T}$, starts in 2007:Q2 and ends in 2016:Q3.
+     #+latex:\\~
+   - Compare two estimates of MDD
+     - *Full Sample Likelihood:* likelihood-tempering-based estimates using the full sample. 
+     - *GDT:* $\log p(y_{1:T_1}) + \log CMDD_{2|1}$. 
+       #+latex:\\~
+   - Arguably stacked against GDT!
+
+
+** Trade-Off Between Runtime and Accuracy
+[[file:static/figure_3_all_StdVsTime.pdf]]
+
+* References
+** References
+   [[bibliography:../../../ref/ref.bib]]

@@ -205,8 +205,8 @@
 		/Notes:/ Each panel depicts a Kernel estimate of the posterior
 		density (solid) and $\ln (N_{eff}) = \ln (N/\mbox{InEff}_N)$
 		(light gray hatched bars correspond to RWMH and solid bars
-		correspond to SMC) for various choices of $\tau$ equal to $0.025$,
-		$0.05$, $0.5$, $0.95$, and $0.975$.
+		correspond to SMC) for various choices of $\tau$ equal to 
+		$0.05$, $0.5$, and $0.95$.
 
 
 

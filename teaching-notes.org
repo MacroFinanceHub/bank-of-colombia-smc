@@ -194,6 +194,8 @@ Confidence "Set" for θ
       
       The answer is 1-q
       
+      what is the probability that is 
+      accepted?
       α(τ₂|τ₁) = min{1,[π₂/(1-q)]/[π₁/(1-q)]}
               = 1
 
@@ -211,6 +213,20 @@ Confidence "Set" for θ
               = min{1, π₁/π₂}
               = π₁ / π₂
               
+      what is the probability that the 
+      proposal is τ₂?
+      
+      the answer is 1-q
+      
+      what is the probability that 
+      is accepted?
+
+      α(τ₂|τ₂) = min{1, [π₂/q]/
+                       [π₂/q]}
+              = min{1, 1}
+              = 1
+
+
    What is the probability that I transition
    from τ₁ to τ₁? 
    
@@ -221,4 +237,55 @@ q       Probability(Propose τ₁|τ₁) x
 0       Probability that I reject
    
    q x 1 + (1-q) x 0 = q [=k11]
+   
+   k₁₁ is probability τ₁ | τ₁ = q
+   k₁₂ is probability τ₂ | τ₁ = 1-q
+   
+
+   
+* SMC   
+** Correction  
+   
+   IS weight: f(θ) / g(θ)
+   
+   f(θ) ∝ [p(Y|θ)]^{ϕₙ} p(θ)
+   g(θ) ∝ [p(Y|θ)]^{ϕₙ₋₁} p(θ)
+   
+   => f(θ) / g(θ) 
+      = [p(Y|θ)]^{ϕₙ-ϕₙ₋₁}
+      
+   but we can't forget previous 
+   weights 
+   
+   total weight 
+   incremental weight x previous weight
+   
+** Selection
+   sample from {θ_{n-1}ⁱ, Wₙⁱ}
+   
+   obtain {hat θₙⁱ, 1}
+   
+** Mutation   
+** Likelihood Evaluations   
+   Block Metropolis Hastings Algorithm
+   with a chain of length N
+   
+   num of likelihood evaluations = 
+   N × Nb 
+   
+   (Nb is the number of blocks)
+
+   100000x3 = 300000
+   
+   SMC
+   N - number of particles (like 5000)
+     Mutation
+     ———————
+     Nb number of blocks (3ish)
+     M number of MH steps (5)
+   N_ϕ (like 500) 
+   
+   5000 x 3 x 5 x 500
+   
+   ~42000000 
    

@@ -183,7 +183,7 @@ If $\theta^i$'s are draws from $g(\cdot)$ then
          \pi_n(\theta) = \frac{[p(Y|\theta)]^{\phi_n} p(\theta)}{\int [p(Y|\theta)]^{\phi_n} p(\theta) d\theta} = \frac{f_n(\theta)}{Z_n}.
       \]
       at least if $\phi_n$ is close to zero.
-- @@latex:{\color{blue}@@ Idea - Part 2:@@latex:}@@ We can try to turn a proposal densi@@ty for $\pi_n$ into a proposal density for $\pi_{n+1}$
+- @@latex:{\color{blue}@@ Idea - Part 2:@@latex:}@@ We can try to turn a proposal density for $\pi_n$ into a proposal density for $\pi_{n+1}$
       and iterate, letting $\phi_n \longrightarrow \phi_N = 1$.
 
 
@@ -571,7 +571,7 @@ on $N_{run}=50$ runs of the SMC algorithm. Each hair corresponds to a DSGE model
 \begin{center}	
 	\includegraphics[width=3in]{static/smc_nphi_vs_npart.pdf}
 \end{center}
-{\em Notes:} Plot of $\mathbb{V}[\bar{\theta}] / \mathbb{V}_\pi[\theta]$ for a
+/Notes:/ Plot of $\mathbb{V}[\bar{\theta}] / \mathbb{V}_\pi[\theta]$ for a
 specific configuration of the SMC algorithm. The inefficiency factors are computed based
 on $N_{run}=50$ runs of the SMC algorithm. $N_{blocks}=1$, $\lambda=2$, $N_{MH}=1$.
 ** Number of blocks $N_{blocks}$ in Mutation Step vs Number of Particles $N$

@@ -134,10 +134,10 @@ Relationship of ${\color{blue} \phi}$ and ${\color{red} \theta}$:
 - @@latex:{\color{blue}@@ Previously:@@latex:}@@ Modify MCMC algorithms to overcome weaknesses: blocking of parameters; tailoring of (mixture) proposal
         densities
         
-        - Kohn et al. (2010)
-        - Chib and Ramamurthy (2011)
-        - Curdia and Reis (2011)
-        - Herbst (2012)
+        - cite:Kohn2010
+        - cite:ChibR08
+        - cite:curdia_reis2010
+        - cite:Herbst2011a
         
 
 - @@latex:{\color{red}@@ Now, we use sequential Monte Carlo (SMC)@@latex:}@@ (more precisely, sequential importance sampling) instead:
@@ -149,8 +149,8 @@ Relationship of ${\color{blue} \phi}$ and ${\color{red} \theta}$:
 
 -  SMC = Importance Sampling on Steriods. We build on
         
-        - Theoretical work: Chopin (2004); Del Moral, Doucet, Jasra (2006)
-        - Applied work: Creal (2007); Durham and Geweke (2011, 2012)
+        - Theoretical work: cite:Chopin2004a; cite:DelMoraletal2006
+        - Applied work: cite:Creal2007; cite:DurhamGeweke2011
         
 
 
@@ -683,7 +683,7 @@ p_n(Y|\theta) = [p(Y|\theta)]^{\phi_n}[\tilde{p}(\tilde{Y}|\theta)]^{1-\phi_n}, 
 
 ** Evergreen Problem: How to Pick Tuning Parameters:
    The SMC algorithm have a number of tuning parameters:
-   1. \textcolor{gray}{Number of Particles $N$: Chopin (2004) provides a CLT for Monte Carlo averages in $N$.}
+   1. \textcolor{gray}{Number of Particles $N$: cite:Chopin2004a provides a CLT for Monte Carlo averages in $N$.}
       #+latex:\\~
    2. \textcolor{gray}{Hyperparameters determining mutation phase. }
       #+latex:\\~
@@ -802,4 +802,7 @@ file:static/figure_1_StdVsTime.pdf
 
 * References
 ** References
+   :PROPERTIES:
+   :BEAMER_OPT: fragile,allowframebreaks,label=
+   :END:   
    [[bibliography:../../../ref/ref.bib]]

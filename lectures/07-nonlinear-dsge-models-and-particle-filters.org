@@ -276,7 +276,7 @@
      \]
      This is the posterior of $s_t$ given $s_{t-1}^j$. Typically infeasible, but a 
      good benchmark.
-   - Approximately conditionally-optimal distributions: from linearize version
+   - Approximately conditionally-optimal distributions: from linearized version
      of DSGE model or approximate nonlinear filters.
    - Conditionally-linear models: do Kalman filter updating on a subvector of $s_t$. Example:
      \begin{eqnarray*}

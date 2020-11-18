@@ -290,3 +290,68 @@ q       Probability(Propose τ₁|τ₁) x
    ~42000000 
    
 * Particle Filters 
+* PMCMC
+#+begin_src jupyter-python :session mh
+  %matplotlib inline
+  import matplotlib.pyplot as plt
+  plt.style.use('seaborn-white')
+#+end_src  
+
+#+RESULTS:
+
+** Acceptance Probability  
+   How does using an estimate of the likelihood function change MH?
+   
+   Assume model y~N(θ,1) and we want to estimate θ
+   
+   We use a uniform prior and a RWMH algorithm.
+   
+   Assume θ₀ = 0 and θ* = 0.  What is α(θ*|θ₀)?
+   
+   min{1, p(Y|θ*) / p(Y|θ₀)} = 1!
+   
+   How do things change with particle filter estimate of p(Y|θ)??
+   
+   Let's assume hat p(Y|θ) = p(Y|θ) * U, U ~ Exp(1)
+   E[hat p(Y|θ)] = p(Y|θ), unbiased!!
+   
+   Acceptance probability is now: 
+   min{1, hat p(Y|θ*) / p(Y|θ₀)}
+   = min{1, p(Y|θ*) * U / p(Y|θ₀) }
+   = min{1, U}
+
+  What is the Expected value of alpha wrt to U?
+#+begin_src jupyter-python :session mh
+  import numpy as np
+  from scipy.stats import norm, expon
+
+  y = 0.25
+
+  logpost  = lambda theta: norm(loc=theta).pdf(y)
+  pflogpost = lambda theta, u: logpost(theta)*u
+  def alpha(theta1,theta0,u):
+      return min(pflogpost(theta1,u)/logpost(theta0),1)
+
+  u = expon().rvs(size=1000)
+  theta0 = 0
+  theta1 = 0
+
+  pfacceptance = np.array([alpha(theta0,theta1,ui) for ui in u])
+  print('        Exact Acpt: ', alpha(theta1, theta0, 1))
+  print('Average PMCMC Acpt: ', pfacceptance.mean())
+#+end_src
+
+#+RESULTS:
+:         Exact Acpt:  1.0
+: Average PMCMC Acpt:  0.6082022189129223
+   
+#+begin_src jupyter-python :session mh
+  xgrid = np.linspace(0,4) 
+  
+  fig, ax = plt.subplots()
+  ax.plot(xgrid, expon().pdf(xgrid))
+  fig.set_size_inches(14,8)
+#+end_src
+
+#+RESULTS:
+[[file:./.ob-jupyter/c758374c95e75fc4ae82120afd07e5ef1fcd8ea6.png]]

@@ -104,7 +104,7 @@
                 \spitem For this procedure to be valid, it needs to be the case that PF approximation is unbiased:
                 \[
                 \mathbb{E}[\hat{p}(Y_{1:T}|\theta)]
-                = \int g(Y_{1:T}|\theta,U_{1:T})p\big(U_{1:T} \big) d\theta
+                = \int g(Y_{1:T}|\theta,U_{1:T})p\big(U_{1:T} \big) dU_{1:T}
                 = p(Y_{1:T}|\theta).
                 \]
         \end{itemize}

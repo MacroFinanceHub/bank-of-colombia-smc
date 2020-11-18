@@ -37,11 +37,11 @@
    \label{eq:obs}
    y_t &=& 2 s_t + \sigma_u u_t, \quad u_t \sim N(0,1)
   \end{eqnarray}
+  Let's set $\rho = 0.8$ and $\sigma_e = 0.1$.
+
   Let's also assume that $s_0 \sim N(1,1)$.
   
-  $\rho = 0.8$.
-  
-  We'll examine various choices of $\sigma_{e}$. 
+  We'll examine various choices of $\sigma_{u}$. 
   
   We are going to go through one iteration of the particle filter,
   with $M = 1000$ particles.  First, we load some libraries.  
@@ -55,22 +55,28 @@
      from scipy.stats import norm
    #+END_SRC
 
+   #+RESULTS:
+
   Let's set up a particle approximation to the distribution
   \(p(s_0)\), by drawing \(M\) times from a Normal(1,1) distribution. 
   
    #+BEGIN_SRC jupyter-python :session nb :exports both :results raw drawer
      M = 1000
-     st_1 = norm.rvs(size=M, loc=1)
-     Wt_1 = np.ones((M))
+     st_0 = norm.rvs(size=M, loc=1)
+     Wt_0 = np.ones((M))
    #+END_SRC
+
+   #+RESULTS:
 
    How good is this approximation?  Let's check a histogram against
    the (known) true distribution. 
    #+BEGIN_SRC jupyter-python :session nb :exports both :results raw drawer
-     str1 = 'Filtered Mean [t-1]: %5.2f' % np.mean(st_1 * Wt_1)
+     str1 = 'Filtered Mean [t=0]: %5.2f' % np.mean(st_0 * Wt_0)
+     str2 = 'Filtered Sqrt [t=0]: %5.2f' % np.sqrt(np.mean( ((st_0 * Wt_0) - np.mean(st_0 * Wt_0))**2 ))
 
-     ax=p.Series(st_1).plot(kind='hist',density=True)#, linewidth=3)
+     ax=p.Series(st_0).plot(kind='hist',density=True)#, linewidth=3)
      ax.annotate(str1, (-7,0.3))
+     ax.annotate(str2, (-7,0.27))
      # the truth
      grid = np.linspace(-8,8,1000)
      ax.plot(grid, norm.pdf(grid,loc=1), linewidth=3, color='black')
@@ -78,7 +84,7 @@
    #+END_SRC
 
    #+RESULTS:
-   [[file:./.ob-jupyter/fcdc447b4a6c80a5b24a2b43e2bdff9a886d7561.png]]
+   [[file:./.ob-jupyter/01dfb5c2f09660ddb550e38f02c352f725ddd8f9.png]]
 
 ** Forecasting $s_1$
    Next, we need to generate draws from \(s_1|s_{0}^j\) for \(j =
@@ -91,22 +97,25 @@
    #+BEGIN_SRC jupyter-python :session nb  :exports results :results raw drawer
      # bootstrap
      rho, sigeps = 0.8, 0.1
-     st = rho * st_1 + sigeps * norm.rvs(size=M)
+     st = rho * st_0 + sigeps * norm.rvs(size=M)
+
+     str1 = 'Forecast Mean [t=1]: %5.2f' % np.mean(st * Wt_0)
+     str2 = 'Forecast Std  [t=1]: %5.2f' % np.sqrt(np.mean( (st * Wt_0 - np.mean(st * Wt_0))**2 ))
 
      ax=p.Series(st).plot(kind='hist', density=True)
 
-     true_loc = rho * 1 + sigeps * 0
-     true_sig = rho**2 * 1 + sigeps**2 * 1
+     ax.annotate(str1, (-7.6,0.3))
+     ax.annotate(str2, (-7.6,0.27))
 
-     ax.plot(grid, norm.pdf(grid,loc=true_loc, scale=np.sqrt(true_sig)), linewidth=3, color='black')
-     ax.legend(['truth', 'particles'])
+     true_loc = rho * 1 + sigeps * 0
+     true_sig = np.sqrt(rho**2 * 1 + sigeps**2 * 1)
+
+     ax.plot(grid, norm.pdf(grid,loc=true_loc, scale=true_sig), linewidth=3, color='black')
+     ax.legend(['truth', 'particles']);
    #+END_SRC
 
    #+RESULTS:
-   :RESULTS:
-   : <matplotlib.legend.Legend at 0x7fd60d013d68>
-   [[file:./.ob-jupyter/9e5a1b8b3a2dc12e046d58309b4bc9c6c3860000.png]]
-   :END:
+   [[file:./.ob-jupyter/55a52487dfcf4a94bb6e12a3e0a61c61c40c771e.png]]
 
 
 ** Updating $s_1|y_1$
@@ -130,7 +139,7 @@
      # yt = 2 * st + sigu * ut (ut ~ N(0,1))
      sigu = 0.3
      predyt = 2 * st 
-     ax = p.Series(predyt).plot(kind='hist',normed=True,bins=20)
+     ax = p.Series(predyt).plot(kind='hist',density=True,bins=20)
 
      # the true yt
      yt = 0.2
@@ -141,17 +150,11 @@
      ax.plot(grid,norm.pdf(grid,loc=yt, scale=0.5), color='darkgrey',linestyle='dashed')
      ax.set_xlim(-2,4)
      ax.set_ylim(0,.5)
-     ax.legend(['truth',r'$\sigma_u=0.05$',r'$\sigma_u=0.3$', r'$\sigma_u=0.5$','particles'])
+     ax.legend(['truth',r'$\sigma_u=0.05$',r'$\sigma_u=0.3$', r'$\sigma_u=0.5$','particles']);
    #+END_SRC
 
    #+RESULTS:
-   :RESULTS:
-   : /home/eherbst/anaconda3/lib/python3.6/site-packages/pandas/plotting/_matplotlib/hist.py:62: MatplotlibDeprecationWarning: 
-   : The 'normed' kwarg was deprecated in Matplotlib 2.1 and will be removed in 3.1. Use 'density' instead.
-   :   n, bins, patches = ax.hist(y, bins=bins, bottom=bottom, **kwds)
-   : <matplotlib.legend.Legend at 0x7fd60cb98b70>
-   [[file:./.ob-jupyter/cba441aa8b84ce032fc6d3e75f5a63ad79480d32.png]]
-   :END:
+   [[file:./.ob-jupyter/eff799a8f05ab7189001e4529902c16dce62c834.png]]
 
 ** Updated $s_1, \sigma_u = 0.3$
    #+BEGIN_SRC jupyter-python :session nb :exports results :results raw drawer
@@ -162,7 +165,7 @@
      Wt = wt_tilde * Wt_1
      Wt = Wt / np.mean(Wt)
      str1 = 'Effective Number of Part: %5.2f' % (M/np.mean(Wt**2))
-     str2 = 'Filtered Mean s[t]: %5.2f' % np.mean(st * Wt)
+     str2 = 'Filtered Mean s[t=1]: %5.2f' % np.mean(st * Wt)
      str3 = 'True mean %5.2f:' % (yt/2)
 
      # resampling 
@@ -170,7 +173,7 @@
      st_update = np.repeat(st,inds)
 
      # plot density
-     ax = p.Series(st_update).plot(kind='hist', normed=True)
+     ax = p.Series(st_update).plot(kind='hist', density=True)
      ax.plot(grid, norm.pdf(grid, loc=yt/2, scale=sigu), color='black', linewidth=3)
      ax.legend(['truth','particles'])
      ax.set_xlim(-2,4)
@@ -178,7 +181,7 @@
    #+END_SRC
 
    #+RESULTS:
-   [[file:./.ob-jupyter/b03bd61b952e1b0d6ec2a0324a0a3513bdb76237.png]]
+   [[file:./.ob-jupyter/8fa207a0e52fe353f7958b7421096c36d3a21291.png]]
 
 ** Updated $s_1, \sigma_u = 0.5$
    #+BEGIN_SRC jupyter-python :session nb  :exports results :results raw drawer
@@ -197,7 +200,7 @@
      st_update = np.repeat(st,inds)
 
      # plot density
-     ax = p.Series(st_update).plot(kind='hist', normed=True)
+     ax = p.Series(st_update).plot(kind='hist', density=True)
      ax.plot(grid, norm.pdf(grid, loc=yt/2, scale=sigu), color='black', linewidth=3)
      ax.legend(['truth','particles'])
      ax.set_xlim(-2,4)
@@ -205,7 +208,7 @@
    #+END_SRC
 
    #+RESULTS:
-   [[file:./.ob-jupyter/2689b44471facb373ab644ead5e491420ecf1652.png]]
+   [[file:./.ob-jupyter/cb2941156d76dc7926421bc9b90efd529161dd63.png]]
 
 ** Updated $s_1, \sigma_u = 0.05$
    #+BEGIN_SRC jupyter-python :session nb  :exports results :results raw drawer
@@ -224,7 +227,7 @@
      st_update = np.repeat(st,inds)
 
      # plot density
-     ax = p.Series(st_update).plot(kind='hist', normed=True)
+     ax = p.Series(st_update).plot(kind='hist', density=True)
      ax.plot(grid, norm.pdf(grid, loc=yt/2, scale=sigu), color='black', linewidth=3)
      ax.legend(['truth','particles'])
      ax.set_xlim(-0.5,0.5)
@@ -232,6 +235,6 @@
    #+END_SRC
 
    #+RESULTS:
-   [[file:./.ob-jupyter/c5189b08e5873603b798909fff7737f19da0ffc2.png]]
+   [[file:./.ob-jupyter/5851deb946207d124744b0f5341b5ec4db22fdcb.png]]
 
 

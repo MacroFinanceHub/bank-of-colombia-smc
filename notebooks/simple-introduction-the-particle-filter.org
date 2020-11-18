@@ -162,7 +162,7 @@
 
      wt_tilde = 1/ sigu * np.exp(-0.5 * (yt - 2*st)**2/sigu)
 
-     Wt = wt_tilde * Wt_1
+     Wt = wt_tilde * Wt_0
      Wt = Wt / np.mean(Wt)
      str1 = 'Effective Number of Part: %5.2f' % (M/np.mean(Wt**2))
      str2 = 'Filtered Mean s[t=1]: %5.2f' % np.mean(st * Wt)
@@ -189,7 +189,7 @@
 
      wt_tilde = 1/ sigu * np.exp(-0.5 * (yt - 2*st)**2/sigu)
 
-     Wt = wt_tilde * Wt_1
+     Wt = wt_tilde * Wt_0
      Wt = Wt / np.mean(Wt)
      str1 = 'Effective Number of Part: %5.2f' % (M/np.mean(Wt**2))
      str2 = 'Filtered Mean s[t]: %5.2f' % np.mean(st * Wt)
@@ -216,7 +216,7 @@
 
      wt_tilde = 1/ sigu * np.exp(-0.5 * (yt - 2*st)**2/sigu)
 
-     Wt = wt_tilde * Wt_1
+     Wt = wt_tilde * Wt_0
      Wt = Wt / np.mean(Wt)
      str1 = 'Effective Number of Part: %5.2f' % (M/np.mean(Wt**2))
      str2 = 'Filtered Mean s[t]: %5.2f' % np.mean(st * Wt)

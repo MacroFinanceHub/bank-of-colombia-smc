@@ -1,0 +1,462 @@
+#+TITLE: Estimating A Nonlinear DSGE: The Empirical Implications of the ZLB
+#+DATE: \today
+#+HUGO_BASE_DIR: /home/eherbst/Dropbox/www/
+#+HUGO_SECTION: teaching/bank-of-colombia-smc/lectures
+#+hugo_custom_front_matter: :math true
+#+hugo_auto_set_lastmod: t
+#+MACRO: NEWLINE @@latex:\\~\\~@@ @@html:<br>@@ @@ascii:|@@
+#+OPTIONS: toc:nil H:2
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{helvet}
+#+LaTEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \bibliographystyle{ecta}
+#+LaTEX_HEADER: \beamertemplatenavigationsymbolsempty
+#+LaTeX_HEADER: \usepackage{bibentry}
+#+LaTeX_HEADER: \nobibliography*
+#+LaTeX_HEADER: \makeatletter\renewcommand\bibentry[1]{\nocite{#1}{\frenchspacing\@nameuse{BR@r@#1\@extra@b@citeb}}}\makeatother
+#+LaTeX_HEADER: \newtheorem{algo}{Algorithm}
+#+LaTeX_CLASS: beamer
+
+* Introduction
+** This Paper
+  
+  - In US, policy instrument has been at or near the effective lower
+    bound (ELB) since the end of 2008.
+    {{{NEWLINE}}}
+  - @@latex:\textcolor{red}{@@Question: *What role did the ELB constraint play during and after the Great Recession (GR)?* @@latex:}@@
+    {{{NEWLINE}}}
+  - @@latex:\textcolor{blue}{@@Answer: *A sizeable one! ELB is responsible for:* @@latex:}@@
+    - Output: About 25 percent of contraction in GR.  Absent ELB, recovery would have occured 1 year earlier.
+    - Inflation: 0.3 ppt lower per year from 2008 - 2012.
+    - /Caution: Posterior mean estimates, substantial uncertainty./
+
+
+
+** How We Get These Numbers
+  
+  - Start with the *fully nonlinear* version of ``medium scale''
+    macroeconomic (DSGE) model along the lines of Christiano,
+    Eichenbaum, and Evans (2005) and Smets and Wouters (2007) with
+    @@latex:\textcolor{red}{@@ *parameters $\theta$* @@latex:}@@.
+    - Explicitly takes into account the effect of future uncertainty
+      about whether ELB will bind. 
+    - ELB systematically changes monqetary policy -- and thus behavior
+      of agents -- even if ELB is never hit!  See 2003-2004.
+      {{{NEWLINE}}}
+
+  - /Technical Contribution:/ estimating (using Bayesian methods) a
+    nonlinear DSGE model in which a lower bound is occasionally
+    binding.
+    - solved via projection method similar to Christiano and Fisher
+      (2000) and Judd et al. (2014) 
+    - estimated using a particle filter Markov Chain Monte Carlo
+      algorithm
+
+  # % - /Solving the model/: projection method similar to Christiano and Fisher (2000) and Judd et al. (2014).
+  # %   
+  # %   - Tedious, but easily parallelizable.
+  # %   - Delivers a nonlinear decision rule for \textcolor{blue}{states of
+  # %       the model $s_{t} ~~ [12x1]$} as a function of past states
+  # %     and \textcolor{green}{structural shocks $\epsilon_{t} ~~ [5x1]$}.
+  # %     \[
+  # %       s_{t} = \Phi(s_{t-1},\epsilon_{t};\theta)
+  # %     \]
+  # %   \end{itemize}
+
+
+
+** Solving the model
+  
+  - Model has twelve state variables and five exogenous shocks. 
+    {{{NEWLINE}}}
+  - Solve for a minimum state variable solution for decision rules
+    -- approximated via Chebyshev polynomials.
+    {{{NEWLINE}}}
+  - Use a fixed point algorithm [Judd et al. (2014)] to solve for the 96,390 coefficients that define our policy rules.
+    {{{NEWLINE}}}
+  - This fixed point algorithm can be parallelized on computer
+    cluster using a Message Passing Interface (MPI).
+    {{{NEWLINE}}}
+  - (Note: In practice, never visit the second (deflationary) steady state.)
+    {{{NEWLINE}}}
+
+
+
+** Gains to Parallelization of Model Solution
+
+  \begin{center}
+    \vspace*{-0.25in}
+    \hspace*{-0.25in}
+    \includegraphics[width=4.8in]{static/parallel_solution}
+  \end{center}
+
+
+** Estimating the Model
+  
+  - For a given parameter value, model solution delivers a
+    nonlinear decision rule for @@latex:\textcolor{blue}{@@states of the model
+    \(s_{t} ~~ [12x1]$} as a function of past states and
+    \textcolor{green}{structural shocks $\epsilon_{t} ~~ [5x1]\)@@latex:}@@.
+     \[
+       s_{t} = \Phi(s_{t-1},\epsilon_{t};\theta)
+     \]
+
+  - States include variables we can't observe (like
+    technology), so it's hard to estimate directly.
+    {{{NEWLINE}}}
+  - Link model to subset of observed variables, yields nonlinear state space system:
+    \begin{eqnarray*}
+      s_t &=& \Phi(s_{t-1}, \epsilon_t;\theta), \quad \epsilon_t \sim N(0, I), \\
+      y_t &=& \Psi(s_t, \epsilon_t;\theta) + u_t, \quad u_t \sim N(0, \Sigma_u)
+    \end{eqnarray*}
+  - /Observables/: Output, consumption, and investment growth.
+      GDP deflator.  3-month treasury bill.
+      {{{NEWLINE}}}
+      Sample: 1983:Q1 to 2014:Q1 (includes ZLB period!)
+
+
+
+** Estimating the model
+  
+  - Overall goal: obtained plausible values of parameters $\theta$ given the data $Y$.
+    {{{NEWLINE}}}
+  - Bayesian approach: use the posterior distribution
+    \[
+      p(\theta|Y) \propto \underbrace{p(Y|\theta)}_{likelihood} \underbrace{p(\theta)}_{prior}
+    \]
+  - *Problem 1:* Can't access this posterior distribution easily!
+    {{{NEWLINE}}}
+  - *Solution:* Use Markov chain Monte Carlo (MCMC) methods to build a sequence
+    $\{\theta^i\}_{i=1}^N$ which converges in distribution to posterior distribution.
+
+** Estimating the model, more
+  
+  - *Problem 2:* Can't even get likelihood in closed form!
+    {{{NEWLINE}}}
+  - *Solution:* Use a /particle filter/, as in
+    Fernandez-Villaverde and Rubio-Ramirez (2007), to get @@latex:\textcolor{red}{@@likelihood
+    estimate $\hat p(Y|\theta)$@@latex:}@@.
+    {{{NEWLINE}}}
+  - Andrieu, Doucet, and Holenstein (2010): MCMC based on
+    \[
+      \hat p(\theta|Y) \propto \hat p(Y|\theta) p(\theta). 
+    \]
+    Converges to posterior of interest.  See also Herbst and Schorfheide (2015).
+    {{{NEWLINE}}}
+  - Still, poor particle filter tuning can lead to inefficient estimates. 
+
+
+** Why is this a paper?
+  
+  For a given $\theta$ it's hard to solve the model and it takes a lot of time.
+  {{{NEWLINE}}}
+  Even given the model solution, likelihood estimation using the particle filter is slow and noisy.
+  {{{NEWLINE}}}
+  How did we manage it?
+  
+  - Parallelization of model solution algorithm.
+    {{{NEWLINE}}}
+  - ``Healthy'' measurement error.
+    {{{NEWLINE}}}
+  - Slight tweaks to bootstrap particle filter.
+    {{{NEWLINE}}}
+  - @@latex:\textcolor{red}{@@\bf Parallelization of resampling step of particle filter tailored to FRB's computer cluster.@@latex:}@@
+
+** Speed Gains from Parallelization, 100 lik. eval.                :noexport:
+  \vspace*{-0.25in}
+  \begin{center}
+    \includegraphics[width=4.8in]{static/parallel_pf}
+  \end{center}
+
+
+
+** What we're going to do
+  After estimating the model, w
+  have a set of draws from our posterior
+  $\{\theta^i\}_{i=1}^N, N=1000$.
+  {{{NEWLINE}}}
+  For each draw, generate (one draw) for smoothed states
+  $\{\hat s_{t|T}\}_{t=1}^T$ and shocks
+  $\{\hat \varepsilon_{t|T}\}_{t=1}^T$.  This collection is the
+  posterior distribution for states and shocks.
+  1. Assess how the distribution of states fits data (remember, measurement error!) 
+    {{{NEWLINE}}}
+  2. According to model, how likely was Great Recession?
+    {{{NEWLINE}}}
+  3. What accounts for the Great Recession?
+    {{{NEWLINE}}}
+  4. Using draws of shocks run counterfactual experiments: What was effect of ELB ?
+
+
+
+** Smoothed Estimates of Model Objects
+\begin{center}
+\label{fig:modelfit}
+\includegraphics[width=2.8in]{static/observable_fit}
+\end{center}
+
+
+** Model Fit
+- The model generally tracks the fluctuations
+  in output, consumption, and investment growth, and generates
+  contractions in these variables in all three of the recessions
+  included in our sample period.
+  {{{NEWLINE}}}
+- For the Great Recession, the model accounts for the sharp falls
+  in output and investment that occurred and modestly understates the
+  fall in consumption.
+  {{{NEWLINE}}}
+- From 2009 onwards, the notional interest rate is well below
+  zero. It falls to about minus 5.5 percent in the first half of 2009,
+  gradually moves up to about minus 1 percent at the end of 2012, and
+  then hovers around that level through 2014:Q4.
+
+
+** How Likely was ELB Spell?
+    - Simulate data from the model using parameter draws from the posterior distribution.  Compute statistics about frequency of ELB episodes.
+      {{{NEWLINE}}}
+    - On average, the model implies that there is a 7 percent probability of the nominal rate being at
+      the ELB.
+      {{{NEWLINE}}}
+    - In our sample, the corresponding statistic in the data is 17 percent.
+      {{{NEWLINE}}}
+    - But, our simulations show that the sampling distribution of this statistic has a long right tail.
+      {{{NEWLINE}}}
+    - $\implies$ it is difficult to estimate this probability with much precision. 
+
+
+** Distribution of the Probability of Hitting the Zero Lower Bound
+  \begin{center}
+    \includegraphics[width=3in]{static/zlbfreqhistpdf}
+  \end{center}
+
+
+** Question: What shocks drove the economy to the ELB?
+
+  Model has five candidates
+  {{{NEWLINE}}}
+  - @@latex:\textcolor{blue}{@@marginal efficiency of investment@@latex:}@@ shocks
+    (JPT 2011), disturbance to the financial sector's ability to
+    channel savings into investment;
+    {{{NEWLINE}}}
+  - @@latex:\textcolor{blue}{@@risk premium shocks@@latex:}@@ directly affects the spread
+    between the risk-free rate and the return on risky assets;
+    {{{NEWLINE}}}
+  - @@latex:\textcolor{blue}{@@Total factor productivity@@latex:}@@: technology shock;
+    {{{NEWLINE}}}
+  - Government spending shocks; 
+    {{{NEWLINE}}}
+  - and monetary policy shocks.
+    {{{NEWLINE}}}
+
+
+
+** Shocks, continued
+  
+  - Look at standardized risk premium shock, standardized MEI shock, and technology shock from 2008-2013.
+    {{{NEWLINE}}}
+  - Also look at model-implied equity premium
+    \[
+      \frac{E_t R^k_{t+1}}{R_t} = \frac{ \tilde{r}^k_{t+1} + q_{t+1} (1-\delta) }{R_t q_t},
+    \]
+    \(\tilde r^k_{t+1} = \) user cost of capital.
+    {{{NEWLINE}}}
+  - Express technology as deviation from its 2008:Q1 deterministic growth path.
+    {{{NEWLINE}}}
+  - Compare to measures found in elsewhere in literature. 
+
+
+
+** Shocks over the Great Recession and beyond
+  \begin{center}
+    \includegraphics[width=4.0in]{static/shocks_combo}
+  \end{center}
+
+
+** Which shocks were the most important?
+
+  
+  - It's hard to do a variance decomposition with the nonlinear
+    mode -- Let's do something a bit easier instead.
+    {{{NEWLINE}}}
+  - Starting in 2007:Q4, we take the estimated state as an initial
+    value, and simulate the economy forward feeding in the smoothed
+    values of one of the shock processes, assuming that the values
+    of the other shocks are set to zero.
+    {{{NEWLINE}}}
+  - Look at differences in trajectories of model-implied
+
+
+
+** Shock Contributions
+  \begin{center}
+    \includegraphics[width=2.8in]{static/drivers_of_gr2}
+  \end{center}
+
+
+** Contributions to Great Recession
+  
+  - The large contraction in output, consumption and investment
+    growth is mostly explained by the risk premium shock.
+    {{{NEWLINE}}}
+  - This shock also generates a somewhat larger fall in inflation
+    than under the baseline path.
+    {{{NEWLINE}}}
+  - These disinflationary effects are offset by the upward
+    pressure on inflation induced by the fall in the level of
+    technology.
+    {{{NEWLINE}}}
+  - The risk premium shock pushes the notional interest rate well
+    below zero (to about -5.5 percent).
+    {{{NEWLINE}}}
+  - A decline in the MEI shock in 2011 contributes to the nominal
+    interest rate remaining at the ZLB in 2011 and 2012.
+
+
+
+** How Much Did The ELB Matter?
+
+  - Use joint posterior distribution of (smoothed) structural shocks and parameters. 
+    {{{NEWLINE}}}
+  - Feed these shocks into the model without effective lower bound
+    on interest rate.
+    {{{NEWLINE}}}
+  - Look at difference between actual outcomes and counterfactual ones.
+    {{{NEWLINE}}}
+
+
+** Mean Estimates (Please forgive the lack of uncertainty bands!)
+  \begin{center}
+    \hspace*{-0.25in}
+    \includegraphics[width=4.8in]{static/effect_of_zlb_levels}
+  \end{center}
+
+
+** ELB was significant
+  
+    - With ELB, in 2009:Q2 output was about 6 percent below its level in
+      2007:Q4.
+      {{{NEWLINE}}}
+    - Without ELB, output would have fallen by only 4.5 percent.
+      {{{NEWLINE}}}
+    - $\implies$ 25 percent of output drop in 2009 due to ELB.
+      {{{NEWLINE}}}
+    - $68$ percent interval covers values between 6 to 46 percent.
+      {{{NEWLINE}}}
+    - At mean estimates, average output was 1.2 percent below
+      counterfactual through 2013.
+      {{{NEWLINE}}}
+    - Inflation would have been 0.3 pct points, higher on average through 2012. 
+
+
+** Notional Interest Rate, Plus Differences in Y, C, and I
+  \vspace*{-0.25in}
+  \begin{center}
+    \hspace*{-0.25in}
+    \includegraphics[width=4.6in]{static/effect_of_zlb}
+  \end{center}
+
+
+
+** More Counterfactuals
+  
+  - *The 2003-2004 deflationary scare*: Policy rate doesn't hit the ELB, but comes close.
+     #+begin_quote
+      \textit{``.. [W]e face new challenges in maintaining price stability,
+        specifically to prevent inflation from falling too low...[T]here is an
+        especially pernicious, albeit remote, scenario in which inflation turns
+        negative...engendering a corrosive deflationary spiral..."} (Alan Greenspan
+     before the House Committee on Financial Services, July 15, 2003)
+    #+end_quote
+  - Does constraint make a difference? YES (a small one).
+
+
+
+** Effect of ELB, 2003-2004
+  \vspace*{-0.25in}
+  \begin{center}
+    \hspace*{-0.25in}
+    \includegraphics[width=4.6in]{static/effect_of_zlb_levels_2003}
+  \end{center}
+
+
+** Effect of ELB, 2003 - 2004
+  
+  - at the end of 2002, taking into the economy's current state
+    and the estimated policy rule, private sector agents believed
+    there was a 12 percent chance that the nominal interest rate would
+    fall to its lower bound during 2003.
+    {{{NEWLINE}}}
+  - ZLB binding imply higher future real policy rates $\implies$
+    scenarios are also characterized by downward shifts in the
+    distributions of outcomes in aggregate spending and output.
+    {{{NEWLINE}}}
+  - the estimated level of output is about 0.2 percent lower with ELB. 
+    {{{NEWLINE}}}
+  - uncertainty about the course of monetary policy can have a
+    tangible economic impact
+
+
+** Forward Guidance and the Estimated Policy Rule
+
+  
+    - In both the 2003 and during the GR, forward guidance about the
+      policy rate played a prominent role in FOMC communications.
+      {{{NEWLINE}}}
+    - FOMC, late 2008: ``weak economic conditions are likely to
+      warrant exceptionally low levels of the federal funds rate for
+      some time.''
+      {{{NEWLINE}}}
+    - Capture forward guidance through the state-contingent path
+      of rates implied by our estimated interest-rate rule.
+      {{{NEWLINE}}}
+    -  The presence of the lagged notional rate, in particular, is an
+      important element of a strategy that seeks to maintain future rates at
+      a low level.
+      {{{NEWLINE}}}
+    - What if policy had reacted to the lagged /actual/ rate?
+
+
+
+** Effect of Interest Rate Smoothing
+  \vspace*{-0.25in}
+  \begin{center}
+    \hspace*{-0.25in}
+    \includegraphics[width=4.6in]{static/mps}
+  \end{center}
+
+
+** Forward Guidance and the Estimated Policy Rule
+
+  
+  - Estimated rule is more accomodative than the alternative rule,
+    because agents known rule will remain at the ELB for longer and in
+    a wider set of circumstances.
+    {{{NEWLINE}}}
+  - under the estimated rule, private sector agent's beliefs the
+    probability that the nominal rate would `liftoff' next quarter is
+    always lower than under the alternative rule
+    {{{NEWLINE}}}
+  - Under both of these rules the nominal interest rate is
+    estimated to remain at the zero lower bound through the end of the
+    sample
+    {{{NEWLINE}}}
+  - the inclusion of the lagged notional rate captures the
+    forward-guidance language used by the FOMC at the time
+
+
+
+** Conclusion
+  We did:
+  
+  - We solved and estimated (using Bayesian techniques) a fully nonlinear DSGE with an occasionally binding constraint (ELB).
+  - Quantified the effect of the ELB -- it's big!
+    {{{NEWLINE}}}
+    More to do:
+    - Econometrics of nonlinear models.
+    - Nonlinear policy rules.
+    - Other unconventional policy.
+    
+
+
+[[bibliography:/home/eherbst/Dropbox/ref/ref.bib]]

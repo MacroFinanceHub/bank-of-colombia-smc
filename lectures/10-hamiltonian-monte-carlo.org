@@ -1,0 +1,598 @@
+#+TITLE: Advanced MCMC: Hamiltonian Monte Carlo
+#+DATE: \today
+#+HUGO_BASE_DIR: /home/eherbst/Dropbox/www/
+#+HUGO_SECTION: teaching/bank-of-colombia-smc/lectures
+#+hugo_custom_front_matter: :math true
+#+hugo_auto_set_lastmod: t
+#+MACRO: NEWLINE @@latex:\\~\\~@@ @@html:<br>@@ @@ascii:|@@
+#+OPTIONS: toc:nil H:2
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{helvet}
+#+LaTEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \bibliographystyle{ecta}
+#+LaTEX_HEADER: \beamertemplatenavigationsymbolsempty
+#+LaTeX_HEADER: \usepackage{bibentry}
+#+LaTeX_HEADER: \nobibliography*
+#+LaTeX_HEADER: \makeatletter\renewcommand\bibentry[1]{\nocite{#1}{\frenchspacing\@nameuse{BR@r@#1\@extra@b@citeb}}}\makeatother
+#+LaTeX_HEADER: \newtheorem{algo}{Algorithm}
+#+LaTeX_CLASS: beamer
+
+
+* Introduction
+  
+  
+** Hamilton Monte Carlo 
+   
+   We previously spoke about how much the efficacy of MCMC algorithms
+   depended on the shape of the posterior. 
+   {{{NEWLINE}}}
+   We're going to talk about posterior simulators that make that idea explicit.
+   {{{NEWLINE}}}
+   In particular, the Hamiltonian Monte Carlo sampler described in 
+   
+** Details    
+   
+   - Hamiltonian Monte Carlo adapts methods from the study of molecular
+     dynamics: /simulate the motion of molecules based on Newton's laws/.
+     {{{NEWLINE}}}
+   - The systems which describe the evolution of molecules over time exhibit so-called
+     /Hamiltonian dynamics/
+     {{{NEWLINE}}}
+   - The state of the system at any point in
+     time is summarized by a pair $(\theta, p)$.  $\theta$ is the location
+     of the molecule, while $p$ gives its momentum (mass times velocity).
+     
+** Some Math      
+   The evolution $\theta$ and $p$ is governed by set of differential
+   equations.  These differential equations are determined by the
+   /Hamiltonian/, $H(\theta,p)$:
+   \begin{eqnarray}
+      H(\theta,p) = \mbox{Kinetic Energy } + \mbox{Potential Energy}.
+   \end{eqnarray}
+   In physical systems, potential and kinetic energy are obviously
+   instrinsic features of the environment.
+   {{{NEWLINE}}}
+   Our world:
+   - the potential energy will be pinned down by the density $\pi(\theta)$ 
+   - The kinetic energy $p$ is unrestricted, look at different kinds
+     
+** Explicit Formulation of Hamiltonian      
+   \begin{eqnarray}
+     H(\theta,p) &=& -\log\pi(p|\theta) - \log\pi(\theta). \nonumber \\
+     &=& K(p,\theta) + V(\theta) \nonumber 
+   \end{eqnarray}
+   Then the joint density of $(\theta,p)$ is given by $e^{-H(\theta,p)}$
+   {{{NEWLINE}}}
+   As mentioned above, the $\theta,p$ evolve over time according to the Hamiltonian equations:
+   \begin{eqnarray}
+      \frac{d\theta}{dt} &=& \frac{\partial H}{\partial p} = \frac{\partial K}{\partial p} \\
+      \frac{dp}{dt} &=& -\frac{\partial H}{\partial \theta} = -\frac{\partial K}{\partial \theta}  -\frac{\partial V}{\partial \theta}    
+   \end{eqnarray}
+   Note that $-\partial V/\partial \theta = \nabla \log \pi(\theta)$, the
+   gradient of the log of the target density.
+   
+** A proposal distribution
+   Consider now the mapping $Q_{\bar t}(p,\theta) = (p(\bar t), \theta(\bar t))$, the mapping of
+   the Hamiltonian for initial state $(p, \theta)$ at time $t = \bar t$.
+   {{{NEWLINE}}}
+   The basic idea is to use this as a proposal distribution in an
+   Metropolis-Hastings chain which targets $e^{-H(p, \theta)}$. 
+   {{{NEWLINE}}}
+
+
+** Some Facts About Q
+   - $Q_{\bar t}(p, \theta)$ is deterministic and one-to-one.  So
+     $Q$ has an inverse.  Neal makes the point that when
+     $K(p) = K(-p)$, the inverse can be obtained via $-Q_{\bar t}(-p, \theta)$.
+   - Prior to approximation $H(p, \theta) = H(Q_{\bar t}(p, \theta))$, so the proposal is always
+     accepted, for any $\bar t$.  This is because of the principal of the
+     conservation of energy (again, high school physics.)  In 
+     implementation, the discretization necessary to solve the ODEs in a
+     general setting means $H(p,\theta)$ will not necessarily be constant.
+   - The jacobian of transformation associated with $Q_{\bar t}(p, \theta) = 1$. 
+   
+** Some Intuition
+   The Hamiltonian Monte Carlo generates a Markov chain for the pair $(\theta^i,p^i)$, $i=1,\ldots,N$. 
+   {{{NEWLINE}}}
+   Start with the case in which $\pi(p|\theta)$ does not depend on $\theta$. 
+   Thus,
+   \[
+      H(\theta,p) = - \log \pi(p) - \log \pi(\theta).
+   \]
+   The Hamiltonian equations describe the evolution of $\theta$ and $p$ subject to the constraint 
+   that $H(\theta,p)$ (the sum of kinetic and potential energy) stays constant. 
+   - if $\pi(p^i) > \pi(p^{i-1})$, it has to be the case that $\pi(\theta^i) < \pi(\theta^{i-1})$. 
+     
+   - One way of thinking about this relationship is that $p^i$ determines the level of the posterior contour from which we 
+     are sampling and $\theta^i$ is the location on the contour. 
+     
+   - As the algorithm iterates over $i$ we are first changing the level of the contour and then we adjust $\theta^i$.
+
+* Example
+** An Example 
+   
+   Suppose that $\pi(\theta)$ corresponds to a $N(\mu,\sigma^2)$. Thus,
+   \[
+    \log \pi(\theta) = - \frac{1}{2} \ln (2 \pi \sigma^2) - \frac{1}{2 \sigma^2} (\theta - \mu)^2.
+   \]
+   Suppose we would generate the sequence $\theta^i$ by direct sampling. Then the level of the log posterior 
+   density would vary according to
+   \[
+    \log \pi(\theta^i) = - \frac{1}{2} \ln (2 \pi \sigma^2) - \frac{1}{2 \sigma^2} (\theta^i - \mu)^2
+   \]
+   with
+   \begin{eqnarray*}
+      \mathbb{E}[\log \pi(\theta^i) ]  &=& - \frac{1}{2} \ln (2 \pi \sigma^2) - \frac{1}{2} \\
+      \mathbb{V}[\log \pi(\theta^i) ]  &=& \frac{1}{2}
+   \end{eqnarray*}
+
+** Example, Continued    
+   
+   Thus, if $\theta^i$ is generated by direct sampling, we should
+   observe that the draws are $iid$ and that the variance of the log
+   density is $1/2$.
+   {{{NEWLINE}}}
+   In the algorithm below, we will generate $p^i$ by direct sampling from $\pi(p)$, which we set to a $N(0,M)$,
+   where $M = \mathbb{V}_\pi[\theta]^{-1} = \sigma^{-2}$. 
+   {{{NEWLINE}}}
+   Note that in this simplified setting, the choice of $M$ only affects
+   the level 
+   \[
+      \mathbb{E}[ \log \pi(p^i)] = \frac{1}{2} \ln (2 \pi \sigma^2) - \frac{1}{2},
+   \]
+   but not the variance in the fluctuations around this level.
+
+** Example, Continued    
+   
+   We are now in a position to solve the Hamiltonian equations, which take the form:
+   \begin{eqnarray*}
+     \dot{\theta} &=& \frac{1}{M} p \\
+     \dot{p}      &=& -\frac{1}{\sigma^2}(\theta - \mu)
+   \end{eqnarray*}
+   It can be verified that the solution to this system of differential equations
+   takes the form
+   \begin{eqnarray*}
+     \theta(t) &=& \mu + \rho \cos \big(\alpha + t/\sqrt{\sigma^2 M} \big) \\
+     p(t)      &=& - \rho \frac{\sqrt{M}}{\sigma} \sin \big(\alpha + t/\sqrt{\sigma^2 M} \big).
+   \end{eqnarray*}
+
+** Example, Continued    
+   
+   Here the parameters $(\rho,\alpha)$ are determined by the initial conditions:
+   \[
+       \theta(0) = \mu + \rho \cos(\alpha), \quad p(0) = -\rho \frac{\sqrt{M}}{\sigma} \sin(\alpha),
+   \]
+   which leads to 
+   \[
+      \rho = -p(0) \frac{\sigma}{\sqrt{M}} \frac{1}{\sin \alpha}, \quad
+      \alpha = \mbox{arctan} \left[ - \frac{p(0)/\sqrt{M}}{(\theta(0)-\mu)/\sigma} \right].
+   \]
+
+** Example, Continued    
+   
+   We can now specify the function $Q_{\bar t}(p, \theta)$. Using the fact that
+   \begin{eqnarray*}
+      \cos(x+y) &=& \cos x \cos y - \sin x \sin y \\
+      \sin(x+y) &=& \sin x \cos y + \cos x \sin y,
+   \end{eqnarray*}
+   we obtain
+   \begin{eqnarray*}
+     \theta(t) - \mu &=& \rho \cos(\alpha) \cos(t/\sqrt{\sigma^2 M}) - \rho \sin (\alpha) \sin (t/\sqrt{\sigma^2 M}) \\
+               &=&  (\theta(0) - \mu) \cos(t/\sqrt{\sigma^2 M}) + p(0) \frac{\sigma}{\sqrt{M}} \sin (t/\sqrt{\sigma^2 M}) \\
+     p(t)      &=& -\rho \frac{\sqrt{M}}{\sigma} \sin(\alpha) \cos(t/\sqrt{\sigma^2 M}) -\rho \frac{\sqrt{M}}{\sigma} \cos(\alpha) \sin(t/\sqrt{\sigma^2 M}) \\
+               &=& p(0) \cos(t/\sqrt{\sigma^2 M}) - (\theta(0)-\mu) \frac{\sqrt{M}}{\sigma} \sin(t/\sqrt{\sigma^2 M}).
+   \end{eqnarray*}
+
+** Example, Continued
+   In matrix form, the equations can be written as
+   \[
+     \hspace{-0.2in}
+     \left[ \begin{array}{c} \theta(t) - \mu \\ p(t) \end{array} \right]
+     = \left[ \begin{array}{cc} \cos(t/\sqrt{\sigma^2 M}) & \frac{\sigma}{\sqrt{M}} \sin (t/\sqrt{\sigma^2 M}) \\        -\frac{\sqrt{M}}{\sigma} \sin(t/\sqrt{\sigma^2 M}) & \cos(t/\sqrt{\sigma^2 M}) \end{array}\right] 
+     \left[ \begin{array}{c} \theta(0) - \mu \\ p(0) \end{array} \right]
+   \]
+
+** Example, Continued
+   
+   It is now easy to see that the jacobian of transformation associated with $Q_{\bar t}(p, \theta) = 1$. Moreover,
+   #+begin_latex
+   \small
+   \begin{eqnarray*}
+    \lefteqn{\left[ \begin{array}{cc} \cos(t/\sqrt{\sigma^2 M}) & \frac{\sigma}{\sqrt{M}} \sin (t/\sqrt{\sigma^2 M}) \\         -\frac{\sqrt{M}}{\sigma} \sin(t/\sqrt{\sigma^2 M}) & \cos(t/\sqrt{\sigma^2 M}) \end{array}\right] 
+    	\left[ \begin{array}{c} \theta(t) - \mu \\ -p(t) \end{array} \right] } \\
+    &=&  \left[ \begin{array}{cc} \cos(t/\sqrt{\sigma^2 M}) & \frac{\sigma}{\sqrt{M}} \sin (t/\sqrt{\sigma^2 M}) \\        -\frac{\sqrt{M}}{\sigma} \sin(t/\sqrt{\sigma^2 M}) & \cos(t/\sqrt{\sigma^2 M}) \end{array}\right] \\
+    &&	\times \left[ \begin{array}{cc} \cos(t/\sqrt{\sigma^2 M}) & \frac{\sigma}{\sqrt{M}} \sin (t/\sqrt{\sigma^2 M}) \\        \frac{\sqrt{M}}{\sigma} \sin(t/\sqrt{\sigma^2 M}) & -\cos(t/\sqrt{\sigma^2 M}) \end{array}\right] 
+    	\left[ \begin{array}{c} \theta(0) - \mu \\ p(0) \end{array} \right] \\
+    &=& \left[ \begin{array}{cc} 1 & 0 \\ 0 & -1 \end{array} \right] 	\left[ \begin{array}{c} \theta(0) - \mu \\ p(0) \end{array} \right].
+   \end{eqnarray*}
+   #+end_latex
+
+** Example, Continued
+   Given the solution to the Hamiltonian equation, we can verify that $H(\theta,p)$ stays indeed constant over time:
+   \begin{eqnarray*}
+           H\big( \theta(t),p(t) \big) 
+           &=&  \frac{1}{2} \ln (2 \pi M) + \frac{1}{2 M} \rho^2 \frac{M}{\sigma^2} \sin^2(\cdot) 
+              + \frac{1}{2} \ln (2 \pi \sigma^2) + \frac{1}{2 \sigma^2} \rho^2 \cos^2(\cdot) \\
+           &=& \frac{1}{2}  \left( \ln (2 \pi M) + \frac{1}{2} \ln (2 \pi \sigma^2) + \frac{\rho^2}{\sigma^2}  \right).
+   \end{eqnarray*}
+   Note that the initial values enter the level of ``energy'' through the parameter $\rho$. 
+
+** The Algorithm    
+   The subsequent algorithm generates the proposal distribution using the Hamiltonian equations.
+   In particular, it will start from 
+   \[
+      \theta(0) = \theta^{i-1}, \quad p(0) \sim N(0,M).
+   \]
+   Using the Hamiltonian equations over a time interval $t$, we obtain (in slight abuse of notation)
+   \begin{eqnarray*}
+    \hspace{-0.2in}
+    \theta^* - \mu &=& \cos(t/\sqrt{\sigma^2 M}) (\theta^{i-1} - \mu) + \sigma \sin (t/\sqrt{\sigma^2 M}) N(0,1)\\
+    p^*            &=& -\frac{\sqrt{M}}{\sigma} \sin(t/\sqrt{\sigma^2 M}) (\theta^{i-1} - \mu) + \sqrt{M} \cos(t/\sqrt{\sigma^2 M}) \cdot N(0,1)
+   \end{eqnarray*}
+
+** The Chain 
+   
+   The acceptance probability for the proposed draw depends on the
+   Hamiltonian. But by construction, the dynamics of $\theta$ and $p$ are
+   such that the Hamiltonian is constant, meaning the draw is always
+   accepted. So, we obtain the following autoregressive law of motion:
+   \[
+      \theta^{i} - \mu = \cos(t/\sqrt{\sigma^2 M}) (\theta^{i-1} - \mu) + \sigma \sin (t/\sqrt{\sigma^2 M}) \epsilon^i, \quad \epsilon^i \sim N(0,1)
+   \]
+   Because $\sin^2 + \cos^2 = 1$, it is easy to see that the stationary
+   distribution of this AR(1) process is the target posterior
+   $N(\mu,\sigma^2)$. The persistence of the chain depends on the time
+   period $t$. When $t$ is set to 
+   \[
+      t^{iid} = \frac{\pi}{2} \sqrt{\sigma^2 M},
+    \]
+   the chain produces uncorrelated draws of $\theta$. 
+
+* Discretization   
+
+** Discretization  
+   To actual obtain (an approximate) $\hat Q_{\bar t}(p, \theta)$, Hamilton's equations are discretized in time.
+   {{{NEWLINE}}}
+   To discretize, pick a step size $\epsilon = \Delta t$.  Then applying $\bar t / \epsilon_t = L$ steps (assumed to be an integer) of the
+   discretized Hamiltonian obtains a draw from $\hat Q_{\bar t}(p, \theta)$.
+   {{{NEWLINE}}}
+   There are many ways approaches to discretize the ODEs!
+   {{{NEWLINE}}}
+   We're going to use the *leapfrog method* because it has nice
+   simulation properties and the resulting density maintains the
+   important statistical properties
+
+** The Leapfrog Simulator 
+   Under the assumption that
+   $p|\theta$ is normally distributed with mean $0$ and variance $M^{-1}$:
+   \begin{eqnarray}
+     \log\pi(p|\theta) \propto - \frac{p'M^{-1}p}{2},
+   \end{eqnarray}
+   $\partial K/\partial \theta = 0$ and
+   the calculations are considerably simplified.
+   /(But it's worth reiterating that $\pi(p|\theta)$ is choice.)/
+   Given $\theta(t)$ and $p(t)$, a
+   step of size $\epsilon$ is taken using the following three steps. 
+   \begin{eqnarray*}
+     p(t+\epsilon/2) &=& p(t) + \frac{\epsilon}{2}\nabla \log \pi(\theta(t)) \\
+     \theta(t+\epsilon) &=& \theta(t) + \epsilon M^{-1}p(t+\epsilon/2) \\
+     p(t+\epsilon) &=& p(t+\epsilon/2) + \frac{\epsilon}{2}\nabla \log \pi(\theta(t+\epsilon)).
+   \end{eqnarray*}
+
+** The Details
+   
+   This leads to the following algorithm (the user needs to specify $\epsilon$ and $L$):
+   {{{NEWLINE}}}
+    \begin{algo}{Modified Leapfrog Simulator,
+            	\label{algo:leapfrog}
+            	$\hat Q_{L\epsilon}(\cdot,\cdot)$.}  This algorithm takes as an
+            inputs $(\theta, p)$ and returns $(\theta^*, p^*)$, after
+            approximating Hamiltonion dynamics using step size $\epsilon$
+            for $L$ steps.
+            \begin{enumerate}
+            	\item For $l = 1, \ldots, L$. Set
+            	\begin{eqnarray*}
+            		&1.& p \leftarrow p + \epsilon \nabla \log \pi(\theta)/2 \\
+            		&2.& \theta \leftarrow \theta + \epsilon M^{-1} p \\
+            		&3.& p \leftarrow p + \epsilon \nabla \log \pi(\theta) / 2 
+            	\end{eqnarray*}
+            	\item  Return $\theta^* = \theta$ and $p^* = -p$.  (The negation is not a typo!)
+            \end{enumerate}
+    \end{algo}
+    
+** Back to the Example    
+   
+   For the example given above, we have
+   \begin{eqnarray}
+     \left[
+     \begin{array}{c}
+       \theta^* - \mu \\ p^*
+     \end{array}
+     \right] &=&
+     \left[
+     \begin{array}{cc}
+       1 & 0 \\ 0 & -1
+     \end{array}
+     \right] 
+   \left[\begin{matrix}1 - \frac{\epsilon^{2}}{2 M \sigma^{2}} & \frac{\epsilon}{M}\\- \frac{\epsilon}{\sigma^{2}} + \frac{\epsilon^{3}}{4 M \sigma^{4}} & 1 - \frac{\epsilon^{2}}{2 M \sigma^{2}}\end{matrix}\right]^L
+     \left[
+     \begin{array}{c}
+       \theta^{i-1} - \mu \\ \hat p
+     \end{array}
+     \right]                                                                             \end{eqnarray}
+   The stability of this system is determined by the eigenvalues $\lambda_1$ and $\lambda_2$, where 
+   \begin{eqnarray}
+   \lambda_1 &= \frac{2 M \sigma^{2} - \epsilon^{2}}{2 M \sigma^{2}} + \frac{\epsilon}{2 M \sigma^{2}} \sqrt{- 4 M \sigma^{2} + \epsilon^{2}}, \nonumber \\
+   \lambda_2 &= \frac{2 M \sigma^{2} - \epsilon^{2}}{2 M \sigma^{2}} - \frac{\epsilon}{2 M \sigma^{2}} \sqrt{- 4 M \sigma^{2} + \epsilon^{2}} \nonumber 
+   \end{eqnarray}
+
+** Example, Continued    
+   
+   *Case 1:* $\epsilon > \sqrt{4M\sigma^2}$. Then
+   \begin{eqnarray*}
+     \lambda_2 &=& 1 - \frac{\epsilon^2}{2M\sigma^2} - \frac{\epsilon}{4M\sigma^2}\sqrt{- 4 M \sigma^{2} + \epsilon^{2}} \\
+               &<& 1 - \frac{\epsilon^2}{2M\sigma^2} \\
+               &<& 1 - \frac{4M\sigma^2}{2M\sigma^2} \\
+               &<& -1    
+   \end{eqnarray*}
+   {{{NEWLINE}}}
+   *Case 2:* $\epsilon \le \sqrt{4M\sigma^2}$. Then the eigenvalues
+   are complex conjugates.  A quick calculation reveals that $|\lambda_i|
+   = 1$ for $i = 1,2$. So the system is stable.
+   
+** Remarks:
+   - It is clear from the above calculations that if the step size is
+     too big $(> 2\sqrt{M\sigma^2})$,  $|\lambda_2| > 1$, so the leapfrog
+     simulator will explode.
+     {{{NEWLINE}}}
+   - On the other hand, step size can't really be ``too small'' in
+     the sense that the system will be stable for any $\epsilon <
+     4\sqrt{M\sigma^2}$.
+     {{{NEWLINE}}}
+   - Setting $M = \sigma^{-2}$, is optimal in the sense that the
+     stability of the system is so no longer dependent on any features
+     of the posterior.
+     {{{NEWLINE}}}
+   - Finally, note that the number of steps, $L$, is irrelevant with
+     respect to the stability properties of the simulator.  
+
+* Acceptance Rates
+  
+** What is the right Acceptance Rates
+  For any Metropolis-style algorithm
+  for $x \sim \pi$ with proposal density $q(x^* | x)$, note the
+  expected (unbounded) acceptance probability is given by: 
+  \begin{eqnarray}
+  E\left[\frac{\pi(x^*)q(x|x^*)}{\pi(x)q(x^*|x)}\right]
+    &=&
+        \int\int\frac{\pi(x^*)q(x|x^*)}{\pi(x)q(x^*|x)}
+        q(x^*|x) \pi(x) dx dx^* \nonumber \\
+    &=& \int \pi(x^*)\left[\int q(x|x^*) dx\right]
+  dx^* \nonumber \\
+    &=& \int \pi(x^*)dx^*  \nonumber \\
+    &=& 1.    
+  \end{eqnarray}
+
+** Some Analytics
+   
+   Note that for both the Random Walk Metropolis-Hastings (RWMH) algorithm $(x = \theta)$ and the Hamiltonian Monte Carlo algorithm $(x = (\theta,p))$,
+   we have $q(x|x^*) = q(x^*|x)$.  This means we can deduce that
+   \begin{eqnarray}
+     \label{eq:pratio}
+     E\left[\frac{\pi(x^*)}{\pi(x)}\right] = 1.
+   \end{eqnarray}
+   If we write the posterior in the form, $\pi(x) = \exp(-f(x))/Z$, then using
+   (\ref{eq:pratio}), we deduce that
+   \begin{eqnarray}
+     \label{eq:pratio}
+     E\left[\exp\left\{-(f(x^*) - f(x))\right\}\right] = 1.
+   \end{eqnarray}
+   
+** Analytics, Continued    
+   
+   Defining $\Delta = f(x^*) - f(x)$ and using Jensen's inequality, we
+   have:
+   \begin{eqnarray}
+     \label{eq:delta}
+     E\left[\Delta\right] \ge 0.
+   \end{eqnarray}
+   In most interesting cases, the inequality is strict. Next, note also that $\alpha(x^*|x)$, the Metropolis-Hastings
+   acceptance probability is given by:
+   \begin{eqnarray}
+     \label{eq:alpha}
+     \alpha(x^*|x) = \min\left\{1,\exp(-\Delta)\right\}.
+   \end{eqnarray}
+
+
+** Analytics, Continued 
+   
+   The expected acceptance rate for an MH algorithm can be
+written as
+\tiny
+\begin{eqnarray}
+  \hspace{-2.4in}
+  \label{eq:avgacpt}
+  \bar \alpha &=& \int \alpha(x^* | x) q(x^*|x) \pi(x) dx^* dx
+                  \nonumber \\
+              &=& \int_{\Delta(x^*,x) < 0} \alpha(x^* | x) q(x^*|x) \pi(x) dx^* dx
+                  + \int_{\Delta(x^*,x) > 0} \alpha(x^* | x) q(x^*|x) \pi(x)
+                  dx^* dx\nonumber \\
+              &=& \int_{\Delta(x^*,x) < 0} \alpha(x^*| x) q(x^*|x) \pi(x) dx^* dx
+                  + \int_{\Delta(x^*,x) > 0} \alpha(x | x^*) q(x|x^*) \pi(x^*)
+                  dx^* dx\nonumber \\
+              &=& \int_{\Delta(x^*,x) < 0} \alpha(x^*| x) q(x^*|x) \pi(x) dx^* dx
+                  + \int_{\Delta(x,x^*) < 0} \alpha(x | x^*) q(x|x^*) \pi(x^*)
+                  dx^* dx\nonumber \\
+              &=& \int_{\Delta(x^*,x) < 0}  q(x^*|x) \pi(x) dx^* dx +
+                  \int_{\Delta(x,x^*) < 0} q(x|x^*) \pi(x^*)
+                  dx^* dx\nonumber \\
+              &=& 2 \times {\mathbb P}(\Delta < 0). 
+\end{eqnarray}
+
+** Properties of Delta 
+   In what follows, we first
+   derive a restriction on the relationship between the mean and variance
+   of $\Delta$.  If we assume the elements of $x$, $x_i$, are independent
+   we can write,
+   \begin{eqnarray}
+     \label{eq:f}
+     f(x) = \sum_{d=1}^D f_d(x_d) \mbox{ and } \Delta = \sum_{d=1}^D \Delta_d,
+   \end{eqnarray}
+   where $D$ is the size of x.  Taking a second-order expansion around
+   $\exp(-\Delta_d)$, we have:
+   \begin{eqnarray}
+     \exp(-\Delta_d) \approx  1 - \Delta_d + \Delta_d^2/2. 
+   \end{eqnarray}
+   Using (\ref{eq:f}), $E[\Delta_d] \approx E[\Delta^2_d]/2.$  This means
+   the mean of $\Delta_d$ is about half of the variance of $\Delta^2_d$.
+   If we further assume that the proposals are independent, this means
+   that $E[\Delta] \approx E[\Delta^2]/2$.  
+
+** Asymptotics    
+   write $\mu = E[\Delta]$,
+   \[
+   \Delta \sim N(\mu, 2\mu). 
+   \]
+   Using this, we can write:
+   \begin{eqnarray}
+     \label{eq:abar}
+     \bar \alpha &=& 2 \times {\mathbb P}(\Delta < 0) \nonumber \\
+                 &=& 2 \Phi\left(\frac{0 - \mu}{\sqrt{2\mu}}\right)
+                     \nonumber \\
+                 &=& 2 \Phi(-\sqrt{\mu/2}).
+   \end{eqnarray}
+   Finally, we use this to construct a (heuristic) cost of an
+   algorithm:
+   \begin{eqnarray}
+     \label{eq:cost}
+     \mbox {Cost of Alg.} &\propto& \mbox{Avg. Number of Proposals
+                                          Before Acceptance} \nonumber \\
+     &~& \times \mbox{ Proposal Steps to ``Independent'' Point} \nonumber
+     \\
+     &=& \frac{1}{\bar \alpha} \times \mbox{ Proposal Steps to ``Independent'' Point}
+   \end{eqnarray}
+
+
+** $\mu$ for RWMH.
+   Consider the RWMH applied
+   to a independent multivariate normal distribution of size $D$.  So
+   $x \sim N(0,I_D)$ and $q(x^*|x) \sim N(x,c^2 I_D)$. Then:
+   \[
+   E[\Delta] = E\left[\sum_{d=1}^D \Delta_d\right] = \sum_{d=1}^D E[\Delta_d] = \frac{c^2}{2}D.
+   \]
+   Informally, this probability is decreasing as $D$ increases, since the
+   expected difference $E[\Delta] \propto D$ with fixed $c$.  
+   {{{NEWLINE}}}
+   This means to maintain a given acceptance rate as $D$ increases, $c$ must shrink
+   at rate $D^{-1/2}$.    
+
+** RWMH Continued 
+   Finally for random walk processes, it is well
+   known that the number of steps needed to reach a ``nearly
+   independent'' point will be proportional to $c^{-2}$.  We can then
+   write the cost, $C_{RWMH}$, as:
+   \begin{eqnarray}
+     \label{eq:cost-rwmh}
+     C_{RWMH} = \frac{1}{2\Phi(-\sqrt{\mu/2})}\times \frac{1}{\mu}. 
+   \end{eqnarray}
+   This cost is minimized when $\mu = 2.83$, which implies as
+   $\bar\alpha = 0.234$, in accordance with well known results.
+
+** $\mu$ for HMC.
+   Now $f(\theta,p)$ can be written as:
+   \[
+   f(\theta, p) = \frac{\theta^2}{2} + \frac{p^2}{2}
+   \]
+   Applying /many/ leapfrog steps $L$ leads to:
+   \[
+   E[\Delta] \approx D\epsilon^4.
+   \]
+   This means that as $D$ increases, $\epsilon$ must shrink at rate
+   $D^{-1/4}$ in order to maintain a reasonable acceptance rate.  
+   {{{NEWLINE}}}
+   The number of leapfrog updates to reach a nearly independent point
+  will grow at rate $\epsilon$.  
+** HMC Acceptance Rate
+   Using the above relationship, $\mu
+     \propto \epsilon^{1/4}$.  Thus:
+   \begin{eqnarray}
+     \label{eq:cost-HMC}
+     C_{HMC} = \frac{1}{2\Phi(-\sqrt{\mu/2})}\times \frac{1}{\mu^{1/4}}. 
+   \end{eqnarray}
+   This cost is minimized when $\mu = 0.41$, which implies as
+   $\bar\alpha = 0.65$.  Hence, one should target an acceptance rate of
+   about 65%. 
+
+* MCMC 
+  
+** MCMC with (Euclidean) Hamiltonian Proposal.  
+   We now combine the components
+   to obtain a Hamiltonian Monte Carlo algorithm.
+   Our goal is to obtain draws from $\pi(\theta)$. To do so, we target the augmented distribution:
+   \[
+       \pi(\theta,p) = \pi(\theta)\underbrace{\pi(p|\theta)}_{\mathcal N(0, M).} = \exp\{-H(\theta,p)\}.
+   \]
+   Given $(\theta^{i-1}, p^{i-1})$, we apply two Markov transition
+   kernels in succession to get $(\theta^i, p^i)$.  The two-step process
+   first operates on $p$ and then $(\theta, p)$ jointly.
+
+** A Two Step Process
+  1. First, draw $\hat p \sim \mathcal N(0, M)$.  This draw is
+     always ``accepted'' because this in fact coincides with true
+     marginal distribution of $\pi(p|\theta)$. 
+  2. Second, given $(\theta^{i-1}, \hat p)$.  Draw
+     $(\theta^*, p^*)$ by applying the (approximate) Hamiltonian
+     mapping using the $\hat Q_{\bar t = L\epsilon}(\theta,p)$.  Note
+     that this is deterministic.  We use the leap frog method with a
+     twist. 
+
+Of course, in practice this is implemented in a one-step procedure.
+In fact, there is no need to store draws of $p$.
+
+In our applications, we should try to have $M$ approximate
+$\mathbb V_{\pi}[\theta]^{-1}$.  And, of course, we also need an initial
+$\theta$.
+
+** Some Details 
+An important thing to note about this proposal is that, 
+\[
+\hat Q_{L\epsilon}(\hat Q_{L\epsilon}(\theta^{i-1}, \hat p)) = (\theta^{i-1}, \hat p).
+\]
+In this sense the mapping is symmetric.  
+{{{NEWLINE}}}
+Moreover, the Jacobian
+associated with $Q_{L\epsilon}$ is 1.  The upshot of this is
+that we don't need to account for $Q_{L\epsilon}$ in the
+Metropolis-Hastings acceptance probability, which is given by:
+\begin{eqnarray}
+\label{eq:hmc-alpha}
+\alpha = \max\left\{1, \exp\left( H(\theta^{i-1}, \hat p)- H(\theta^*, p^*)\right)\right\} 
+       = \max\left\{1, \frac{\pi(\theta^*, p^*)}{\pi(\theta^{i-1}, \hat p)}\right\}.
+\end{eqnarray}
+Note that the Hamiltonian equations ensure that the ratio $\pi(\theta^*, p^*)/\pi(\theta^{i-1},\hat p)$, and therefore the acceptance ratio, is close to one. Because of the discretization, however, in the practical implementation the ratio is not equal to one. 
+
+* Example 
+** Example
+   
+   Consider the circular posterior density
+\[
+\pi(\theta) \propto \exp \bigg \{ -\frac{1}{2}\psi_n \big((\theta_1-1)^2 + (\theta_2-1)^2 -1  \big)
+^2 \bigg \}{\bf 1}\left\{\theta\in[-1,3]^2\right\}
+\]
+This means that:
+\[
+  \nabla \log \pi(\theta) = \bigg[- 2 \psi_n \left(\theta_{1} - 1\right) \left(\left(\theta_{1} - 1\right)^{2} + \left(\theta_{2} - 1\right)^{2} - 1\right), - 2 \psi_n \left(\theta_{2} - 1\right) \left(\left(\theta_{1} - 1\right)^{2} + \left(\theta_{2} - 1\right)^{2} - 1\right)\bigg].
+\]
+With $\psi_n = 1000$, the ``posterior'' covariance of this distribution is: 
+\begin{eqnarray*}
+\mathbb V_{\pi}[\theta] = \left[\begin{array}{cc} 0.5 & 0 \\ 0 & 0.5 \end{array}\right].
+\end{eqnarray*}
+
+** Let $N = 50000, L = 10, \epsilon = 0.01$. 
+
+  \begin{center}
+     \includegraphics[width=6in]{static/results}
+  \end{center}
+
+   
+[[bibliography:/home/eherbst/Dropbox/ref/ref.bib]]

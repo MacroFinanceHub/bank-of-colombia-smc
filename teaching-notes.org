@@ -355,3 +355,18 @@ q       Probability(Propose τ₁|τ₁) x
 
 #+RESULTS:
 [[file:./.ob-jupyter/c758374c95e75fc4ae82120afd07e5ef1fcd8ea6.png]]
+
+* Empirical Implications of the ZLB
+  
+  Interest Rate Rule:
+  
+  Rt = max{0, Rt*}
+  
+  Rₜ* = ρ Rₜ₋₁* + (1-ρ)*(ψ_π πₜ + ψ_y yₜ) + εₜ
+  
+  Rₜ* = ρ Rₜ₋₁ + (1-ρ)*(ψ_π πₜ + ψ_y yₜ) + εₜ
+  
+
+  
+  
+  

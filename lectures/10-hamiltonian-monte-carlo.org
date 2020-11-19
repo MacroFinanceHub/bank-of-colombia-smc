@@ -29,6 +29,7 @@
    We're going to talk about posterior simulators that make that idea explicit.
    {{{NEWLINE}}}
    In particular, the Hamiltonian Monte Carlo sampler described in 
+   \cite{Neal_2011}.
    
 ** Details    
    
@@ -84,11 +85,13 @@
    - $Q_{\bar t}(p, \theta)$ is deterministic and one-to-one.  So
      $Q$ has an inverse.  Neal makes the point that when
      $K(p) = K(-p)$, the inverse can be obtained via $-Q_{\bar t}(-p, \theta)$.
+     {{{NEWLINE}}}
    - Prior to approximation $H(p, \theta) = H(Q_{\bar t}(p, \theta))$, so the proposal is always
      accepted, for any $\bar t$.  This is because of the principal of the
      conservation of energy (again, high school physics.)  In 
      implementation, the discretization necessary to solve the ODEs in a
      general setting means $H(p,\theta)$ will not necessarily be constant.
+     {{{NEWLINE}}}
    - The jacobian of transformation associated with $Q_{\bar t}(p, \theta) = 1$. 
    
 ** Some Intuition
@@ -279,6 +282,7 @@
      p(t+\epsilon) &=& p(t+\epsilon/2) + \frac{\epsilon}{2}\nabla \log \pi(\theta(t+\epsilon)).
    \end{eqnarray*}
 
+
 ** The Details
    
    This leads to the following algorithm (the user needs to specify $\epsilon$ and $L$):
@@ -300,10 +304,15 @@
             \end{enumerate}
     \end{algo}
     
+** Leapfrog Simulator
+   
+   
+   \includegraphics[width=4in]{static/leapfrog_neal}
+
 ** Back to the Example    
    
    For the example given above, we have
-   \begin{eqnarray}
+   \begin{eqnarray*}
      \left[
      \begin{array}{c}
        \theta^* - \mu \\ p^*
@@ -319,7 +328,7 @@
      \begin{array}{c}
        \theta^{i-1} - \mu \\ \hat p
      \end{array}
-     \right]                                                                             \end{eqnarray}
+     \right]                                                                             \end{eqnarray*}
    The stability of this system is determined by the eigenvalues $\lambda_1$ and $\lambda_2$, where 
    \begin{eqnarray}
    \lambda_1 &= \frac{2 M \sigma^{2} - \epsilon^{2}}{2 M \sigma^{2}} + \frac{\epsilon}{2 M \sigma^{2}} \sqrt{- 4 M \sigma^{2} + \epsilon^{2}}, \nonumber \\
@@ -358,7 +367,7 @@
 
 * Acceptance Rates
   
-** What is the right Acceptance Rates
+** What is the Right Acceptance Rate?
   For any Metropolis-style algorithm
   for $x \sim \pi$ with proposal density $q(x^* | x)$, note the
   expected (unbounded) acceptance probability is given by: 
@@ -580,9 +589,11 @@ Note that the Hamiltonian equations ensure that the ratio $\pi(\theta^*, p^*)/\p
 ^2 \bigg \}{\bf 1}\left\{\theta\in[-1,3]^2\right\}
 \]
 This means that:
-\[
-  \nabla \log \pi(\theta) = \bigg[- 2 \psi_n \left(\theta_{1} - 1\right) \left(\left(\theta_{1} - 1\right)^{2} + \left(\theta_{2} - 1\right)^{2} - 1\right), - 2 \psi_n \left(\theta_{2} - 1\right) \left(\left(\theta_{1} - 1\right)^{2} + \left(\theta_{2} - 1\right)^{2} - 1\right)\bigg].
-\]
+\begin{multline}
+
+  \nabla \log \pi(\theta) = \bigg[- 2 \psi_n \left(\theta_{1} - 1\right) \left(\left(\theta_{1} - 1\right)^{2} + \left(\theta_{2} - 1\right)^{2} - 1\right), \\
+  - 2 \psi_n \left(\theta_{2} - 1\right) \left(\left(\theta_{1} - 1\right)^{2} + \left(\theta_{2} - 1\right)^{2} - 1\right)\bigg].
+\end{multline}
 With $\psi_n = 1000$, the ``posterior'' covariance of this distribution is: 
 \begin{eqnarray*}
 \mathbb V_{\pi}[\theta] = \left[\begin{array}{cc} 0.5 & 0 \\ 0 & 0.5 \end{array}\right].
@@ -591,8 +602,36 @@ With $\psi_n = 1000$, the ``posterior'' covariance of this distribution is:
 ** Let $N = 50000, L = 10, \epsilon = 0.01$. 
 
   \begin{center}
-     \includegraphics[width=6in]{static/results}
+     \includegraphics[width=4.5in]{static/results}
   \end{center}
 
+** Going Beyond Hamiltonian
    
-[[bibliography:/home/eherbst/Dropbox/ref/ref.bib]]
+   - Sometimes the leapfrog set is inefficient.  Going around in circles!
+     {{{NEWLINE}}}
+   - Modification: "No U-Turn Sampler" (NUTS) of \cite{Hoffman_Gelman_2014}
+     {{{NEWLINE}}}
+   - This is the backbone of the popular "probabilistic programming language" [[https://mc-stan.org/][Stan]].
+     {{{NEWLINE}}}
+   - Provide interface (and automatic differentiate) for many popular
+     random variables (and hence Bayesian models)
+     
+
+* Beyond
+  
+
+
+** Can this work for DSGE models?   
+
+   It seems like this should be great for DSGE models right?
+   {{{NEWLINE}}}
+   Well, we need to compute \(\nabla \log \pi(\theta)\).  Not to easy for a DSGE!
+   - Numerical? Noisy, Slow
+   - Analytic? Slow, Explosive
+   - Automatic? Accurate but slow, issues with complex roots
+     {{{NEWLINE}}}
+   Also, multimodality is still present!  Can combine SMC with HMC!
+
+* References
+** References   
+   [[bibliography:/home/eherbst/Dropbox/ref/ref.bib]]

@@ -21,7 +21,7 @@
 * Introduction
   
   
-** Hamilton Monte Carlo 
+** Hamiltonian Monte Carlo 
    
    We previously spoke about how much the efficacy of MCMC algorithms
    depended on the shape of the posterior. 
@@ -256,7 +256,7 @@
 ** Discretization  
    To actual obtain (an approximate) $\hat Q_{\bar t}(p, \theta)$, Hamilton's equations are discretized in time.
    {{{NEWLINE}}}
-   To discretize, pick a step size $\epsilon = \Delta t$.  Then applying $\bar t / \epsilon_t = L$ steps (assumed to be an integer) of the
+   To discretize, pick a step size $\epsilon = \Delta t$.  Then applying $\bar t / \epsilon = L$ steps (assumed to be an integer) of the
    discretized Hamiltonian obtains a draw from $\hat Q_{\bar t}(p, \theta)$.
    {{{NEWLINE}}}
    There are many ways approaches to discretize the ODEs!
@@ -267,7 +267,7 @@
 
 ** The Leapfrog Simulator 
    Under the assumption that
-   $p|\theta$ is normally distributed with mean $0$ and variance $M^{-1}$:
+   $p|\theta$ is normally distributed with mean $0$ and variance $M$:
    \begin{eqnarray}
      \log\pi(p|\theta) \propto - \frac{p'M^{-1}p}{2},
    \end{eqnarray}

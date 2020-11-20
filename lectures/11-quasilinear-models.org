@@ -1,0 +1,558 @@
+#+TITLE: Quasilinear Models
+#+DATE: \today
+#+HUGO_BASE_DIR: /home/eherbst/Dropbox/www/
+#+HUGO_SECTION: teaching/bank-of-colombia-smc/lectures
+#+hugo_custom_front_matter: :math true
+#+hugo_auto_set_lastmod: t
+#+MACRO: NEWLINE @@latex:\\~\\~@@ @@html:<br>@@ @@ascii:|@@
+#+OPTIONS: toc:nil H:2
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{helvet}
+#+LaTEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \bibliographystyle{ecta}
+#+LaTEX_HEADER: \beamertemplatenavigationsymbolsempty
+#+LaTeX_HEADER: \usepackage{bibentry}
+#+LaTeX_HEADER: \nobibliography*
+#+LaTeX_HEADER: \makeatletter\renewcommand\bibentry[1]{\nocite{#1}{\frenchspacing\@nameuse{BR@r@#1\@extra@b@citeb}}}\makeatother
+#+LaTeX_HEADER: \newtheorem{algo}{Algorithm}
+#+LaTeX_CLASS: beamer
+
+* Introduction
+  
+** What We've Done So Far
+   - Linear(ized) models
+     - Solve a System of Linear Rational Expectations System
+     - Estimate the model using Kalman Filter
+   
+   
+   {{{NEWLINE}}}
+   - Nonlinear models
+     - Solve model via higher order perturbation or projection
+     - Estimate model using Particle Filter 
+
+  
+   {{{NEWLINE}}}
+   *Today:* Models with occasionally binding constraints, piecewise
+   linear solution. 
+
+** Extended Perfect-Foresight Path (EPFP)
+   
+   I'm going to talk about solutions based on the /Extended
+   Perfect-Forecast Path/ algorithm from Fair and Taylor (1983).
+   {{{NEWLINE}}}
+   There are many papers using this framework: Eggertsson and Woodford
+   (2003), Christiano, Eichenbaum, and Trabandt (2015),Guerrieri and
+   Iacoviello (2015), Kulish, Morley, and Robinson (2017), Holden
+   (2019), and Boehl (2019).  
+   {{{NEWLINE}}}
+   The \cite{Guerrieri_2015} variant is called =OccBin=,
+   and it's available in Dynare.  
+
+   
+** The Idea of the Algorithm    
+   - Assume in period \(t+H\) system reverts back to the steady state in
+     which the constraint is no longer binding.
+     {{{NEWLINE}}}
+   - Initial guess about whether the constaint in binding in periods
+     \(t+h, h=1,\ldots,H\)
+     {{{NEWLINE}}}
+   - Solve the model backwards from the steady state in period \(t+H\)
+     {{{NEWLINE}}}
+   - Check whether you guess was correct, if not update your guess and
+     try again.
+
+** The OccBin Algorithm
+   Let's suppose there is just one constraint. 
+   {{{NEWLINE}}}
+   Further, let's called the regime where the economy isn't binding
+   the *reference regime*.
+   {{{NEWLINE}}}
+   Prerequisites
+   1. Locally unique rational expectations solution hold at reference regime
+   2. If shocks move the model away from the reference regime to the
+      alternative regime, the model will return to the reference
+      regime in finite under the assumption that no future shocks occur.
+
+
+** Writing the Equilibrium Conditions
+   Let \(x_t\) be the variables of the model and let \(\epsilon_t\) be
+   the (iid) exogenous shocks.
+   {{{NEWLINE}}}
+   Let's write the equilibrium conditions of the model in the reference regime as:
+   \begin{align}
+   \label{eq:system}
+   \Gamma_{+1} \mathbb E_t\left[x_{t+1}\right] + \Gamma_0 x_t + \Gamma_{-1} x_{t-1} + \Gamma_{\epsilon}\epsilon_t = 0. 
+   \end{align}
+   Note that this has a (locally unique) solution:
+   \begin{align}
+   \label{eq:sol}
+   x_t = T x_{t-1} + R \epsilon_t. 
+   \end{align}
+   Now, let's write the equilibrium conditions for the model when the constraint is binding:
+      \begin{align}
+   \label{eq:system}
+   \Gamma_{+1}^*\mathbb E_t\left[x_{t+1}\right] + \Gamma_0^* x_t + \Gamma_{-1}^* x_{t-1} + \Gamma_c^* + \Gamma_{\epsilon}\epsilon_t = 0. 
+   \end{align}
+
+** An Example
+   Consider a simple model: 
+   \begin{align}
+     \label{eq:simple}
+     q_t &= \beta (1-\rho) E_t[q_{t+1}] + \rho q_{t-1} -\sigma r_t + u_t, \nonumber \\
+     r_t &= \max\{\underbar r, \phi q_t\}, \nonumber \\
+     u_t &= \rho u_{t-1} + \sigma_\epsilon \epsilon_t \nonumber
+   \end{align}
+   Where \(\underbar r = -1/\beta + 1\). 
+
+   Then: 
+   \begin{align}
+   \Gamma_{+1} = \left[\begin{matrix}- \beta \left(- \rho + 1\right) & 0 & 0\\0 & 0 & 0\\0 & 0 & 0\end{matrix}\right], 
+   \quad\Gamma_{0}    = \left[\begin{matrix}1 & \sigma & -1\\- \phi & 1 & 0\\0 & 0 & 1\end{matrix}\right] \nonumber \\
+   \Gamma_{-1} = \left[\begin{matrix}- \rho & 0 & 0\\0 & 0 & 0\\0 & 0 & - \rho\end{matrix}\right]
+   \quad\Gamma_{\epsilon} = \left[\begin{matrix}0\\0\\-1\end{matrix}\right] 
+   \end{align}
+
+** When the regime is binding 
+   When the regime is binding we simply replace the second equilibrium
+   condition with r_t = \underbar r.
+   \begin{align}
+   \Gamma_{+1}^* = \left[\begin{matrix}- \beta \left(- \rho + 1\right) & 0 & 0\\0 & 0 & 0\\0 & 0 & 0\end{matrix}\right], 
+   \quad \Gamma_{0}^*    = \left[\begin{matrix}1 & \sigma & -1\\ & 1 & 0\\0 & 0 & 1\end{matrix}\right] \nonumber \\
+   \Gamma_{-1}^* = \left[\begin{matrix}- \rho & 0 & 0\\0 & 0 & 0\\0 & 0 & - \rho\end{matrix}\right]
+   \quad\Gamma_{c}^* = \left[\begin{matrix}0\\-\underbar r\\-1\end{matrix}\right] 
+   \quad\Gamma_{\epsilon}^* = \left[\begin{matrix}0\\0\\-1\end{matrix}\right] 
+   \end{align}
+   Note we don't have a unique solution to this system.  
+
+** The Solution
+   - Given an initial state \(x_0\) and shock \(\epsilon_1\), we want
+     to solve for the trajectory \(\{x_1,\ldots,x_T\}\).  Consider the
+     /perfect foresight solution/, with \(\epsilon_{t} = 0\) for \(t>1\). 
+     {{{NEWLINE}}}
+   - This solution will lead to mapping:
+     \begin{align}
+     x_1 &= C_1 + T_1 x_0 + R_1 \epsilon_1 \\
+     x_t &= C_t + T_t x_{t-1} \quad \mbox{ for } t > 2, \ldots, T. 
+     \end{align}
+     {{{NEWLINE}}}
+   - Thus the dynamics of the state variable are linear with a
+     time-varying intercept and autoregressive coefficent matrix. 
+     {{{NEWLINE}}}
+   - Now we just need to find these matrices \(\{C_t,T_t\}_{t=1}^{T}\) and \(Q_1\).
+
+** The Algorithm
+   - Assume that in period \(T\) the model is back in the reference regime.  Thus 
+     \begin{align}
+       \label{eq:soln-T}
+       x_T = T x_{T-1} + R \epsilon_T = T x_{T-1}.
+     \end{align}
+     So \(T_T = T\) and \(C_T = 0\).
+   - Now, suppose that in period \(T-1\) are in the binding regime.
+     We'll our system will have to satisfy: 
+     \begin{align}
+      &\Gamma_{+1}^*\mathbb E_{T-1}\left[x_T\right] + \Gamma_0^* x_{T-1} + \Gamma_{-1}^* x_{T-2} + \Gamma_c^* + \Gamma_{\epsilon}\epsilon_t = \nonumber \\      
+      &\Gamma_{+1}^*\mathbb E_{T-1}(T_T x_{T-1} + R_T) + \Gamma_0^* x_{T-1} + \Gamma_{-1}^* x_{T-2} + \Gamma_c^* = 0 
+     \end{align}
+     where the second equation follows from (\ref{eq:soln-T}) and our perfect foresight assumption. 
+     
+   - By matching coefficients
+     \[
+     \hspace{-0.5in}
+     x_{T-1} = \underbrace{-(\Gamma_{+1}^*T_T + \Gamma_0^*)^{-1}\Gamma_{-1}^*}_{T_{T-1}} x_{T-2} +
+            \underbrace{-(\Gamma_{+1}^*T_T + \Gamma_0^*)^{-1}(\Gamma_c^* + T_T R_T)}_{R_{T-1}}
+     \]
+** Iteration
+   - We proceed in the fashion under time $T = 1$.  At which point we deduce that 
+     \[
+     Q_1 = -(\Gamma_{+1}^*T_2 + \Gamma_0^*)^{-1} \Gamma_\epsilon^*.
+     \]
+   - We have produced a sequence \(\{x_t\}_{t=1}^T\) based on guesses
+     whether the constraint bound in each period.
+     
+   - The last thing to do is check whether the sequence
+     \(\{x_t\}_{t=1}^T\) is consistent with our guesses about whether
+     the constraint bound.
+     
+   - If so, great, we are done!  If not, update our guesses as start
+     again.
+
+** Returning to Our Example 
+   Let \(x_0 = [0,0,0]'\) and \(\epsilon_1 = -0.2\).  Let's set $T = 20$. 
+ 
+ #+begin_src jupyter-python :session linear :exports results
+   from dsge.DSGE import DSGE
+   simple = DSGE.read('model.yaml')
+
+   p0 = simple.p0()
+   p0[1] = 0.5
+
+   from sympy import lambdify
+   subs_dict.update({v: 0 for v in sub_var})
+   subs_dict.update({v(1): 0 for v in sub_var})
+   subs_dict.update({v(-1): 0 for v in sub_var})
+
+   diff_eq = lambda i,j,h=0,s='var': (simple['perturb_eq'][i]
+                                      .set_eq_zero
+                                      .diff(simple['%s_ordering' % s][j](h))
+                                      .subs(subs_dict))
+   nvar = 3
+   neps = 1
+   from dsge.symbols import Parameter
+   para = [Parameter(para) for para in simple.parameters]
+   A = lambdify(para,Matrix(nvar, nvar, lambda i, j: diff_eq(i,j,1)))(*p0)
+   B = lambdify(para,Matrix(nvar, nvar, diff_eq))(*p0)
+   D = np.zeros((3,1))
+   C = lambdify(para,Matrix(nvar, nvar, lambda i, j: diff_eq(i,j,-1)))(*p0)
+   E = lambdify(para,Matrix(nvar, neps, lambda i, j: diff_eq(i,j,0,'shk')))(*p0)
+
+   zlb = -1/p0[0]+1
+   Astar = A.copy()
+   Bstar = B.copy()
+   Cstar = C.copy()
+   Dstar = D.copy()
+   Estar = E.copy()
+   Astar[1,:] = 0
+   Bstar[1,0] = 0
+   Cstar[1,:] = 0
+   Dstar[1] = -zlb
+   Estar[1] = 0
+
+
+
+   simplelin = simple.compile_model()
+   TT, RR, RC = simplelin.solve_LRE(p0)
+   P, Q = TT[:3,:3], RR[:3,:]
+
+   capT = 20
+
+
+   def occbin(x0,eps0,initial_guess_binding,capT):
+       binding = initial_guess_binding.copy()
+
+       ii = 0
+       while ii < 20:
+           Pmat = np.zeros((capT,3,3)) 
+           Rmat = np.zeros((capT,3,1))
+
+           if binding[capT-1]:
+               Pmat[capT-1] = -np.linalg.inv(Astar @ P + Bstar) @ Cstar 
+               Rmat[capT-1] = -np.linalg.inv(Astar @ P + Bstar) @ Dstar
+           else:
+               Pmat[capT-1] = -np.linalg.inv(A @ P + B) @ C 
+               Rmat[capT-1] = -np.linalg.inv(A @ P + B) @ D
+
+           for t in range(capT-2, -1, -1):
+               if binding[t]:
+                   Pmat[t] = -np.linalg.inv(Astar @ Pmat[t+1] + Bstar) @ Cstar
+                   Rmat[t] = -np.linalg.inv(Astar @ Pmat[t+1] + Bstar) @ (Dstar + Astar @ Rmat[t+1])
+               else:
+                   Pmat[t] = -np.linalg.inv(A @ Pmat[t+1] + B) @ C
+                   Rmat[t] = -np.linalg.inv(A @ Pmat[t+1] + B) @ (D + A @ Rmat[t+1])
+
+           if binding[0]:
+               Pmat[t] = -np.linalg.inv(Astar @ Pmat[t+1] + Bstar) @ Cstar
+               Rmat[t] = -np.linalg.inv(Astar @ Pmat[t+1] + Bstar) @ (Dstar + Astar @ Rmat[t+1])
+
+               Q1 = -np.linalg.inv(Astar @ Pmat[1] + Bstar) @ Estar
+           else:
+               Pmat[t] = -np.linalg.inv(A @ Pmat[t+1] + B) @ C
+               Rmat[t] = -np.linalg.inv(A @ Pmat[t+1] + B) @ (D + A @ Rmat[t+1])
+
+               Q1 = -np.linalg.inv(A @ Pmat[1] + B) @ E
+
+
+           rpathnew = np.zeros(capT)
+           xhat = x0.copy()
+           for t in range(capT):
+               if t==0:
+                   xhat = Pmat[0] @ xhat + Rmat[0] + Q1 @ eps0
+               else: 
+                   xhat = Pmat[t] @ xhat + Rmat[t]
+
+               rpathnew[t] = xhat[1]
+
+           bindingnew = rpathnew <= zlb
+
+           if np.array_equal(binding,bindingnew):
+               return Pmat, Rmat, Q1
+           else:
+               binding = bindingnew.copy()
+
+           ii+=1
+       return Pmat, Rmat, Q1
+   x0 = np.array([[0],[0],[0]])
+   eps0 = np.array([[-0.25 ]])
+
+
+   qpath = np.array([(np.linalg.matrix_power(P,i)@(P @ x0 + Q @ eps0))[0][0] 
+                     for i in range(capT)])
+
+   rpath = np.array([(np.linalg.matrix_power(P,i)@(P @ x0 + Q @ eps0))[1][0] 
+                     for i in range(capT)])
+   binding = rpath < zlb
+
+   Pmat, Rmat, Q1 = occbin(x0,eps0,binding,capT)
+
+   rpathnew = np.zeros(capT)
+   qpathnew = np.zeros(capT)
+   xhat = x0.copy()
+   for i in range(capT):
+       if i==0:
+           xhat = Pmat[0] @ xhat + Rmat[0] + Q1 @ eps0
+       else: 
+           xhat = Pmat[i] @ xhat + Rmat[i]
+
+       rpathnew[i] = xhat[1]
+       qpathnew[i] = xhat[0]
+
+   results = p.DataFrame(np.c_[rpathnew, rpath, qpathnew, qpath ],columns=['ZLB','NOZLB', 'ZLBq','NOZLBq'])
+
+   import pandas as p
+   %matplotlib inline
+   import matplotlib.pyplot as plt
+   plt.style.use('seaborn-white')
+   fig, ax = plt.subplots(ncols=2)
+
+   results.ZLBq.plot(ax=ax[0],linewidth=4)
+   results.NOZLBq.plot(ax=ax[0],linewidth=3,linestyle='dashed')
+   ax[0].set_title(r'$q_t$')
+
+   results.ZLB.plot(ax=ax[1],linewidth=4)
+   results.NOZLB.plot(ax=ax[1],linewidth=3,linestyle='dashed')
+   ax[1].axhline(-1/p0[0]+1,color='black');
+   ax[1].set_title(r'$r_t$')
+   fig.set_size_inches(10,6);
+#+end_src
+   #+RESULTS:
+   [[file:./.ob-jupyter/146d577dbba9fee4ee91dc1c43278b039aa3c4cb.png]]
+
+** The Policy Function
+#+begin_src jupyter-python :session linear :exports results
+  eps_grid = np.linspace(-0.2,0.2,100)
+  binding = np.zeros(capT,dtype=bool)
+
+  r_grid = np.zeros(100)
+  for i, eps in enumerate(eps_grid):
+      Pmat, Rmat, Q1 = occbin(x0,np.array([[eps]]),binding,capT)
+      r_grid[i] = Rmat[0,1] + Q1[1]*eps
+
+
+  plt.plot(eps_grid, r_grid)
+  plt.xlabel(r'$\epsilon_1$');
+  plt.title(r'$r_1$');
+#+end_src
+
+#+RESULTS:
+:RESULTS:
+: Text(0.5, 1.0, '$r_1$')
+[[file:./.ob-jupyter/f99fefd4b9cce00219ee170b3be6f54c0b275dc0.png]]
+:END:
+
+** Caution 
+   
+   - There's not necessarily a unique solution associated with this algorithm.
+     {{{NEWLINE}}}
+   - Moreover, the solution relies on certainty equivalence.
+     - Agents don't expect to return to the bound once they leave!
+     - But that an assumption underpinning all linear models. 
+
+     {{{NEWLINE}}}
+   - For big models, this could take a long time, but it's much faster
+     than a global solution!
+
+** Estimating this kind of model:
+   
+   - Suppose that the number of shocks in your model was equal to the
+     number of observables.
+     {{{NEWLINE}}}
+   - One could attempt to use the /inversion filter/, to solve for the
+     shocks to satisfy the measurement equation.  No measurement error
+     needed (or wanted)! /(Note, we need the jacobian from y to $\epsilon$)/
+     {{{NEWLINE}}}
+   - But, this kind of filter essentially approximates the integral: 
+     \[
+     \int p(Y_{1:T}|s_0)p(s_0) d s_0 
+     \]
+   - It can be very noisy! 
+
+** Conditionally Optimal Particle Filter for Piecewise Linear Models
+   Remember our friend the conditionally optimal particle filter.  
+   \[
+g_{t}^{*}\left(\tilde{s}_{t} \mid s_{t-1}^{j}, \theta\right)=p\left(\tilde{s}_{t} \mid y_{t}, s_{t-1}^{j}, \theta\right) \propto p\left(y_{t} \mid \tilde{s}_{t}, \theta\right) p\left(\tilde{s}_{t} \mid s_{t-1}^{j}, \theta\right)
+   \]
+   with
+   $$
+   \tilde{\omega}_{t}^{j}=\frac{p\left(y_{t} \mid \tilde{s}_{t}^{j}, \theta\right) p\left(\tilde{s}_{t}^{j} \mid s_{t-1}^{j}, \theta\right)}{p\left(\tilde{s}_{t}^{j} \mid y_{t}, s_{t-1}^{j}, \theta\right)}=p\left(y_{t} \mid s_{t-1}^{j}\right)
+   $$
+   Sketch out the conditionally optimal particle filter for piecewise linear models in Aruoba et al. (2020)
+
+
+** \cite{aruoba2020piecewise}
+   Derive the solution to a piecewise linear model as:
+   $$
+   s_{t}=\left\{\begin{array}{ll}
+   \Phi_{0}(n)+\Phi_{1}(n) s_{t-1}+\Phi_{\eta}(n) \eta_{t} & \text { if } \eta_{1, t}<\zeta\left(s_{t-1}\right) \\
+   \Phi_{0}(b)+\Phi_{1}(b) s_{t-1}+\Phi_{\eta}(b) \eta_{t} & \text { otherwise }
+   \end{array}\right.
+   $$
+   "n" is nonbinding, "b" is binding, and $\eta$ is a linear combination of the structural shocks. 
+   {{{NEWLINE}}}
+   This solution doesn't have to obey certainty equivalence!
+   {{{NEWLINE}}}
+   Observation equation:
+   $$
+   y_{t}^{o}=A_{0}+A_{s} s_{t}+u_{t}, \quad u_{t} \sim N\left(0, \zeta \Sigma_{u}\right)
+   $$
+  
+** Some Definitions
+   
+   \begin{align} \nu_{t}^{j}(\cdot)
+   &=y_{t}-A_{0}-A_{s}\left(\Phi_{0}(\cdot)-\Phi_{1}(\cdot)
+   s_{t-1}^{j}\right) \\ \bar{\eta}_{t}^{j}(\cdot) &=\left(\zeta
+   I+\Phi_{\eta}^{\prime}(\cdot) A_{s}^{\prime} \Sigma_{u}^{-1} A_{s}
+   \Phi_{\eta}(\cdot)\right)^{-1} \Phi_{\eta}^{\prime}(\cdot)
+   A_{s}^{\prime} \Sigma_{u}^{-1} \nu_{t}^{j}(\cdot)
+   \\ \bar{\Omega}(\cdot) &=\zeta\left(\zeta
+   I+\Phi_{\eta}^{\prime}(\cdot) A_{s}^{\prime} \Sigma_{u}^{-1} A_{s}
+   \Phi_{\eta}(\cdot)\right)^{-1} \end{align}
+  Here $\nu_{t}^{j}(\cdot)$ is the error made in forecasting $y_t$ based on \(s^j_{t−1}\).
+ {{{NEWLINE}}}
+  \(\bar{\eta}_{t}^{j}(\cdot)\) and \(\bar{\Omega}(\cdot)\) are the posterior mean vector and covariance matrix
+ of \(\eta_t|(y_t,s^j_{t−1})\) absent any truncation
+ 
+  (that is, for \(\zeta(s^j_{t−1})\) being  \(+\infty\) or \(-\infty\))
+
+** The density of \(p(y_t |s_{t-1}^j)\)
+   \begin{equation}
+   \begin{aligned} 
+D_{t}^{j}(n)=&(2 \pi)^{-n_{y} / 2}\left|\Sigma_{u}\right|^{-1 / 2}\left|\zeta I+\Phi_{\eta}(n)^{\prime} A_{s}^{\prime} \Sigma_{u}^{-1} A_{s} \Phi_{\eta}(n)\right|^{1 / 2} \\ & \times \exp \left\{-\frac{1}{2} \nu_{t}^{j}(n)^{\prime}\left(\zeta \Sigma_{u}+A_{s} \Phi_{\eta}(n) \Phi_{\eta}^{\prime}(n) A_{s}^{\prime}\right)^{-1} \nu_{t}^{j}(n)\right\} \\ & \times \Phi_{N}\left(\left(\zeta\left(s_{t-1}\right)-\bar{\eta}_{1, t}^{j}(n) / \sqrt{\bar{\Omega}_{11}(n)}\right)\right.\\ D_{t}^{j}(b)=&(2 \pi)^{-n_{y} / 2}\left|\Sigma_{u}\right|^{-1 / 2}\left|\zeta I+\Phi_{\eta}(b)^{\prime} A_{s}^{\prime} \Sigma_{u}^{-1} A_{s} \Phi_{\eta}(b)\right|^{1 / 2} \\ & \times \exp \left\{-\frac{1}{2} \nu_{t}^{j}(b)^{\prime}\left(\zeta \Sigma_{u}+A_{s} \Phi_{\eta}(b) \Phi_{\eta}^{\prime}(b) A_{s}^{\prime}\right)^{-1} \nu_{t}^{j}(b)\right\} \\ &\left(1-\Phi_{N}\left(\left(\zeta\left(s_{t-1}\right)-\bar{\eta}_{1, t}^{j}(b)\right) / \sqrt{\bar{\Omega}_{11}(b)}\right)\right) \end{aligned}\end{equation}
+   It can be shown that \(D_{t}^{j}(n) + D_{t}^{j}(b) = p(y_t |s_{t-1}^j)\).
+
+** Proposition 
+ :PROPERTIES:
+ :BEAMER_opt: allowframebreaks,label=
+ :END:
+Suppose that \(\eta_t is N(0,I)\) Draws from the conditional
+optimal proposal density can be generated by: 
+1. Let
+   $$
+   \xi_{t}^{j}=\left\{\begin{array}{l} n^{\prime} \text { with prob. }
+   \lambda_{t}^{j} \\ b^{\prime} \text { with prob. } 1-\lambda_{t}^{j},
+   \quad \text { where } \quad
+   \lambda_{t}^{j}=\frac{D_{t}^{j}(n)}{D_{t}^{j}(n)+D_{t}^{j}(b)}
+   \end{array}\right.  $$
+2. If $\xi_t^j = 'n'$, then generate $\eta_t$ from the distribution: 
+   \begin{align}
+   \eta_{1, t}^{j} \sim N\left(\bar{\eta}_{1, t}^{j}(n), \bar{\Omega}_{11}(n)\right) \mathbb{I}\left\{\eta_{1, t}^{j} \leq \zeta\left(s_{t-1}^{j}\right)\right\}, \nonumber \\
+   \quad \eta_{2, t}^{j} \mid \eta_{1, t}^{j} \sim N\left(\bar{\eta}_{2 \mid 1}^{j}\left(n, \eta_{1, t}^{j}\right), \bar{\Omega}_{2 \mid 1}(n)\right) \nonumber
+   \end{align}
+   and let 
+   $$
+   \tilde{s}_{t}^{j}=\Phi_{0}(n)+\Phi_{1}(n) s_{t-1}^{j}+\Phi_{\eta}(n) \eta_{t}^{j}
+   $$
+   If $\xi_t^j = 'b'$, then generate $\eta_t$ from the distribution: 
+   \begin{align}
+   \eta_{1, t}^{j} \sim N\left(\bar{\eta}_{1}^{j}(b), \bar{\Omega}_{11}(b)\right) \mathbb{I}\left\{\eta_{1, t}^{j}>\zeta\left(s_{t-1}^{j}\right)\right\}, \nonumber \\
+   \eta_{2, t}^{j} \mid \eta_{1, t}^{j} \sim N\left(\bar{\eta}_{2 \mid 1}^{j}\left(b, \eta_{1, t}^{j}\right), \bar{\Omega}_{2 \mid 1}(b)\right) \nonumber
+   \end{align}
+   and let
+   $$
+   \tilde{s}_{t}^{j}=\Phi_{0}(b)+\Phi_{1}(b) s_{t-1}^{j}+\Phi_{\eta}(b) \eta_{t}^{j}.
+   $$
+3. The incremental particle weight is $D_{t}^{j}(n) + D_{t}^{j}(b)$. 
+** Likelihood Approximation on a Small Scale DSGE
+   
+   \includegraphics[width=4in]{static/frank_pf}
+
+** Autocorrelation Function From a PFMH Run 
+   
+   \includegraphics[width=4in]{static/frank_acf}
+
+** Conclusion
+   Overall this is an still an active area of research on both the
+   solution and estimation front.
+   {{{NEWLINE}}}
+   Key challenges: how to estimate large models with any kind of nonlinearities
+   {{{NEWLINE}}}
+   Thanks for a great class!
+
+** References
+[[bibliography:/home/eherbst/Dropbox/ref/ref.bib]]
+
+** Example                                                         :noexport:
+   
+   
+   # NB: the solution to this model is given by \(q_t = a q_{t-1} + b u_t \)
+   # \[a = \frac{\rho}{1+\sigma\phi - \beta(1-\rho)} \mbox{ and } b = \frac{ } \]
+   # a q_{t-1} + b u_t = \beta (1-\rho)(a*a*q_{t-1} + a*b u_t) + \rho q_{t-1} - \sigma \phi (a q_{t-1} + b * u_t) + u_t
+   #  
+   # a = \beta(1-\rho)a + \rho - \sigma\phi a
+   # => a(1 +\sigma\phi - beta(1-\rho)) = rho
+   # => a = rho / (1+\sigma\phi - \beta(1-rho))
+   # b =  \beta*(1-rho) * b  - \sigma\phi b + 1
+   # b = 1 / (1+\sigma\phi - \beta(1-rho))
+** A simple DSGE                                                   :noexport:
+   
+   \begin{align}
+   \hat c_t &= \mathbb E_t[\hat c_{t+1}] - R_t + E_t[\hat \pi_t]\\
+   \hat \pi_t &= \beta E_{t+1} + \kappa \hat c_t.
+   \hat R_t &= \max\left{\psi \hat \pi_t + \epsilon_{R,t}, -\ln(r\pi_I}
+   \end{align}
+** Results                                                         :noexport:
+   #+begin_src jupyter-python :session linear :exports results
+     import numpy as np
+     from dsge.examples import nkmp
+     nkmplin = nkmp.compile_model()
+
+     p0 = nkmp.p0()
+
+     GAM0, GAM1, PSI, PPI = nkmplin.GAM0(p0), nkmplin.GAM1(p0), nkmplin.PSI(p0), nkmplin.PPI(p0)
+
+     sub_var = nkmp['var_ordering']
+     nvar = len(sub_var)
+     neps = len(nkmp['shk_ordering'])
+     subs_dict = {}
+     subs_dict.update({v: 0 for v in sub_var})
+     subs_dict.update({v(1): 0 for v in sub_var})
+     subs_dict.update({v(-1): 0 for v in sub_var})
+
+     from sympy.matrices import Matrix, zeros
+     diff_eq = lambda i,j,h=0,s='var': (nkmp['perturb_eq'][i]
+                                          .set_eq_zero
+                                          .diff(nkmp['%s_ordering' % s][j](h))
+                                          .subs(subs_dict))
+     A = Matrix(nvar, nvar, diff_eq)
+     B = Matrix(nvar, nvar, lambda i, j: diff_eq(i,j,0))
+     C = Matrix(nvar, nvar, lambda i, j: diff_eq(i,j,-1))
+     E = Matrix(nvar, neps, lambda i, j: diff_eq(i,j,0,'shk'))
+
+     new_eq = nkmp['perturb_eq'].copy()
+
+     from dsge.symbols import Equation
+     new_eq = Equation('R', '-piA/4 - rA/4 - gamQ')      
+     new_eq.set_eq_zero.diff('R')
+ #+end_src
+
+ #+RESULTS:
+ :RESULTS:
+ # [goto error]
+ : 
+ : TypeErrorTraceback (most recent call last)
+ : <ipython-input-435-da0313e90857> in <module>
+ :      29 from dsge.symbols import Equation
+ :      30 new_eq = Equation('R', '-piA/4 - rA/4 - gamQ')
+ : ---> 31 new_eq.set_eq_zero.diff('R')
+ : 
+ : ~/anaconda3/lib/python3.6/site-packages/dsge/symbols.py in set_eq_zero(self)
+ :     163     @property
+ :     164     def set_eq_zero(self):
+ : --> 165         return self.lhs - self.rhs
+ :     166 
+ :     167     @property
+ : 
+ : TypeError: unsupported operand type(s) for -: 'str' and 'str'
+ :END:
+
+
+
+

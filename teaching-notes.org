@@ -370,3 +370,30 @@ q       Probability(Propose τ₁|τ₁) x
   
   
   
+* Particle Filter
+  
+  Given state n at time t
+  
+  and particle sₜ₋₁ʲ
+  
+  forecast of y
+  
+  E[y|sₜ₋₁ʲ,n] = 
+  A₀ + Aₛ E[sₜ|sₜ₋₁ʲ,n] = 
+  A₀ + Aₛ (ϕ₀(n) + ϕ₁(sₜ₋₁ʲ))
+  
+  
+  p(y|sₜ₋₁ʲ) = 
+  p(y|sₜ₋₁ʲ,n)P(n|sₜ₋₁ʲ)
+  +p(y|sₜ₋₁ʲ,b)P(b|sₜ₋₁ʲ)
+  = 
+  p(y|sₜ₋₁ʲ,n)P(n|sₜ₋₁ʲ)
+  +p(y|sₜ₋₁ʲ,b)(1-P(n|sₜ₋₁ʲ))
+  
+
+  what is being calculated is
+  
+λₜʲ = p(n|sₜ₋₁ʲ,yₜ) ∝ p(y|s_{t-1}ʲ) x P(n|sₜ₋₁ʲ)
+  
+  
+

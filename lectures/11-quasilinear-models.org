@@ -117,9 +117,9 @@
    condition with r_t = \underbar r.
    \begin{align}
    \Gamma_{+1}^* = \left[\begin{matrix}- \beta \left(- \rho + 1\right) & 0 & 0\\0 & 0 & 0\\0 & 0 & 0\end{matrix}\right], 
-   \quad \Gamma_{0}^*    = \left[\begin{matrix}1 & \sigma & -1\\ & 1 & 0\\0 & 0 & 1\end{matrix}\right] \nonumber \\
+   \quad \Gamma_{0}^*    = \left[\begin{matrix}1 & \sigma & -1\\ 0 & 1 & 0\\0 & 0 & 1\end{matrix}\right] \nonumber \\
    \Gamma_{-1}^* = \left[\begin{matrix}- \rho & 0 & 0\\0 & 0 & 0\\0 & 0 & - \rho\end{matrix}\right]
-   \quad\Gamma_{c}^* = \left[\begin{matrix}0\\-\underbar r\\-1\end{matrix}\right] 
+   \quad\Gamma_{c}^* = \left[\begin{matrix}0\\-\underbar r\\0\end{matrix}\right] 
    \quad\Gamma_{\epsilon}^* = \left[\begin{matrix}0\\0\\-1\end{matrix}\right] 
    \end{align}
    Note we don't have a unique solution to this system.  
@@ -132,13 +132,13 @@
    - This solution will lead to mapping:
      \begin{align}
      x_1 &= C_1 + T_1 x_0 + R_1 \epsilon_1 \\
-     x_t &= C_t + T_t x_{t-1} \quad \mbox{ for } t > 2, \ldots, T. 
+     x_t &= C_t + T_t x_{t-1} \quad \mbox{ for } t = 2, \ldots, T. 
      \end{align}
      {{{NEWLINE}}}
    - Thus the dynamics of the state variable are linear with a
      time-varying intercept and autoregressive coefficent matrix. 
      {{{NEWLINE}}}
-   - Now we just need to find these matrices \(\{C_t,T_t\}_{t=1}^{T}\) and \(Q_1\).
+   - Now we just need to find these matrices \(\{C_t,T_t\}_{t=1}^{T}\) and \(R_1\).
 
 ** The Algorithm
    - Assume that in period \(T\) the model is back in the reference regime.  Thus 
@@ -150,8 +150,8 @@
    - Now, suppose that in period \(T-1\) are in the binding regime.
      We'll our system will have to satisfy: 
      \begin{align}
-      &\Gamma_{+1}^*\mathbb E_{T-1}\left[x_T\right] + \Gamma_0^* x_{T-1} + \Gamma_{-1}^* x_{T-2} + \Gamma_c^* + \Gamma_{\epsilon}\epsilon_t = \nonumber \\      
-      &\Gamma_{+1}^*\mathbb E_{T-1}(T_T x_{T-1} + R_T) + \Gamma_0^* x_{T-1} + \Gamma_{-1}^* x_{T-2} + \Gamma_c^* = 0 
+      &\Gamma_{+1}^*\mathbb E_{T-1}\left[x_T\right] + \Gamma_0^* x_{T-1} + \Gamma_{-1}^* x_{T-2} + \Gamma_c^* + \Gamma_{\epsilon}^*\epsilon_t = \nonumber \\      
+      &\Gamma_{+1}^*\mathbb E_{T-1}(T_T x_{T-1} + C_T) + \Gamma_0^* x_{T-1} + \Gamma_{-1}^* x_{T-2} + \Gamma_c^* = 0 
      \end{align}
      where the second equation follows from (\ref{eq:soln-T}) and our perfect foresight assumption. 
      
@@ -159,12 +159,12 @@
      \[
      \hspace{-0.5in}
      x_{T-1} = \underbrace{-(\Gamma_{+1}^*T_T + \Gamma_0^*)^{-1}\Gamma_{-1}^*}_{T_{T-1}} x_{T-2} +
-            \underbrace{-(\Gamma_{+1}^*T_T + \Gamma_0^*)^{-1}(\Gamma_c^* + T_T R_T)}_{R_{T-1}}
+            \underbrace{-(\Gamma_{+1}^*T_T + \Gamma_0^*)^{-1}(\Gamma_c^* + T_T C_T)}_{C_{T-1}}
      \]
 ** Iteration
    - We proceed in the fashion under time $T = 1$.  At which point we deduce that 
      \[
-     Q_1 = -(\Gamma_{+1}^*T_2 + \Gamma_0^*)^{-1} \Gamma_\epsilon^*.
+     R_1 = -(\Gamma_{+1}^*T_2 + \Gamma_0^*)^{-1} \Gamma_\epsilon^*.
      \]
    - We have produced a sequence \(\{x_t\}_{t=1}^T\) based on guesses
      whether the constraint bound in each period.
